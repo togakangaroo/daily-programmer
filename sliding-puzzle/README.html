@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2019-10-29 Tue 15:55 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="George Mauer" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgdc1f915">1. Sliding Puzzle</a>
+<ul>
+<li><a href="#org97b49f7">1.1. Problem Statement</a></li>
+<li><a href="#org23b2e40">1.2. Glossary</a></li>
+<li><a href="#org2b51223">1.3. Thinking it Through</a></li>
+<li><a href="#org8a55b6b">1.4. Utilities</a>
+<ul>
+<li><a href="#orgc1f464c">1.4.1. <code>value_at_location</code></a></li>
+<li><a href="#orgec1be36">1.4.2. <code>swap</code> -</a></li>
+</ul>
+</li>
+<li><a href="#org6c5e978">1.5. Putting it Together</a></li>
+<li><a href="#org50e821c">1.6. Tests</a></li>
+<li><a href="#org8e5e9ac">1.7. Links</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgdc1f915" class="outline-2">
+<h2 id="orgdc1f915"><span class="section-number-2">1</span> Sliding Puzzle</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+
+<div id="outline-container-org97b49f7" class="outline-3">
+<h3 id="org97b49f7"><span class="section-number-3">1.1</span> Problem Statement</h3>
+<div class="outline-text-3" id="text-1-1">
+<blockquote>
+<p>
+On a 2x3 board, there are 5 tiles represented by the integers 1 through 5, and an empty square represented by 0.
+A move consists of choosing 0 and a 4-directionally adjacent number and swapping it.
+The state of the board is solved if and only if the board is <code>[[1,2,3],[4,5,0]]</code>.
+Given a puzzle board, return the least number of moves required so that the state of the board is solved. If it is impossible for the state of the board to be solved, return -1.
+</p>
+
+<p>
+Note:
+</p>
+<ul class="org-ul">
+<li>board will be a 2 x 3 array as described above</li>
+<li><code>board[i][j]</code> will be a permutation of <code>[0, 1, 2, 3, 4, 5]</code></li>
+</ul>
+</blockquote>
+
+<table id="orgff486a8" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">2</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-right">4</td>
+<td class="org-right">0</td>
+<td class="org-right">5</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Expected Output: 1
+Explanation: Swap the 0 and the 5 in one move.
+</p>
+
+<table id="orgf136c0d" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">2</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-right">4</td>
+<td class="org-right">0</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Output: -1
+Explanation: No number of moves will make the board solved.
+</p>
+
+<table id="org5e708a5" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">4</td>
+<td class="org-right">1</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-right">0</td>
+<td class="org-right">3</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Expected Output: 5
+Explanation: 5 is the smallest number of moves that solves the board.
+An example path:
+</p>
+<ul class="org-ul">
+<li>After move 0: [[4,1,2],[5,0,3]]</li>
+<li>After move 1: [[4,1,2],[0,5,3]]</li>
+<li>After move 2: [[0,1,2],[4,5,3]]</li>
+<li>After move 3: [[1,0,2],[4,5,3]]</li>
+<li>After move 4: [[1,2,0],[4,5,3]]</li>
+<li>After move 5: [[1,2,3],[4,5,0]]</li>
+</ul>
+
+<table id="org7020b27" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">3</td>
+<td class="org-right">2</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">5</td>
+<td class="org-right">0</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Expected Output: 14
+</p>
+</div>
+</div>
+
+<div id="outline-container-org23b2e40" class="outline-3">
+<h3 id="org23b2e40"><span class="section-number-3">1.2</span> Glossary</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+We're going to be using the following terms here
+</p>
+
+<ul class="org-ul">
+<li><b>state</b> - a 2D state of the board at a given point in time. Since we're moving things around, solving this puzzle can be considered a sequence of states.</li>
+<li><b>location</b> - a two value tuple representing a location in a <b>state</b> <code>(row, column)</code>. Might nto be a valid location</li>
+<li><b>value</b> - the actual value in a state at a location</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2b51223" class="outline-3">
+<h3 id="org2b51223"><span class="section-number-3">1.3</span> Thinking it Through</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+Ok, so lets start here by defining the high level thing we want as if our helper methods allready existed. There is an obvious case for recursion here as I'm picturing execution as a tree (the diagram below is a partial illustration of <code>sp-board-3</code>)
+</p>
+
+
+<div class="figure">
+<p><img src="recusive-justification.png" alt="recusive-justification.png" />
+</p>
+</div>
+
+<p>
+The rules for the recursion therefore seem to be
+</p>
+
+<ul class="org-ul">
+<li>A list of known states is a map from a state to the minimum moves from that state. It is seeded with the desired state and a step count of 0</li>
+<li>Given a new state, if we have seen it before, return the number of moves associated</li>
+<li>Otherwise, for each possible move recurse, take the minimum  non-null and add 1. That is the thic cell's value and you return it</li>
+</ul>
+
+<p>
+An optimization is possible here. If we do the search depth first then once we know the amount of moves one branch takes, we could pass a "moves left" field down to other branches (decremented by 1 on each pass).
+</p>
+
+<p>
+So I'm thinking something like this at the high level
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #cf7900; background-color: #fdf9f2;">def</span> <span style="color: #d15120; background-color: #fdf2ed;">_get_solve_depth</span><span style="color: #8c8c8c;">(</span>known_states, state, move_left<span style="color: #8c8c8c;">)</span>:
+    <span style="color: #cf7900; background-color: #fdf9f2;">if</span> state <span style="color: #cf7900; background-color: #fdf9f2;">in</span> known_states:
+        <span style="color: #cf7900; background-color: #fdf9f2;">if</span> <span style="color: #a66bab; background-color: #f8f1f8;">None</span> != <span style="color: #8c8c8c;">(</span>steps := known_states.get<span style="color: #93a8c6;">(</span>state<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>:
+            <span style="color: #cf7900; background-color: #fdf9f2;">yield</span> <span style="color: #8c8c8c;">(</span>steps, state<span style="color: #8c8c8c;">)</span>
+            <span style="color: #cf7900; background-color: #fdf9f2;">return</span>
+        <span style="color: #cf7900; background-color: #fdf9f2;">return</span>
+    <span style="color: #cf7900; background-color: #fdf9f2;">if</span> move_left == <span style="color: #a66bab; background-color: #f8f1f8;">0</span>:
+        <span style="color: #cf7900; background-color: #fdf9f2;">return</span>
+    <span style="color: #cf7900; background-color: #fdf9f2;">for</span> <span style="color: #8c8c8c;">(</span>next_steps, next_state<span style="color: #8c8c8c;">)</span> <span style="color: #cf7900; background-color: #fdf9f2;">in</span> get_states_by_moving_0<span style="color: #8c8c8c;">(</span>state, move_left-<span style="color: #a66bab; background-color: #f8f1f8;">1</span><span style="color: #8c8c8c;">)</span>:
+        <span style="color: #cf7900; background-color: #fdf9f2;">yield</span> <span style="color: #8c8c8c;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>+next_steps, next_state<span style="color: #8c8c8c;">)</span>
+
+
+
+<span style="color: #cf7900; background-color: #fdf9f2;">def</span> <span style="color: #d15120; background-color: #fdf2ed;">get_solve_depth</span><span style="color: #8c8c8c;">(</span>known_states, state, moves_left<span style="color: #8c8c8c;">)</span>:
+    <span style="color: #6b82a7; background-color: #f1f4f8;">known_states</span> = <span style="color: #8c8c8c;">{</span><span style="color: #93a8c6;">(</span><span style="color: #b0b1a3;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">2</span>,<span style="color: #a66bab; background-color: #f8f1f8;">3</span><span style="color: #b0b1a3;">)</span>,<span style="color: #b0b1a3;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">4</span>,<span style="color: #a66bab; background-color: #f8f1f8;">5</span>,<span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span>: <span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #8c8c8c;">}</span>
+    <span style="color: #cf7900; background-color: #fdf9f2;">return</span> _get_solve_depth<span style="color: #8c8c8c;">(</span>known_states, <span style="color: #93a8c6;">(</span><span style="color: #b0b1a3;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">3</span>,<span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #b0b1a3;">)</span>,<span style="color: #b0b1a3;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">4</span>,<span style="color: #a66bab; background-color: #f8f1f8;">2</span>,<span style="color: #a66bab; background-color: #f8f1f8;">5</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span>, <span style="color: #a66bab; background-color: #f8f1f8;">None</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+
+<p>
+Hmm, that's not right, when would <code>known_states</code> get mutated?
+</p>
+
+<p>
+And I worry about some of the paths being really deep&#x2026;the worst case scenario here for larger boards could really suck since you'd be effectively exploring the entire space before hitting a solution. If there's no solution it's what&#x2026;something like <code>O(n!)</code>? Maybe not quite that bad but its bad.
+</p>
+
+<p>
+Ok, but looking at that diagram, it's not <b>that</b> grim. So what if we go <b>breadth first</b> That would look something like this?
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python" id="org8550ee0"><span style="color: #cf7900; background-color: #fdf9f2;">from</span> itertools <span style="color: #cf7900; background-color: #fdf9f2;">import</span> chain
+
+<span style="color: #6b82a7; background-color: #f1f4f8;">_end_state</span> = <span style="color: #8c8c8c;">(</span><span style="color: #93a8c6;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">2</span>,<span style="color: #a66bab; background-color: #f8f1f8;">3</span><span style="color: #93a8c6;">)</span>, <span style="color: #93a8c6;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">4</span>,<span style="color: #a66bab; background-color: #f8f1f8;">5</span>,<span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+<span style="color: #cf7900; background-color: #fdf9f2;">def</span> <span style="color: #d15120; background-color: #fdf2ed;">find_min_move</span><span style="color: #8c8c8c;">(</span>states, desired_state=_end_state, known_states=<span style="color: #d2ad00; background-color: #faf7e7;">set</span><span style="color: #93a8c6;">()</span><span style="color: #8c8c8c;">)</span>:
+    <span style="color: #cf7900; background-color: #fdf9f2;">if</span> desired_state <span style="color: #cf7900; background-color: #fdf9f2;">in</span> states:
+        <span style="color: #cf7900; background-color: #fdf9f2;">return</span> <span style="color: #a66bab; background-color: #f8f1f8;">0</span>
+    <span style="color: #6b82a7; background-color: #f1f4f8;">novel_states</span> = <span style="color: #d2ad00; background-color: #faf7e7;">set</span><span style="color: #8c8c8c;">(</span>states<span style="color: #8c8c8c;">)</span> - known_states
+    <span style="color: #cf7900; background-color: #fdf9f2;">if</span> <span style="color: #cf7900; background-color: #fdf9f2;">not</span> novel_states:
+        <span style="color: #cf7900; background-color: #fdf9f2;">return</span> <span style="color: #a66bab; background-color: #f8f1f8;">None</span>
+    <span style="color: #6b82a7; background-color: #f1f4f8;">known_states</span> = known_states | novel_states <span style="color: #a49da5; background-color: #f7f7f7; font-style: italic;">#</span><span style="color: #a49da5; background-color: #f7f7f7; font-style: italic;">https://stackoverflow.com/questions/58583158/why-does-seem-to-mutate-a-set-when-the-long-form-does-not</span>
+
+    <span style="color: #6b82a7; background-color: #f1f4f8;">next_states</span> = <span style="color: #d2ad00; background-color: #faf7e7;">list</span><span style="color: #8c8c8c;">(</span>chain<span style="color: #93a8c6;">(</span>*<span style="color: #b0b1a3;">(</span>get_navigable_states<span style="color: #97b098;">(</span>s, from_value=<span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #97b098;">)</span> <span style="color: #cf7900; background-color: #fdf9f2;">for</span> s <span style="color: #cf7900; background-color: #fdf9f2;">in</span> novel_states<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+    <span style="color: #6b82a7; background-color: #f1f4f8;">next_count</span> = find_min_move<span style="color: #8c8c8c;">(</span>next_states, desired_state, known_states<span style="color: #8c8c8c;">)</span>
+    <span style="color: #cf7900; background-color: #fdf9f2;">return</span> <span style="color: #a66bab; background-color: #f8f1f8;">None</span> <span style="color: #cf7900; background-color: #fdf9f2;">if</span> next_count <span style="color: #cf7900; background-color: #fdf9f2;">is</span> <span style="color: #a66bab; background-color: #f8f1f8;">None</span> <span style="color: #cf7900; background-color: #fdf9f2;">else</span> next_count + <span style="color: #a66bab; background-color: #f8f1f8;">1</span>
+</pre>
+</div>
+
+<p>
+ok, i think that's good? we do have to implement <code>get_navigable_states</code> though. easy enough
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python" id="org15af299"><span style="color: #cf7900; background-color: #fdf9f2;">def</span> <span style="color: #d15120; background-color: #fdf2ed;">get_navigable_states</span><span style="color: #8c8c8c;">(</span>state, from_value<span style="color: #8c8c8c;">)</span>:
+    <span style="color: #cf7900; background-color: #fdf9f2;">for</span> <span style="color: #8c8c8c;">(</span>r, row<span style="color: #8c8c8c;">)</span> <span style="color: #cf7900; background-color: #fdf9f2;">in</span> <span style="color: #d2ad00; background-color: #faf7e7;">enumerate</span><span style="color: #8c8c8c;">(</span>state<span style="color: #8c8c8c;">)</span>:
+        <span style="color: #cf7900; background-color: #fdf9f2;">for</span> <span style="color: #8c8c8c;">(</span>c, cell<span style="color: #8c8c8c;">)</span> <span style="color: #cf7900; background-color: #fdf9f2;">in</span> <span style="color: #d2ad00; background-color: #faf7e7;">enumerate</span><span style="color: #8c8c8c;">(</span>row<span style="color: #8c8c8c;">)</span>:
+            <span style="color: #cf7900; background-color: #fdf9f2;">if</span> cell == from_value:
+                <span style="color: #cf7900; background-color: #fdf9f2;">for</span> l <span style="color: #cf7900; background-color: #fdf9f2;">in</span> <span style="color: #8c8c8c;">(</span><span style="color: #93a8c6;">(</span>r,c+<span style="color: #a66bab; background-color: #f8f1f8;">1</span><span style="color: #93a8c6;">)</span>,
+                          <span style="color: #93a8c6;">(</span>r+<span style="color: #a66bab; background-color: #f8f1f8;">1</span>,c<span style="color: #93a8c6;">)</span>,
+                          <span style="color: #93a8c6;">(</span>r,c-<span style="color: #a66bab; background-color: #f8f1f8;">1</span><span style="color: #93a8c6;">)</span>,
+                          <span style="color: #93a8c6;">(</span>r-<span style="color: #a66bab; background-color: #f8f1f8;">1</span>,c<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>:
+                    <span style="color: #cf7900; background-color: #fdf9f2;">if</span> value_at_location<span style="color: #8c8c8c;">(</span>state, l, default=<span style="color: #a66bab; background-color: #f8f1f8;">None</span><span style="color: #8c8c8c;">)</span> <span style="color: #cf7900; background-color: #fdf9f2;">is</span> <span style="color: #cf7900; background-color: #fdf9f2;">not</span> <span style="color: #a66bab; background-color: #f8f1f8;">None</span>:
+                        <span style="color: #cf7900; background-color: #fdf9f2;">yield</span> swap<span style="color: #8c8c8c;">(</span>state, <span style="color: #93a8c6;">(</span>r,c<span style="color: #93a8c6;">)</span>, l<span style="color: #8c8c8c;">)</span>
+                <span style="color: #cf7900; background-color: #fdf9f2;">return</span>
+
+</pre>
+</div>
+
+<p>
+looks like we need some helper functions here. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8a55b6b" class="outline-3">
+<h3 id="org8a55b6b"><span class="section-number-3">1.4</span> Utilities</h3>
+<div class="outline-text-3" id="text-1-4">
+</div>
+<div id="outline-container-orgc1f464c" class="outline-4">
+<h4 id="orgc1f464c"><span class="section-number-4">1.4.1</span> <code>value_at_location</code></h4>
+<div class="outline-text-4" id="text-1-4-1">
+<p>
+Given a 2D state, get the value at the given location - if that location doesn't exist return kw <code>default</code> or throw if one not provided
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python" id="org37d5209"><span style="color: #cf7900; background-color: #fdf9f2;">def</span> <span style="color: #d15120; background-color: #fdf2ed;">_get_value_at_index</span><span style="color: #8c8c8c;">(</span>coll, idx<span style="color: #8c8c8c;">)</span>:
+    <span style="color: #cf7900; background-color: #fdf9f2;">if</span> <span style="color: #cf7900; background-color: #fdf9f2;">not</span> <span style="color: #8c8c8c;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span> &lt;= idx &lt; <span style="color: #d2ad00; background-color: #faf7e7;">len</span><span style="color: #93a8c6;">(</span>coll<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>:
+        <span style="color: #cf7900; background-color: #fdf9f2;">raise</span> <span style="color: #b23f1e; background-color: #fcf3f1;">IndexError</span><span style="color: #8c8c8c;">(</span>f<span style="color: #5f9411; background-color: #eff8e9;">"Invalid index {idx}"</span><span style="color: #8c8c8c;">)</span>
+    <span style="color: #cf7900; background-color: #fdf9f2;">return</span> coll<span style="color: #8c8c8c;">[</span>idx<span style="color: #8c8c8c;">]</span>
+
+<span style="color: #cf7900; background-color: #fdf9f2;">def</span> <span style="color: #d15120; background-color: #fdf2ed;">value_at_location</span><span style="color: #8c8c8c;">(</span>state, loc, **kwargs<span style="color: #8c8c8c;">)</span>:
+    <span style="color: #cf7900; background-color: #fdf9f2;">try</span>:
+        <span style="color: #cf7900; background-color: #fdf9f2;">return</span> _get_value_at_index<span style="color: #8c8c8c;">(</span> _get_value_at_index<span style="color: #93a8c6;">(</span>state, loc<span style="color: #b0b1a3;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #b0b1a3;">]</span><span style="color: #93a8c6;">)</span>, loc<span style="color: #93a8c6;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">)</span>
+    <span style="color: #cf7900; background-color: #fdf9f2;">except</span> <span style="color: #b23f1e; background-color: #fcf3f1;">IndexError</span>:
+        <span style="color: #cf7900; background-color: #fdf9f2;">if</span> <span style="color: #5f9411; background-color: #eff8e9;">"default"</span> <span style="color: #cf7900; background-color: #fdf9f2;">in</span> kwargs:
+            <span style="color: #cf7900; background-color: #fdf9f2;">return</span> kwargs<span style="color: #8c8c8c;">[</span><span style="color: #5f9411; background-color: #eff8e9;">"default"</span><span style="color: #8c8c8c;">]</span>
+        <span style="color: #cf7900; background-color: #fdf9f2;">raise</span>
+</pre>
+</div>
+
+<p>
+Sample: 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #6b82a7; background-color: #f1f4f8;">state</span> = <span style="color: #8c8c8c;">(</span><span style="color: #93a8c6;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">2</span>,<span style="color: #a66bab; background-color: #f8f1f8;">3</span><span style="color: #93a8c6;">)</span>,
+         <span style="color: #93a8c6;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">4</span>,<span style="color: #a66bab; background-color: #f8f1f8;">5</span>,<span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+<span style="color: #cf7900; background-color: #fdf9f2;">for</span> <span style="color: #8c8c8c;">(</span>loc, expected<span style="color: #8c8c8c;">)</span> <span style="color: #cf7900; background-color: #fdf9f2;">in</span> <span style="color: #8c8c8c;">(</span>
+  <span style="color: #93a8c6;">[</span>
+    <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span>,<span style="color: #a66bab; background-color: #f8f1f8;">1</span><span style="color: #97b098;">)</span>, <span style="color: #a66bab; background-color: #f8f1f8;">2</span><span style="color: #b0b1a3;">)</span>, 
+    <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span>,<span style="color: #a66bab; background-color: #f8f1f8;">3</span><span style="color: #97b098;">)</span>, <span style="color: #a66bab; background-color: #f8f1f8;">None</span><span style="color: #b0b1a3;">)</span>, 
+    <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>-<span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">1</span><span style="color: #97b098;">)</span>, <span style="color: #a66bab; background-color: #f8f1f8;">None</span><span style="color: #b0b1a3;">)</span>,
+  <span style="color: #93a8c6;">]</span>
+<span style="color: #8c8c8c;">)</span>:
+
+  <span style="color: #cf7900; background-color: #fdf9f2;">print</span><span style="color: #8c8c8c;">(</span>f<span style="color: #5f9411; background-color: #eff8e9;">"value_at_location(state, {loc}) = {value_at_location(state, loc, default=None)}, expected = {expected}"</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+
+<pre class="example">
+value_at_location(state, (0, 1)) = 2, expected = 2
+value_at_location(state, (0, 3)) = None, expected = None
+value_at_location(state, (-1, 1)) = None, expected = None
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgec1be36" class="outline-4">
+<h4 id="orgec1be36"><span class="section-number-4">1.4.2</span> <code>swap</code> -</h4>
+<div class="outline-text-4" id="text-1-4-2">
+<p>
+Given a 2d state, create a new one with the value at the <code>from_</code> location swapped with the one at the <code>to</code>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python" id="org4a334e7"><span style="color: #cf7900; background-color: #fdf9f2;">from</span> copy <span style="color: #cf7900; background-color: #fdf9f2;">import</span> deepcopy
+<span style="color: #cf7900; background-color: #fdf9f2;">def</span> <span style="color: #d15120; background-color: #fdf2ed;">swap</span><span style="color: #8c8c8c;">(</span>state, from_, to_<span style="color: #8c8c8c;">)</span>:
+    <span style="color: #6b82a7; background-color: #f1f4f8;">t</span> = value_at_location<span style="color: #8c8c8c;">(</span>state, to_<span style="color: #8c8c8c;">)</span>
+    <span style="color: #6b82a7; background-color: #f1f4f8;">s</span> = <span style="color: #d2ad00; background-color: #faf7e7;">list</span><span style="color: #8c8c8c;">(</span>deepcopy<span style="color: #93a8c6;">(</span>state<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+    s<span style="color: #8c8c8c;">[</span>to_<span style="color: #93a8c6;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">]</span> = <span style="color: #d2ad00; background-color: #faf7e7;">list</span><span style="color: #8c8c8c;">(</span>s<span style="color: #93a8c6;">[</span>to_<span style="color: #b0b1a3;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #b0b1a3;">]</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">)</span>
+    s<span style="color: #8c8c8c;">[</span>from_<span style="color: #93a8c6;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">]</span> = <span style="color: #d2ad00; background-color: #faf7e7;">list</span><span style="color: #8c8c8c;">(</span>s<span style="color: #93a8c6;">[</span>from_<span style="color: #b0b1a3;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #b0b1a3;">]</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">)</span>
+    s<span style="color: #8c8c8c;">[</span>to_<span style="color: #93a8c6;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">][</span>to_<span style="color: #93a8c6;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">]</span> = value_at_location<span style="color: #8c8c8c;">(</span>state, from_<span style="color: #8c8c8c;">)</span>
+    s<span style="color: #8c8c8c;">[</span>from_<span style="color: #93a8c6;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">][</span>from_<span style="color: #93a8c6;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">]</span> = t
+    s<span style="color: #8c8c8c;">[</span>to_<span style="color: #93a8c6;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">]</span> = <span style="color: #d2ad00; background-color: #faf7e7;">tuple</span><span style="color: #8c8c8c;">(</span>s<span style="color: #93a8c6;">[</span>to_<span style="color: #b0b1a3;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #b0b1a3;">]</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">)</span>
+    s<span style="color: #8c8c8c;">[</span>from_<span style="color: #93a8c6;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">]</span> = <span style="color: #d2ad00; background-color: #faf7e7;">tuple</span><span style="color: #8c8c8c;">(</span>s<span style="color: #93a8c6;">[</span>from_<span style="color: #b0b1a3;">[</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #b0b1a3;">]</span><span style="color: #93a8c6;">]</span><span style="color: #8c8c8c;">)</span>
+    <span style="color: #cf7900; background-color: #fdf9f2;">return</span> <span style="color: #d2ad00; background-color: #faf7e7;">tuple</span><span style="color: #8c8c8c;">(</span>s<span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+
+<p>
+Sample usage:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #6b82a7; background-color: #f1f4f8;">prompt</span> = <span style="color: #5f9411; background-color: #eff8e9;">"expected: "</span>
+<span style="color: #cf7900; background-color: #fdf9f2;">for</span> <span style="color: #8c8c8c;">(</span>from_, to_, expected<span style="color: #8c8c8c;">)</span> <span style="color: #cf7900; background-color: #fdf9f2;">in</span> <span style="color: #8c8c8c;">(</span>
+    <span style="color: #93a8c6;">[</span>
+      <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">2</span><span style="color: #97b098;">)</span>, <span style="color: #97b098;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">0</span>,<span style="color: #a66bab; background-color: #f8f1f8;">2</span><span style="color: #97b098;">)</span>, <span style="color: #97b098;">(</span><span style="color: #aebed8;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">2</span>,<span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #aebed8;">)</span>,<span style="color: #aebed8;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">4</span>,<span style="color: #a66bab; background-color: #f8f1f8;">5</span>,<span style="color: #a66bab; background-color: #f8f1f8;">3</span><span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span> <span style="color: #b0b1a3;">)</span>, 
+      <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">2</span><span style="color: #97b098;">)</span>, <span style="color: #97b098;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">1</span><span style="color: #97b098;">)</span>, <span style="color: #97b098;">(</span><span style="color: #aebed8;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">2</span>,<span style="color: #a66bab; background-color: #f8f1f8;">3</span><span style="color: #aebed8;">)</span>,<span style="color: #aebed8;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">4</span>,<span style="color: #a66bab; background-color: #f8f1f8;">0</span>,<span style="color: #a66bab; background-color: #f8f1f8;">5</span><span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span> <span style="color: #b0b1a3;">)</span>, 
+    <span style="color: #93a8c6;">]</span>
+<span style="color: #8c8c8c;">)</span>:
+    <span style="color: #cf7900; background-color: #fdf9f2;">print</span><span style="color: #8c8c8c;">(</span>f<span style="color: #5f9411; background-color: #eff8e9;">"swap(state, {from_}, {to_}) = \n{' '*len(prompt)}{swap(state, from_, to_)}\n{prompt}{expected}"</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+
+<pre class="example">
+swap(state, (1, 2), (0, 2)) = 
+          ((1, 2, 0), (4, 5, 3))
+expected: ((1, 2, 0), (4, 5, 3))
+swap(state, (1, 2), (1, 1)) = 
+          ((1, 2, 3), (4, 0, 5))
+expected: ((1, 2, 3), (4, 0, 5))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org6c5e978" class="outline-3">
+<h3 id="org6c5e978"><span class="section-number-3">1.5</span> Putting it Together</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+Ok, so lets test <code>get_navigable_states</code> to make sure it works
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #cf7900; background-color: #fdf9f2;">print</span><span style="color: #8c8c8c;">(</span>f<span style="color: #5f9411; background-color: #eff8e9;">"state is {state}"</span><span style="color: #8c8c8c;">)</span>
+<span style="color: #cf7900; background-color: #fdf9f2;">print</span><span style="color: #8c8c8c;">(</span>f<span style="color: #5f9411; background-color: #eff8e9;">"navigable states from 0 {list(get_navigable_states(state, from_value=0))}"</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+
+<pre class="example">
+state is ((1, 2, 3), (4, 5, 0))
+navigable states from 0 [((1, 2, 3), (4, 0, 5)), ((1, 2, 0), (4, 5, 3))]
+</pre>
+
+
+
+<p>
+This looks good&#x2026;so if I got it right then this should just work
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #cf7900; background-color: #fdf9f2;">from</span> itertools <span style="color: #cf7900; background-color: #fdf9f2;">import</span> chain
+
+<span style="color: #6b82a7; background-color: #f1f4f8;">_end_state</span> = <span style="color: #8c8c8c;">(</span><span style="color: #93a8c6;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">1</span>,<span style="color: #a66bab; background-color: #f8f1f8;">2</span>,<span style="color: #a66bab; background-color: #f8f1f8;">3</span><span style="color: #93a8c6;">)</span>, <span style="color: #93a8c6;">(</span><span style="color: #a66bab; background-color: #f8f1f8;">4</span>,<span style="color: #a66bab; background-color: #f8f1f8;">5</span>,<span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+<span style="color: #cf7900; background-color: #fdf9f2;">def</span> <span style="color: #d15120; background-color: #fdf2ed;">find_min_move</span><span style="color: #8c8c8c;">(</span>states, desired_state=_end_state, known_states=<span style="color: #d2ad00; background-color: #faf7e7;">set</span><span style="color: #93a8c6;">()</span><span style="color: #8c8c8c;">)</span>:
+    <span style="color: #cf7900; background-color: #fdf9f2;">if</span> desired_state <span style="color: #cf7900; background-color: #fdf9f2;">in</span> states:
+        <span style="color: #cf7900; background-color: #fdf9f2;">return</span> <span style="color: #a66bab; background-color: #f8f1f8;">0</span>
+    <span style="color: #6b82a7; background-color: #f1f4f8;">novel_states</span> = <span style="color: #d2ad00; background-color: #faf7e7;">set</span><span style="color: #8c8c8c;">(</span>states<span style="color: #8c8c8c;">)</span> - known_states
+    <span style="color: #cf7900; background-color: #fdf9f2;">if</span> <span style="color: #cf7900; background-color: #fdf9f2;">not</span> novel_states:
+        <span style="color: #cf7900; background-color: #fdf9f2;">return</span> <span style="color: #a66bab; background-color: #f8f1f8;">None</span>
+    <span style="color: #6b82a7; background-color: #f1f4f8;">known_states</span> = known_states | novel_states <span style="color: #a49da5; background-color: #f7f7f7; font-style: italic;">#</span><span style="color: #a49da5; background-color: #f7f7f7; font-style: italic;">https://stackoverflow.com/questions/58583158/why-does-seem-to-mutate-a-set-when-the-long-form-does-not</span>
+
+    <span style="color: #6b82a7; background-color: #f1f4f8;">next_states</span> = <span style="color: #d2ad00; background-color: #faf7e7;">list</span><span style="color: #8c8c8c;">(</span>chain<span style="color: #93a8c6;">(</span>*<span style="color: #b0b1a3;">(</span>get_navigable_states<span style="color: #97b098;">(</span>s, from_value=<span style="color: #a66bab; background-color: #f8f1f8;">0</span><span style="color: #97b098;">)</span> <span style="color: #cf7900; background-color: #fdf9f2;">for</span> s <span style="color: #cf7900; background-color: #fdf9f2;">in</span> novel_states<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+    <span style="color: #6b82a7; background-color: #f1f4f8;">next_count</span> = find_min_move<span style="color: #8c8c8c;">(</span>next_states, desired_state, known_states<span style="color: #8c8c8c;">)</span>
+    <span style="color: #cf7900; background-color: #fdf9f2;">return</span> <span style="color: #a66bab; background-color: #f8f1f8;">None</span> <span style="color: #cf7900; background-color: #fdf9f2;">if</span> next_count <span style="color: #cf7900; background-color: #fdf9f2;">is</span> <span style="color: #a66bab; background-color: #f8f1f8;">None</span> <span style="color: #cf7900; background-color: #fdf9f2;">else</span> next_count + <span style="color: #a66bab; background-color: #f8f1f8;">1</span>
+
+<span style="color: #cf7900; background-color: #fdf9f2;">for</span> <span style="color: #8c8c8c;">(</span>board, expected<span style="color: #8c8c8c;">)</span> <span style="color: #cf7900; background-color: #fdf9f2;">in</span> <span style="color: #8c8c8c;">(</span>
+  nil
+<span style="color: #8c8c8c;">)</span>:
+    <span style="color: #6b82a7; background-color: #f1f4f8;">board</span> = tupelize_iterable<span style="color: #8c8c8c;">(</span>board<span style="color: #8c8c8c;">)</span>
+    <span style="color: #cf7900; background-color: #fdf9f2;">print</span><span style="color: #8c8c8c;">(</span>f<span style="color: #5f9411; background-color: #eff8e9;">"for {board} min move: {find_min_move((board,))}, expected: {expected}"</span><span style="color: #8c8c8c;">)</span>
+    <span style="color: #cf7900; background-color: #fdf9f2;">print</span><span style="color: #8c8c8c;">(</span>f<span style="color: #5f9411; background-color: #eff8e9;">"===================="</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+
+<pre class="example">
+for ((1, 2, 3), (4, 0, 5)) min move: 1, expected: 1
+====================
+for ((1, 2, 3), (5, 4, 0)) min move: None, expected: None
+====================
+for ((4, 1, 2), (5, 0, 3)) min move: 5, expected: 5
+====================
+for ((3, 2, 4), (1, 5, 0)) min move: 14, expected: 14
+====================
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-org50e821c" class="outline-3">
+<h3 id="org50e821c"><span class="section-number-3">1.6</span> Tests</h3>
+<div class="outline-text-3" id="text-1-6">
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #a49da5; background-color: #f7f7f7; font-style: italic;"># </span><span style="color: #a49da5; background-color: #f7f7f7; font-style: italic;">this is stupid but it really seems like on osx this is the best way to omit the last 2 lines</span>
+pytest ./tests.py -v | python -c <span style="color: #5f9411; background-color: #eff8e9;">"import sys;[sys.stdout.write(s) for s in [*sys.stdin][6:-2]]"</span> | awk <span style="color: #5f9411; background-color: #eff8e9;">'{print $1, $2}'</span>
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">tests.py::test<sub>value</sub><sub>at</sub><sub>location</sub>[loc0-2]</td>
+<td class="org-left">PASSED</td>
+</tr>
+
+<tr>
+<td class="org-left">tests.py::test<sub>value</sub><sub>at</sub><sub>location</sub>[loc1-None]</td>
+<td class="org-left">PASSED</td>
+</tr>
+
+<tr>
+<td class="org-left">tests.py::test<sub>value</sub><sub>at</sub><sub>location</sub>[loc2-None]</td>
+<td class="org-left">PASSED</td>
+</tr>
+
+<tr>
+<td class="org-left">tests.py::test<sub>swap</sub>[from<sub>0</sub>-to<sub>0</sub>-expected0]</td>
+<td class="org-left">PASSED</td>
+</tr>
+
+<tr>
+<td class="org-left">tests.py::test<sub>swap</sub>[from<sub>1</sub>-to<sub>1</sub>-expected1]</td>
+<td class="org-left">PASSED</td>
+</tr>
+
+<tr>
+<td class="org-left">tests.py::test<sub>find</sub><sub>min</sub><sub>move</sub>[state0-1]</td>
+<td class="org-left">PASSED</td>
+</tr>
+
+<tr>
+<td class="org-left">tests.py::test<sub>find</sub><sub>min</sub><sub>move</sub>[state1-None]</td>
+<td class="org-left">PASSED</td>
+</tr>
+
+<tr>
+<td class="org-left">tests.py::test<sub>find</sub><sub>min</sub><sub>move</sub>[state2-5]</td>
+<td class="org-left">PASSED</td>
+</tr>
+
+<tr>
+<td class="org-left">tests.py::test<sub>find</sub><sub>min</sub><sub>move</sub>[state3-14]</td>
+<td class="org-left">PASSED</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org8e5e9ac" class="outline-3">
+<h3 id="org8e5e9ac"><span class="section-number-3">1.7</span> Links</h3>
+<div class="outline-text-3" id="text-1-7">
+<ul class="org-ul">
+<li><a href="tangle/sliding_puzzle.py">Sliding Puzzle Python Module</a></li>
+<li><a href="tangle/tests.py">Tests</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: George Mauer</p>
+<p class="date">Created: 2019-10-29 Tue 15:55</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

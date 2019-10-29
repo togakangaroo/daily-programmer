@@ -409,19 +409,19 @@ This looks good...so if I got it right then this should just work
 
 #+begin_src shell :exports both :eval no-export :dir tangle
   # this is stupid but it really seems like on osx this is the best way to omit the last 2 lines
-  pytest ./tests.py -v | python -c "import sys;[sys.stdout.write(s) for s in [*sys.stdin][6:-2]]"
+  pytest ./tests.py -v | python -c "import sys;[sys.stdout.write(s) for s in [*sys.stdin][6:-2]]" | awk '{print $1, $2}'
 #+end_src
 
 #+RESULTS:
-| tests.py::test_value_at_location[loc0-2]    | PASSED | [      | 11%] |
-| tests.py::test_value_at_location[loc1-None] | PASSED | [      | 22%] |
-| tests.py::test_value_at_location[loc2-None] | PASSED | [      | 33%] |
-| tests.py::test_swap[from_0-to_0-expected0]  | PASSED | [      | 44%] |
-| tests.py::test_swap[from_1-to_1-expected1]  | PASSED | [      | 55%] |
-| tests.py::test_find_min_move[state0-1]      | PASSED | [      | 66%] |
-| tests.py::test_find_min_move[state1-None]   | PASSED | [      | 77%] |
-| tests.py::test_find_min_move[state2-5]      | PASSED | [      | 88%] |
-| tests.py::test_find_min_move[state3-14]     | PASSED | [100%] |      |
+| tests.py::test_value_at_location[loc0-2]    | PASSED |
+| tests.py::test_value_at_location[loc1-None] | PASSED |
+| tests.py::test_value_at_location[loc2-None] | PASSED |
+| tests.py::test_swap[from_0-to_0-expected0]  | PASSED |
+| tests.py::test_swap[from_1-to_1-expected1]  | PASSED |
+| tests.py::test_find_min_move[state0-1]      | PASSED |
+| tests.py::test_find_min_move[state1-None]   | PASSED |
+| tests.py::test_find_min_move[state2-5]      | PASSED |
+| tests.py::test_find_min_move[state3-14]     | PASSED |
 
 ** Links
       - [[file:tangle/sliding_puzzle.py][Sliding Puzzle Python Module]]
