@@ -1,0 +1,8 @@
+This is a repository for playing around with [[https://en.wikipedia.org/wiki/Literate_programming][Literate Programming (embedding code in literate documents as opposed to embedding literate comments in code)]], and [[https://orgmode.org/][Org Mode]] (Like Markdown on stereoids).
+
+What you find here, are not writeups of me solving these problems, they're the actual code I wrote itself. Any code files are gnerated *from* the document itself.
+
+* Implementations
+
+- [[./sliding-puzzle][Sliding Puzzle]] 
+
