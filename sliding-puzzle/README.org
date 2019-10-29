@@ -1,0 +1,428 @@
+* Sliding Puzzle
+    :PROPERTIES:
+    :header-args: :noweb yes :results output :exports both :noweb yes :eval no-export :mkdirp yes
+    :END:
+
+** Problem Statement
+    
+ #+begin_quote
+ On a 2x3 board, there are 5 tiles represented by the integers 1 through 5, and an empty square represented by 0.
+ A move consists of choosing 0 and a 4-directionally adjacent number and swapping it.
+ The state of the board is solved if and only if the board is ~[[1,2,3],[4,5,0]]~.
+ Given a puzzle board, return the least number of moves required so that the state of the board is solved. If it is impossible for the state of the board to be solved, return -1.
+
+ Note:
+ - board will be a 2 x 3 array as described above
+ - ~board[i][j]~ will be a permutation of ~[0, 1, 2, 3, 4, 5]~
+ #+end_quote
+
+ #+NAME: board-1
+ | 1 | 2 | 3 |
+ | 4 | 0 | 5 |
+
+ Expected Output: 1
+ Explanation: Swap the 0 and the 5 in one move.
+
+ #+NAME: board-2
+ | 1 | 2 | 3 |
+ | 5 | 4 | 0 |
+
+ Output: -1
+ Explanation: No number of moves will make the board solved.
+
+ #+NAME: board-3
+ | 4 | 1 | 2 |
+ | 5 | 0 | 3 |
+
+ Expected Output: 5
+ Explanation: 5 is the smallest number of moves that solves the board.
+ An example path:
+ - After move 0: [[4,1,2],[5,0,3]]
+ - After move 1: [[4,1,2],[0,5,3]]
+ - After move 2: [[0,1,2],[4,5,3]]
+ - After move 3: [[1,0,2],[4,5,3]]
+ - After move 4: [[1,2,0],[4,5,3]]
+ - After move 5: [[1,2,3],[4,5,0]]
+
+ #+NAME: board-4
+ | 3 | 2 | 4 |
+ | 1 | 5 | 0 |
+
+ Expected Output: 14
+ 
+** Glossary
+
+We're going to be using the following terms here
+
+- *state* - a 2D state of the board at a given point in time. Since we're moving things around, solving this puzzle can be considered a sequence of states.
+- *location* - a two value tuple representing a location in a *state* ~(row, column)~. Might nto be a valid location
+- *value* - the actual value in a state at a location
+  
+** Executable Prep                                                 :noexport:
+   These are just things you have to run in order for the literate programming in this document to be executable. If you're not going to be executing, feel free to ignore this section
+   
+     #+begin_src shell :exports none
+       pip install pytest
+     #+end_src
+
+     #+RESULTS:
+     #+begin_example
+     Collecting pytest
+       Downloading https://files.pythonhosted.org/packages/93/16/f6dec5178f5f4141e80dfc4812a9aba88f5f29ca881f174ab1851181d016/pytest-5.2.2-py3-none-any.whl (227kB)
+     Collecting packaging (from pytest)
+       Downloading https://files.pythonhosted.org/packages/cf/94/9672c2d4b126e74c4496c6b3c58a8b51d6419267be9e70660ba23374c875/packaging-19.2-py2.py3-none-any.whl
+     Collecting py>=1.5.0 (from pytest)
+       Downloading https://files.pythonhosted.org/packages/76/bc/394ad449851729244a97857ee14d7cba61ddb268dce3db538ba2f2ba1f0f/py-1.8.0-py2.py3-none-any.whl (83kB)
+     Collecting pluggy<1.0,>=0.12 (from pytest)
+       Downloading https://files.pythonhosted.org/packages/92/c7/48439f7d5fd6bddb4c04b850bb862b42e3e2b98570040dfaf68aedd8114b/pluggy-0.13.0-py2.py3-none-any.whl
+     Requirement already satisfied: attrs>=17.4.0 in /Users/gmauer/.pyenv/versions/3.8.0/lib/python3.8/site-packages (from pytest) (19.3.0)
+     Collecting atomicwrites>=1.0 (from pytest)
+       Downloading https://files.pythonhosted.org/packages/52/90/6155aa926f43f2b2a22b01be7241be3bfd1ceaf7d0b3267213e8127d41f4/atomicwrites-1.3.0-py2.py3-none-any.whl
+     Requirement already satisfied: wcwidth in /Users/gmauer/.pyenv/versions/3.8.0/lib/python3.8/site-packages (from pytest) (0.1.7)
+     Requirement already satisfied: more-itertools>=4.0.0 in /Users/gmauer/.pyenv/versions/3.8.0/lib/python3.8/site-packages (from pytest) (7.2.0)
+     Requirement already satisfied: six in /Users/gmauer/.pyenv/versions/3.8.0/lib/python3.8/site-packages (from packaging->pytest) (1.12.0)
+     Collecting pyparsing>=2.0.2 (from packaging->pytest)
+       Downloading https://files.pythonhosted.org/packages/11/fa/0160cd525c62d7abd076a070ff02b2b94de589f1a9789774f17d7c54058e/pyparsing-2.4.2-py2.py3-none-any.whl (65kB)
+     Installing collected packages: pyparsing, packaging, py, pluggy, atomicwrites, pytest
+     Successfully installed atomicwrites-1.3.0 packaging-19.2 pluggy-0.13.0 py-1.8.0 pyparsing-2.4.2 pytest-5.2.2
+     #+end_example
+
+** Thinking it Through
+
+Ok, so lets start here by defining the high level thing we want as if our helper methods allready existed. There is an obvious case for recursion here as I'm picturing execution as a tree (the diagram below is a partial illustration of ~sp-board-3~)
+
+#+begin_src plantuml :file recusive-justification.png :exports results
+  @startuml
+  hide empty description
+  [*] --> 412_503
+
+  412_503 --> 412_053
+  412_503 --> 402_513
+  412_503 --> 412_530
+
+  412_053 --> 012_453
+  412_053 --> 412_503
+
+  402_513 --> 042_513
+  402_513 --> 420_513
+  402_513 --> 412_503
+
+  412_530 --> 412_503
+  412_530 --> 410_532
+
+  012_453 --> 102_453
+  012_453 --> 412_053
+
+  102_453 --> 012_453
+  102_453 --> 120_453
+  102_453 --> 152_403
+
+  120_453 --> 102_453
+  120_453 --> 123_450
+  123_450 --> [*]
+
+  042_513 --> 402_513
+  042_513 --> 542_013
+
+  542_013 --> 042_513
+  542_013 --> 542_103
+
+  123_450 : 0
+  120_453 : 1
+  @enduml
+#+end_src
+
+#+RESULTS:
+[[file:recusive-justification.png]]
+
+The rules for the recursion therefore seem to be
+
+- A list of known states is a map from a state to the minimum moves from that state. It is seeded with the desired state and a step count of 0
+- Given a new state, if we have seen it before, return the number of moves associated
+- Otherwise, for each possible move recurse, take the minimum  non-null and add 1. That is the thic cell's value and you return it
+
+An optimization is possible here. If we do the search depth first then once we know the amount of moves one branch takes, we could pass a "moves left" field down to other branches (decremented by 1 on each pass).
+
+So I'm thinking something like this at the high level
+
+#+begin_src python :results none :eval none
+  def _get_solve_depth(known_states, state, move_left):
+      if state in known_states:
+          if None != (steps := known_states.get(state)):
+              yield (steps, state)
+              return
+          return
+      if move_left == 0:
+          return
+      for (next_steps, next_state) in get_states_by_moving_0(state, move_left-1):
+          yield (1+next_steps, next_state)
+
+
+
+  def get_solve_depth(known_states, state, moves_left):
+      known_states = {((1,2,3),(4,5,0)): 0}
+      return _get_solve_depth(known_states, ((1,3,0),(4,2,5)), None)
+#+end_src
+
+Hmm, that's not right, when would ~known_states~ get mutated?
+
+And I worry about some of the paths being really deep...the worst case scenario here for larger boards could really suck since you'd be effectively exploring the entire space before hitting a solution. If there's no solution it's what...something like ~O(n!)~? Maybe not quite that bad but its bad.
+
+Ok, but looking at that diagram, it's not *that* grim. So what if we go *breadth first* That would look something like this?
+
+#+name: find_min_move
+#+begin_src python :results none :session sp 
+  from itertools import chain
+
+  _end_state = ((1,2,3), (4,5,0))
+  def find_min_move(states, desired_state=_end_state, known_states=set()):
+      if desired_state in states:
+          return 0
+      novel_states = set(states) - known_states
+      if not novel_states:
+          return None
+      known_states = known_states | novel_states #https://stackoverflow.com/questions/58583158/why-does-seem-to-mutate-a-set-when-the-long-form-does-not
+
+      next_states = list(chain(*(get_navigable_states(s, from_value=0) for s in novel_states)))
+      next_count = find_min_move(next_states, desired_state, known_states)
+      return None if next_count is None else next_count + 1
+#+end_src
+
+ok, i think that's good? we do have to implement ~get_navigable_states~ though. easy enough
+
+#+name: get_navigable_states
+#+begin_src python :session sp :results none
+  def get_navigable_states(state, from_value):
+      for (r, row) in enumerate(state):
+          for (c, cell) in enumerate(row):
+              if cell == from_value:
+                  for l in ((r,c+1),
+                            (r+1,c),
+                            (r,c-1),
+                            (r-1,c)):
+                      if value_at_location(state, l, default=None) is not None:
+                          yield swap(state, (r,c), l)
+                  return
+
+#+end_src
+
+looks like we need some helper functions here. 
+
+** Utilities
+*** ~value_at_location~ 
+
+Given a 2D state, get the value at the given location - if that location doesn't exist return kw ~default~ or throw if one not provided
+
+#+name: value_at_location
+#+begin_src python :session sp :results none
+  def _get_value_at_index(coll, idx):
+      if not (0 <= idx < len(coll)):
+          raise IndexError(f"Invalid index {idx}")
+      return coll[idx]
+
+  def value_at_location(state, loc, **kwargs):
+      try:
+          return _get_value_at_index( _get_value_at_index(state, loc[0]), loc[1])
+      except IndexError:
+          if "default" in kwargs:
+              return kwargs["default"]
+          raise
+#+end_src
+
+Sample: 
+
+#+name: test-data:value_at_location
+#+begin_src python :eval no :exports none
+  [
+    ((0,1), 2), 
+    ((0,3), None), 
+    ((-1,1), None),
+  ]
+#+end_src
+#+begin_src python :session sp 
+    state = ((1,2,3),
+             (4,5,0))
+    for (loc, expected) in (
+      <<test-data:value_at_location>>
+    ):
+          
+      print(f"value_at_location(state, {loc}) = {value_at_location(state, loc, default=None)}, expected = {expected}")
+#+end_src
+
+#+RESULTS:
+: value_at_location(state, (0, 1)) = 2, expected = 2
+: value_at_location(state, (0, 3)) = None, expected = None
+: value_at_location(state, (-1, 1)) = None, expected = None
+
+*** ~swap~ - 
+
+Given a 2d state, create a new one with the value at the ~from_~ location swapped with the one at the ~to~
+
+#+name: swap
+#+begin_src python :session sp :results none
+  from copy import deepcopy
+  def swap(state, from_, to_):
+      t = value_at_location(state, to_)
+      s = list(deepcopy(state))
+      s[to_[0]] = list(s[to_[0]])
+      s[from_[0]] = list(s[from_[0]])
+      s[to_[0]][to_[1]] = value_at_location(state, from_)
+      s[from_[0]][from_[1]] = t
+      s[to_[0]] = tuple(s[to_[0]])
+      s[from_[0]] = tuple(s[from_[0]])
+      return tuple(s)
+#+end_src
+
+Sample usage:
+
+#+name: test-data:swap
+#+begin_src python :eval no :exports none
+  [
+    ((1,2), (0,2), ((1,2,0),(4,5,3)) ), 
+    ((1,2), (1,1), ((1,2,3),(4,0,5)) ), 
+  ]
+#+end_src
+
+#+begin_src python :session sp
+  prompt = "expected: "
+  for (from_, to_, expected) in (
+      <<test-data:swap>>
+  ):
+      print(f"swap(state, {from_}, {to_}) = \n{' '*len(prompt)}{swap(state, from_, to_)}\n{prompt}{expected}")
+#+end_src
+
+#+RESULTS:
+: swap(state, (1, 2), (0, 2)) = 
+:           ((1, 2, 0), (4, 5, 3))
+: expected: ((1, 2, 0), (4, 5, 3))
+: swap(state, (1, 2), (1, 1)) = 
+:           ((1, 2, 3), (4, 0, 5))
+: expected: ((1, 2, 3), (4, 0, 5))
+
+
+** Putting it Together
+     
+Ok, so lets test ~get_navigable_states~ to make sure it works
+     
+#+begin_src python :session sp
+  print(f"state is {state}")
+  print(f"navigable states from 0 {list(get_navigable_states(state, from_value=0))}")
+#+end_src
+
+#+RESULTS:
+: state is ((1, 2, 3), (4, 5, 0))
+: navigable states from 0 [((1, 2, 3), (4, 0, 5)), ((1, 2, 0), (4, 5, 3))]
+
+
+This looks good...so if I got it right then this should just work
+
+#+name: boards-to-test
+#+begin_src python :var board1=board-1 :var board2=board-2 :var board3=board-3 :var board4=board-4 :exports none
+  def tupelize_iterable(coll):
+      """
+      In order to be hashable with set(), we expect input to find_min_move to be tuples but
+      org returns tables as lists, so this helper function is helpful to tuple-ize all
+      iterables recursively
+      """
+      if not hasattr(coll, "__iter__"):
+          return coll
+      return tuple((tupelize_iterable(x) for x in coll))
+
+  print([
+      (tupelize_iterable(b), expected)
+      for b, expected in (
+              (board1, 1),
+              (board2, None),
+              (board3, 5),
+              (board4, 14)
+      )
+  ])
+#+end_src
+
+#+RESULTS: boards-to-test
+: [(((1, 2, 3), (4, 0, 5)), 1), (((1, 2, 3), (5, 4, 0)), None), (((4, 1, 2), (5, 0, 3)), 5), (((3, 2, 4), (1, 5, 0)), 14)]
+
+
+#+begin_src python :session sp
+  <<find_min_move>>
+
+  for (board, expected) in (
+    <<boards-to-test()>>
+  ):
+      board = tupelize_iterable(board)
+      print(f"for {board} min move: {find_min_move((board,))}, expected: {expected}")
+      print(f"====================")
+#+end_src
+
+#+RESULTS:
+: for ((1, 2, 3), (4, 0, 5)) min move: 1, expected: 1
+: ====================
+: for ((1, 2, 3), (5, 4, 0)) min move: None, expected: None
+: ====================
+: for ((4, 1, 2), (5, 0, 3)) min move: 5, expected: 5
+: ====================
+: for ((3, 2, 4), (1, 5, 0)) min move: 14, expected: 14
+: ====================
+
+
+** Tests
+   :PROPERTIES:
+   :header-args: :eval no :exports none :noweb yes
+   :END:
+   
+#+begin_src python :tangle tangle/sliding_puzzle.py
+  <<value_at_location>>
+
+  <<swap>>
+
+  <<get_navigable_states>>
+
+  <<find_min_move>>
+#+end_src
+
+
+#+begin_src python :tangle tangle/tests.py
+  from sliding_puzzle import value_at_location, swap, find_min_move
+  import pytest
+
+  state = ((1,2,3),
+           (4,5,0))
+
+  @pytest.mark.parametrize("loc,val", 
+    <<test-data:value_at_location>> 
+  )
+  def test_value_at_location(loc, val):
+    assert value_at_location(state, loc, default=None) == val
+
+  @pytest.mark.parametrize("from_,to_,expected",
+    <<test-data:swap>>
+  )
+  def test_swap(from_,to_,expected):
+    assert swap(state, from_, to_) == expected
+
+  @pytest.mark.parametrize("state, min_move", (
+    <<boards-to-test()>>
+  ))
+  def test_find_min_move(state, min_move):
+    assert find_min_move([state]) == min_move
+#+end_src
+
+#+begin_src shell :exports both :eval no-export :dir tangle
+  # this is stupid but it really seems like on osx this is the best way to omit the last 2 lines
+  pytest ./tests.py -v | python -c "import sys;[sys.stdout.write(s) for s in [*sys.stdin][6:-2]]"
+#+end_src
+
+#+RESULTS:
+| tests.py::test_value_at_location[loc0-2]    | PASSED | [      | 11%] |
+| tests.py::test_value_at_location[loc1-None] | PASSED | [      | 22%] |
+| tests.py::test_value_at_location[loc2-None] | PASSED | [      | 33%] |
+| tests.py::test_swap[from_0-to_0-expected0]  | PASSED | [      | 44%] |
+| tests.py::test_swap[from_1-to_1-expected1]  | PASSED | [      | 55%] |
+| tests.py::test_find_min_move[state0-1]      | PASSED | [      | 66%] |
+| tests.py::test_find_min_move[state1-None]   | PASSED | [      | 77%] |
+| tests.py::test_find_min_move[state2-5]      | PASSED | [      | 88%] |
+| tests.py::test_find_min_move[state3-14]     | PASSED | [100%] |      |
+
+** Links
+      - [[file:tangle/sliding_puzzle.py][Sliding Puzzle Python Module]]
+      - [[file:tangle/tests.py][Tests]]

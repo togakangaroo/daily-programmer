@@ -1,0 +1,8 @@
+# Python stuff
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node stuff
+node_modules/
