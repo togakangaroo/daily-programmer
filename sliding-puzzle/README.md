@@ -1,26 +1,28 @@
 
 # Table of Contents
 
-1.  [Sliding Puzzle](#org4056258)
-    1.  [Problem Statement](#org15c9201)
-    2.  [Glossary](#orgbae790c)
-    3.  [Thinking it Through](#org92b0791)
-    4.  [Utilities](#orgcb38dd8)
-        1.  [`value_at_location`](#org2d34dc6)
-        2.  [`swap` -](#org6928c03)
-    5.  [Putting it Together](#orgc432a79)
-    6.  [Tests](#orgf59e07b)
-    7.  [Links](#orgc6ae1b9)
+1.  [Sliding Puzzle](#org454b570)
+    1.  [Problem Statement](#orgc5c6e13)
+    2.  [Glossary](#orgb343c4a)
+    3.  [Thinking it Through](#org6fbc94d)
+    4.  [Utilities](#orgf74f556)
+        1.  [`value_at_location`](#orga75b782)
+        2.  [`swap` -](#org12c4028)
+    5.  [Putting it Together](#orgc5120fe)
+    6.  [Tests](#orgcfa936f)
+    7.  [Links](#org7d60615)
 
 
-<a id="org4056258"></a>
+<a id="org454b570"></a>
 
 # Sliding Puzzle
 
 
-<a id="org15c9201"></a>
+<a id="orgc5c6e13"></a>
 
 ## Problem Statement
+
+[From the Operation Spark #daily-programmer chat](https://operation-code.slack.com/archives/C7JMZ5LAV/p1571739463040000)
 
 > On a 2x3 board, there are 5 tiles represented by the integers 1 through 5, and an empty square represented by 0.
 > A move consists of choosing 0 and a 4-directionally adjacent number and swapping it.
@@ -32,7 +34,7 @@
 > -   board will be a 2 x 3 array as described above
 > -   `board[i][j]` will be a permutation of `[0, 1, 2, 3, 4, 5]`
 
-<table id="org5077ce0" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org03b7875" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -61,7 +63,7 @@
 Expected Output: 1
 Explanation: Swap the 0 and the 5 in one move.
 
-<table id="org1721d09" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org4942b83" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -90,7 +92,7 @@ Explanation: Swap the 0 and the 5 in one move.
 Output: -1
 Explanation: No number of moves will make the board solved.
 
-<table id="org606ffbe" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org40e254a" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -127,7 +129,7 @@ An example path:
 -   After move 4: [[1,2,0],[4,5,3]]
 -   After move 5: [[1,2,3],[4,5,0]]
 
-<table id="orga920702" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org53a9819" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -156,7 +158,7 @@ An example path:
 Expected Output: 14
 
 
-<a id="orgbae790c"></a>
+<a id="orgb343c4a"></a>
 
 ## Glossary
 
@@ -167,7 +169,7 @@ We're going to be using the following terms here
 -   **value** - the actual value in a state at a location
 
 
-<a id="org92b0791"></a>
+<a id="org6fbc94d"></a>
 
 ## Thinking it Through
 
@@ -240,12 +242,12 @@ ok, i think that's good? we do have to implement `get_navigable_states` though. 
 looks like we need some helper functions here. 
 
 
-<a id="orgcb38dd8"></a>
+<a id="orgf74f556"></a>
 
 ## Utilities
 
 
-<a id="org2d34dc6"></a>
+<a id="orga75b782"></a>
 
 ### `value_at_location`
 
@@ -283,7 +285,7 @@ Sample:
     value_at_location(state, (-1, 1)) = None, expected = None
 
 
-<a id="org6928c03"></a>
+<a id="org12c4028"></a>
 
 ### `swap` -
 
@@ -320,7 +322,7 @@ Sample usage:
     expected: ((1, 2, 3), (4, 0, 5))
 
 
-<a id="orgc432a79"></a>
+<a id="orgc5120fe"></a>
 
 ## Putting it Together
 
@@ -366,7 +368,7 @@ This looks good&#x2026;so if I got it right then this should just work
     ====================
 
 
-<a id="orgf59e07b"></a>
+<a id="orgcfa936f"></a>
 
 ## Tests
 
@@ -438,7 +440,7 @@ This looks good&#x2026;so if I got it right then this should just work
 </table>
 
 
-<a id="orgc6ae1b9"></a>
+<a id="org7d60615"></a>
 
 ## Links
 
