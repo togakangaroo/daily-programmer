@@ -1,3 +1,4 @@
+#+STARTUP: content
 * Sliding Puzzle
     :PROPERTIES:
     :header-args: :noweb yes :results output :exports both :noweb yes :eval no-export :mkdirp yes
