@@ -5,4 +5,5 @@ What you find here, are not writeups of me solving these problems, they're the a
 * Implementations
 
 - [[./sliding-puzzle][Sliding Puzzle]] 
+- [[./roman-to-integer][Roman Numeral to Integer]] 
 

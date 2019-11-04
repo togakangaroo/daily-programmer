@@ -47,21 +47,21 @@ We should be able to get the following values (where blank means that roman nume
    These are the terms as used in this document
    
    - *Symbol* - A single letter symbol ~I~, ~V~, etc
-   - *Numeral Increment* - A valid combination of symbols to make a single instance that represents a "digit". Eg I, III, IV, V, but not VI
+   - *[Roman] Numeral* - The Roman numeral itself
 
 ** Ideation
   
    Basic ass way of doing this. Start from left to right one symbol at a time. As you process the next symbol several things are possible
    
    - It is the same symbol as prev and there are < 3 in a row - add in that symbol to buffer
-   - It is the next symbol of higher value from prev and there is only one symbol buffered - Add in value from buffer
+   - It is the +next+ symbol of higher value from prev and there is only one symbol buffered - Add in value from buffer
    - It is a lower value symbol - Add in value from buffer and add symbol to buffer
    - It is end - add in value from buffer
    - Else - *Error*
      
    Also, since I have a Ruby interview coming up, lets do this in Ruby
 
-** Ruby Playground 
+** Ruby Playground                                                 :noexport:
    :PROPERTIES:
    :header-args: :exports none :results output
    :END:
@@ -148,7 +148,7 @@ ok, I'm seeing something really odd happen where variables inside of functions a
 
 ** Solution
 *** Create Roman Numeral Symbol hash 
-    According to the logic in <<Ideation>> we will need the ability to look up a symbol's value, the next highest symbol, and to look a symbol up by its string char
+    According to the logic in [[Ideation]] we will need the ability to look up a symbol's value, the next highest symbol, and to look a symbol up by its string char
     
     #+name: define-RomanNumeralSymbol
     #+begin_src ruby :session :results none
@@ -230,5 +230,7 @@ ok, I'm seeing something really odd happen where variables inside of functions a
     | MCMXCIV | 1994 |
     | IIII    |      |
     | IL      |      |
+    
+    Yay! I should export that to its own files and run a ruby test on it but I got stuff to do right now
     
  #+STARTUP: content
