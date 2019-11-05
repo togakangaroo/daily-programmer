@@ -1,6 +1,6 @@
 * Roman Numeral to Integer
   :PROPERTIES:
-  :header-args: :noweb yes :results output :exports both :noweb yes :eval no-export :mkdirp yes
+  :header-args: :noweb yes :results output :exports both :eval no-export :mkdirp yes
   :END:
   
 ** Problem Statement

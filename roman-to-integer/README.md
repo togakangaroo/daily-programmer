@@ -1,23 +1,22 @@
 
 # Table of Contents
 
-1.  [Roman Numeral to Integer](#org172b201)
-    1.  [Problem Statement](#org1279241)
-    2.  [Glossary](#org10c2e7f)
-    3.  [Ideation](#org9b0e930)
-    4.  [Ruby Playground](#orgfbd84d1)
-    5.  [Solution](#org4c338ea)
-        1.  [Create Roman Numeral Symbol hash](#org9dd7459)
-        2.  [Define `calculate_numeral_value`](#org3c6e0ba)
-        3.  [Test it out](#org7eba142)
+1.  [Roman Numeral to Integer](#org0a7864d)
+    1.  [Problem Statement](#orgd9e2098)
+    2.  [Glossary](#org4b632cc)
+    3.  [Ideation](#org0d65ddd)
+    4.  [Solution](#orgd48a77a)
+        1.  [Create Roman Numeral Symbol hash](#org7d18c20)
+        2.  [Define `calculate_numeral_value`](#org0e1dd18)
+        3.  [Test it out](#orgbc3264d)
 
 
-<a id="org172b201"></a>
+<a id="org0a7864d"></a>
 
 # Roman Numeral to Integer
 
 
-<a id="org1279241"></a>
+<a id="orgd9e2098"></a>
 
 ## Problem Statement
 
@@ -25,7 +24,7 @@
 
 Roman numerals are represented by seven different symbols:
 
-<table id="org7abdb19" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orga416db1" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -95,7 +94,7 @@ Roman numerals are usually written largest to smallest from left to right. Howev
 
 We should be able to get the following values (where blank means that roman numeral is invalid)
 
-<table id="orgf48b5b6" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgf4a0e7d" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -149,24 +148,24 @@ We should be able to get the following values (where blank means that roman nume
 </table>
 
 
-<a id="org10c2e7f"></a>
+<a id="org4b632cc"></a>
 
 ## Glossary
 
 These are the terms as used in this document
 
 -   **Symbol** - A single letter symbol `I`, `V`, etc
--   **Numeral Increment** - A valid combination of symbols to make a single instance that represents a "digit". Eg I, III, IV, V, but not VI
+-   **[Roman] Numeral** - The Roman numeral itself
 
 
-<a id="org9b0e930"></a>
+<a id="org0d65ddd"></a>
 
 ## Ideation
 
 Basic ass way of doing this. Start from left to right one symbol at a time. As you process the next symbol several things are possible
 
 -   It is the same symbol as prev and there are < 3 in a row - add in that symbol to buffer
--   It is the next symbol of higher value from prev and there is only one symbol buffered - Add in value from buffer
+-   It is the <del>next</del> symbol of higher value from prev and there is only one symbol buffered - Add in value from buffer
 -   It is a lower value symbol - Add in value from buffer and add symbol to buffer
 -   It is end - add in value from buffer
 -   Else - **Error**
@@ -174,42 +173,26 @@ Basic ass way of doing this. Start from left to right one symbol at a time. As y
 Also, since I have a Ruby interview coming up, lets do this in Ruby
 
 
-<a id="orgfbd84d1"></a>
-
-## Ruby Playground
-
-I'm not good with ruby so lets play with ruby
-
-How exactly would string destructuring work?
-
-ok, I'm seeing something really odd happen where variables inside of functions are not always always visible in an inner scope. Lets check that out.
-
-[`define_method`](https://apidock.com/ruby/Module/define_method) [Ruby local variable is undefined - Stack Overflow](https://stackoverflow.com/a/9671368/5056) 
-
-
-<a id="org4c338ea"></a>
+<a id="orgd48a77a"></a>
 
 ## Solution
 
 
-<a id="org9dd7459"></a>
+<a id="org7d18c20"></a>
 
 ### Create Roman Numeral Symbol hash
 
-According to the logic in <a id="org6dc34b7"></a> we will need the ability to look up a symbol's value, the next highest symbol, and to look a symbol up by its string char
+According to the logic in [1.3](#org0d65ddd) we will need the ability to look up a symbol's value, the next highest symbol, and to look a symbol up by its string char
 
-    RomanNumeralSymbol = Struct.new("RomanNumeralSymbol", :symbol, :value, :next)
+    RomanNumeralSymbol = Struct.new("RomanNumeralSymbol", :symbol, :value)
 
 We can now create instances of this and put them into a `roman_numeral_symbols` hash like we need
 
     rns = symbol_values.map { |(symbol, value)| RomanNumeralSymbol.new(symbol, value)}
-    rns.zip(rns.drop(1)).each do |(s, n)| 
-      s.next = n
-    end
     roman_numeral_symbols = rns.map { |x| [x.symbol, x] }.to_h
 
 
-<a id="org3c6e0ba"></a>
+<a id="org0e1dd18"></a>
 
 ### Define `calculate_numeral_value`
 
@@ -255,7 +238,7 @@ We can now create instances of this and put them into a `roman_numeral_symbols` 
     end
 
 
-<a id="org7eba142"></a>
+<a id="orgbc3264d"></a>
 
 ### Test it out
 
@@ -312,4 +295,6 @@ We can now create instances of this and put them into a `roman_numeral_symbols` 
 </tr>
 </tbody>
 </table>
+
+Yay! I should export that to its own files and run a ruby test on it but I got stuff to do right now
 
