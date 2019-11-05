@@ -152,7 +152,7 @@ ok, I'm seeing something really odd happen where variables inside of functions a
     
     #+name: define-RomanNumeralSymbol
     #+begin_src ruby :session :results none
-      RomanNumeralSymbol = Struct.new("RomanNumeralSymbol", :symbol, :value, :next)
+      RomanNumeralSymbol = Struct.new("RomanNumeralSymbol", :symbol, :value)
     #+end_src
    
     We can now create instances of this and put them into a ~roman_numeral_symbols~ hash like we need
@@ -160,9 +160,6 @@ ok, I'm seeing something really odd happen where variables inside of functions a
     #+name: create-roman_numeral_symbols
     #+begin_src ruby :var symbol_values=symbol-values :session :results none
       rns = symbol_values.map { |(symbol, value)| RomanNumeralSymbol.new(symbol, value)}
-      rns.zip(rns.drop(1)).each do |(s, n)| 
-        s.next = n
-      end
       roman_numeral_symbols = rns.map { |x| [x.symbol, x] }.to_h
     #+end_src
 ***  Define ~calculate_numeral_value~
