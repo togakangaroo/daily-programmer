@@ -1,7 +1,7 @@
 #+STARTUP: content
 * Matrix Sum of Region
   :PROPERTIES:
-  :header-args: :lang racket :results output :export both
+  :header-args: :lang racket :results output :exports both
   :END:
 
 ** Problem Statement

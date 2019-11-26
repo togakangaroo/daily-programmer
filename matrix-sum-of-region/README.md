@@ -1,24 +1,24 @@
 
 # Table of Contents
 
-1.  [Matrix Sum of Region](#org4156e58)
-    1.  [Problem Statement](#orgdf71e84)
-    2.  [Playground](#org87dcaf0)
-        1.  [String formats](#org45e2d7d)
-        2.  [Hashes](#orgfcd61ed)
-        3.  [Structs](#org4d7bfcc)
-        4.  [Array](#orgf5888ec)
-        5.  [Array Slicing](#orgbb540e7)
-    3.  [Implementation](#orgaaed595)
+1.  [Matrix Sum of Region](#org964559a)
+    1.  [Problem Statement](#org7aaa625)
+    2.  [Playground](#orgcfd2369)
+        1.  [String formats](#orge6f3364)
+        2.  [Hashes](#org8dbd841)
+        3.  [Structs](#orgbd898ab)
+        4.  [Array](#org1e6f827)
+        5.  [Array Slicing](#orgcc4adcb)
+    3.  [Implementation](#org4406919)
 
 
 
-<a id="org4156e58"></a>
+<a id="org964559a"></a>
 
 # Matrix Sum of Region
 
 
-<a id="orgdf71e84"></a>
+<a id="org7aaa625"></a>
 
 ## Problem Statement
 
@@ -32,27 +32,31 @@ Example:
       #[5 6 7 8]
       #[9 0 1 2]]
 
+    '#(#(1 2 3 4) #(5 6 7 8) #(9 0 1 2))
+
     (struct location (column row))
     (struct region-test (start end expected-sum))
     
     (region-test (location 1 1) (location 3 2) 24)
 
+    #<region-test>
 
-<a id="org87dcaf0"></a>
+
+<a id="orgcfd2369"></a>
 
 ## Playground
 
-This section is because I am only just learning Racket. If you want to skip past me figuring this stuff out then jump to [1.3](#orgaaed595).
+This section is because I am only just learning Racket. If you want to skip past me figuring this stuff out then jump to [1.3](#org4406919).
 
 
-<a id="org45e2d7d"></a>
+<a id="orge6f3364"></a>
 
 ### String formats
 
 [Docs](https://docs.racket-lang.org/reference/strings.html#%28part._format%29)
 
 
-<a id="orgfcd61ed"></a>
+<a id="org8dbd841"></a>
 
 ### Hashes
 
@@ -63,8 +67,12 @@ I don't like to have just random tuples in lists - I think I should learn about 
     (printf "has a: ~a, the value is: ~a\n" (dict-has-key? h 'a) (dict-ref h 'b))
     (printf "has c: ~a\n" (dict-has-key? h 'c))
 
+    h is: #hash((a . apple) (b . banana))
+    has a: #t, the value is: banana
+    has c: #f
 
-<a id="org4d7bfcc"></a>
+
+<a id="orgbd898ab"></a>
 
 ### Structs
 
@@ -75,8 +83,10 @@ But I think structs are actually more natural for this
     (define p (posn 139 73))
     (printf "p: ~a, prop x is: ~a\n" p (posn-x p))
 
+    p: #<posn>, prop x is: 139
 
-<a id="orgf5888ec"></a>
+
+<a id="org1e6f827"></a>
 
 ### Array
 
@@ -86,13 +96,17 @@ Arrays are different from lists, they seem to be&#x2026;multidimensional? Which 
     (require math/array)
     (array #[#['first 'row 'data] #['second 'row 'data]])
 
+    (array #[#['first 'row 'data] #['second 'row 'data]])
+
     (require math/array)
     (build-array #(4 5) (λ (js)
                           (match-define (vector j0 j1) js)
                           (+ j0 j1)))
 
+    (array #[#[0 1 2 3 4] #[1 2 3 4 5] #[2 3 4 5 6] #[3 4 5 6 7]])
 
-<a id="orgbb540e7"></a>
+
+<a id="orgcc4adcb"></a>
 
 ### Array Slicing
 
@@ -107,8 +121,11 @@ So this takes an array with a [Slice Spec](https://docs.racket-lang.org/math/arr
     (printf "~a\n" sliced)
     (printf "sum: ~a" (array-all-sum sliced))
 
+    (array #[#[6 7 8] #[0 1 2]])
+    sum: 24
 
-<a id="orgaaed595"></a>
+
+<a id="org4406919"></a>
 
 ## Implementation
 
@@ -131,6 +148,8 @@ Uhh&#x2026;ok&#x2026;so with the array functions above this becomes stupid simpl
                          #[9 0 1 2]])
                 (location 1 1)
                 (location 3 2))
+
+    24
 
 Hacha!
 
