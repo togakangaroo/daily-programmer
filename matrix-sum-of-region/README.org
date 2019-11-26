@@ -32,7 +32,7 @@
 
 ** Playground
    This section is because I am only just learning Racket. If you want to skip past me figuring this stuff out then jump to [[Implementation]].
-   
+
 *** String formats
     [[https://docs.racket-lang.org/reference/strings.html#%2528part._format%2529][Docs]]
 *** Hashes
@@ -101,13 +101,13 @@
 
 ** Implementation
    Uhh...ok...so with the array functions above this becomes stupid simple
-    
+
    #+begin_src racket
      (require math/array)
 
      (struct location (column row))
 
-     (define (sum-matrix matrix start end)
+     (define (sum-matrix-region matrix start end)
        (define slice-spec (list (:: (location-row start)
                                     (add1 (location-row end)))
                                 (:: (location-column start)
@@ -115,11 +115,11 @@
        (define sliced (array-slice-ref matrix slice-spec))
        (array-all-sum sliced))
 
-     (sum-matrix (array #[#[1 2 3 4]
-                          #[5 6 7 8]
-                          #[9 0 1 2]])
-                 (location 1 1)
-                 (location 3 2))
+     (sum-matrix-region (array #[#[1 2 3 4]
+                                 #[5 6 7 8]
+                                 #[9 0 1 2]])
+                        (location 1 1)
+                        (location 3 2))
    #+end_src
 
    #+RESULTS:

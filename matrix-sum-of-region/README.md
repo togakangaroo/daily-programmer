@@ -1,24 +1,24 @@
 
 # Table of Contents
 
-1.  [Matrix Sum of Region](#org964559a)
-    1.  [Problem Statement](#org7aaa625)
-    2.  [Playground](#orgcfd2369)
-        1.  [String formats](#orge6f3364)
-        2.  [Hashes](#org8dbd841)
-        3.  [Structs](#orgbd898ab)
-        4.  [Array](#org1e6f827)
-        5.  [Array Slicing](#orgcc4adcb)
-    3.  [Implementation](#org4406919)
+1.  [Matrix Sum of Region](#org4009f11)
+    1.  [Problem Statement](#org9c8f47f)
+    2.  [Playground](#orgfbbcad0)
+        1.  [String formats](#orgdddb04b)
+        2.  [Hashes](#org1dde01d)
+        3.  [Structs](#org96691c3)
+        4.  [Array](#orga7175e1)
+        5.  [Array Slicing](#orga6ca280)
+    3.  [Implementation](#org3f063ee)
 
 
 
-<a id="org964559a"></a>
+<a id="org4009f11"></a>
 
 # Matrix Sum of Region
 
 
-<a id="org7aaa625"></a>
+<a id="org9c8f47f"></a>
 
 ## Problem Statement
 
@@ -42,21 +42,21 @@ Example:
     #<region-test>
 
 
-<a id="orgcfd2369"></a>
+<a id="orgfbbcad0"></a>
 
 ## Playground
 
-This section is because I am only just learning Racket. If you want to skip past me figuring this stuff out then jump to [1.3](#org4406919).
+This section is because I am only just learning Racket. If you want to skip past me figuring this stuff out then jump to [1.3](#org3f063ee).
 
 
-<a id="orge6f3364"></a>
+<a id="orgdddb04b"></a>
 
 ### String formats
 
 [Docs](https://docs.racket-lang.org/reference/strings.html#%28part._format%29)
 
 
-<a id="org8dbd841"></a>
+<a id="org1dde01d"></a>
 
 ### Hashes
 
@@ -72,7 +72,7 @@ I don't like to have just random tuples in lists - I think I should learn about 
     has c: #f
 
 
-<a id="orgbd898ab"></a>
+<a id="org96691c3"></a>
 
 ### Structs
 
@@ -86,7 +86,7 @@ But I think structs are actually more natural for this
     p: #<posn>, prop x is: 139
 
 
-<a id="org1e6f827"></a>
+<a id="orga7175e1"></a>
 
 ### Array
 
@@ -106,7 +106,7 @@ Arrays are different from lists, they seem to be&#x2026;multidimensional? Which 
     (array #[#[0 1 2 3 4] #[1 2 3 4 5] #[2 3 4 5 6] #[3 4 5 6 7]])
 
 
-<a id="orgcc4adcb"></a>
+<a id="orga6ca280"></a>
 
 ### Array Slicing
 
@@ -125,7 +125,7 @@ So this takes an array with a [Slice Spec](https://docs.racket-lang.org/math/arr
     sum: 24
 
 
-<a id="org4406919"></a>
+<a id="org3f063ee"></a>
 
 ## Implementation
 
@@ -135,7 +135,7 @@ Uhh&#x2026;ok&#x2026;so with the array functions above this becomes stupid simpl
     
     (struct location (column row))
     
-    (define (sum-matrix matrix start end)
+    (define (sum-matrix-region matrix start end)
       (define slice-spec (list (:: (location-row start)
                                    (add1 (location-row end)))
                                (:: (location-column start)
@@ -143,11 +143,11 @@ Uhh&#x2026;ok&#x2026;so with the array functions above this becomes stupid simpl
       (define sliced (array-slice-ref matrix slice-spec))
       (array-all-sum sliced))
     
-    (sum-matrix (array #[#[1 2 3 4]
-                         #[5 6 7 8]
-                         #[9 0 1 2]])
-                (location 1 1)
-                (location 3 2))
+    (sum-matrix-region (array #[#[1 2 3 4]
+                                #[5 6 7 8]
+                                #[9 0 1 2]])
+                       (location 1 1)
+                       (location 3 2))
 
     24
 
