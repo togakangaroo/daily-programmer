@@ -1,0 +1,128 @@
+#+STARTUP: content
+* Matrix Sum of Region
+  :PROPERTIES:
+  :header-args: :lang racket :results output :export both
+  :END:
+
+** Problem Statement
+
+   [[https://operation-code.slack.com/archives/C7JMZ5LAV/p1574682267172200][From the Operation Code #daily-programmer chat]]
+
+   Given a matrix of integers and the top left and bottom right coordinates of a rectangular region within the matrix, find the sum of numbers falling inside the rectangle.
+
+   Example:
+
+   #+name: matrix-1
+   #+begin_src racket
+     #[#[1 2 3 4]
+       #[5 6 7 8]
+       #[9 0 1 2]]
+   #+end_src
+
+   #+name: matrix-1-tests
+   #+begin_src racket :eval none
+     (struct location (column row))
+     (struct region-test (start end expected-sum))
+
+     (region-test (location 1 1) (location 3 2) 24)
+   #+end_src
+
+   #+RESULTS: matrix-1-tests
+   : #<region-test>
+
+** Playground
+   This section is because I am only just learning Racket. If you want to skip past me figuring this stuff out then jump to [[Implementation]].
+   
+*** String formats
+    [[https://docs.racket-lang.org/reference/strings.html#%2528part._format%2529][Docs]]
+*** Hashes
+    I don't like to have just random tuples in lists - I think I should learn about hashes.
+    #+begin_src racket
+      (define h (make-hash '((a . "apple") (b . "banana"))))
+      (printf "h is: ~a\n" h)
+      (printf "has a: ~a, the value is: ~a\n" (dict-has-key? h 'a) (dict-ref h 'b))
+      (printf "has c: ~a\n" (dict-has-key? h 'c))
+    #+end_src
+
+    #+RESULTS:
+    : h is: #hash((a . apple) (b . banana))
+    : has a: #t, the value is: banana
+    : has c: #f
+
+*** Structs
+    [[https://download.racket-lang.org/docs/5.1/html/guide/define-struct.html][Docs]]
+    But I think structs are actually more natural for this
+    #+begin_src racket
+      (struct posn (x y))
+      (define p (posn 139 73))
+      (printf "p: ~a, prop x is: ~a\n" p (posn-x p))
+    #+end_src
+
+    #+RESULTS:
+    : p: #<posn>, prop x is: 139
+
+*** Array
+    [[https://docs.racket-lang.org/math/array.html][Docs]]
+    Arrays are different from lists, they seem to be...multidimensional? Which is after all waht I want here
+    #+begin_src racket
+      (require math/array)
+      (array #[#['first 'row 'data] #['second 'row 'data]])
+    #+end_src
+
+    #+RESULTS:
+    : (array #[#['first 'row 'data] #['second 'row 'data]])
+
+    #+begin_src racket
+      (require math/array)
+      (build-array #(4 5) (λ (js)
+                            (match-define (vector j0 j1) js)
+                            (+ j0 j1)))
+    #+end_src
+
+    #+RESULTS:
+    : (array #[#[0 1 2 3 4] #[1 2 3 4 5] #[2 3 4 5 6] #[3 4 5 6 7]])
+
+*** Array Slicing
+    [[https://docs.racket-lang.org/math/array_slicing.html][Docs]]
+    So this takes an array with a [[https://docs.racket-lang.org/math/array_indexing.html#%28form._%28%28lib._math%2Farray..rkt%29._.Slice-.Spec%29%29][Slice Spec]]. This is multidimensional. Lets figure out the slide spec for copying out ~#[#[6 7 8] #[0 1 2]]~
+    #+begin_src racket :results output
+      (require math/array)
+      (define matrix (array #[#[1 2 3 4]
+                              #[5 6 7 8]
+                              #[9 0 1 2]]))
+      (define sliced (array-slice-ref matrix (list (:: 1 3) (:: 1 4))))
+      (printf "~a\n" sliced)
+      (printf "sum: ~a" (array-all-sum sliced))
+    #+end_src
+
+    #+RESULTS:
+    : (array #[#[6 7 8] #[0 1 2]])
+    : sum: 24
+
+** Implementation
+   Uhh...ok...so with the array functions above this becomes stupid simple
+    
+   #+begin_src racket
+     (require math/array)
+
+     (struct location (column row))
+
+     (define (sum-matrix matrix start end)
+       (define slice-spec (list (:: (location-row start)
+                                    (add1 (location-row end)))
+                                (:: (location-column start)
+                                    (add1 (location-column end)))))
+       (define sliced (array-slice-ref matrix slice-spec))
+       (array-all-sum sliced))
+
+     (sum-matrix (array #[#[1 2 3 4]
+                          #[5 6 7 8]
+                          #[9 0 1 2]])
+                 (location 1 1)
+                 (location 3 2))
+   #+end_src
+
+   #+RESULTS:
+   : 24
+
+   Hacha!
