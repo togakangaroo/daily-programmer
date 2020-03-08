@@ -1,7 +1,7 @@
 #+OPTIONS: toc:nil 
 * Sum elements to next in a list
   
-Question:
+Question from the Operation Code Slack:
 #+begin_quote
 I have to create a function that sums of every 2 consecutives elements in a list. for example ([2,4,3,1,-2]). the output expected [6,7,4,-1]
 #+end_quote
