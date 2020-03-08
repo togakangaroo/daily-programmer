@@ -1,0 +1,69 @@
+#+OPTIONS: toc:nil 
+* Sum elements to next in a list
+  
+Question:
+#+begin_quote
+I have to create a function that sums of every 2 consecutives elements in a list. for example ([2,4,3,1,-2]). the output expected [6,7,4,-1]
+#+end_quote
+
+So the basic idea here is to take the collection 
+
+#+name: input
+|  2 |
+|  4 |
+|  3 |
+|  1 |
+| -2 |
+
+#+name: original
+#+begin_src python :var lst=input :exports none
+  # because we used table styling above, it gets passed in as a list of lists and we have to unwrap it. 
+  # This is an org detail and not relevant to the question itself so hide this fact.
+  return [a[0] for a in lst]
+#+end_src
+
+#+RESULTS: original
+| 2 | 4 | 3 | 1 | -2 |
+
+and a copy of it that same collection that skips the first element ([[https://docs.python.org/3/library/itertools.html#itertools.islice][islice is a good fit for this]]) 
+
+#+name: skip-first
+#+begin_src python :var lst=original() :exports both
+  from itertools import islice
+  return list(islice(lst, 1, None))
+#+end_src
+
+#+RESULTS: skip-first
+| 4 | 3 | 1 | -2 |
+
+You then [[https://docs.python.org/3/library/functions.html#zip][zip]] the two together into a [[https://www.tutorialspoint.com/python/python_tuples.htm][tuple.]]
+
+#+name: zipped
+#+begin_src python :var lst=original() :var skipped=skip-first() :exports both
+  return list(zip(lst, skipped))
+#+end_src
+
+#+RESULTS: zipped
+| 2 |  4 |
+| 4 |  3 |
+| 3 |  1 |
+| 1 | -2 |
+
+Now it is a simple matter of iterating each tuple and adding the two elements
+
+#+begin_src python :var zipped=zipped()
+  return list(a+b for a,b in zipped)
+#+end_src
+
+#+RESULTS:
+| 6 | 7 | 4 | -1 |
+
+
+So putting it all together, it's a one liner. Viola!
+#+begin_src python :var lst=original() :exports both
+  from itertools import islice
+  return list(a+b for a,b in zip(lst, islice(lst, 1, None)))
+#+end_src
+
+#+RESULTS:
+| 6 | 7 | 4 | -1 |
