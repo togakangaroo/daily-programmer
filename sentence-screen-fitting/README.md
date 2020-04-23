@@ -1,19 +1,19 @@
 
 # Table of Contents
 
-1.  [Sentence Screen Fitting](#org34aa856)
-    1.  [Problem Statement](#orgb69f05b)
-    2.  [Examples](#orga03529f)
-    3.  [Helpful Utilities](#orge72ab12)
-    4.  [Putting it all together](#org0ad1503)
+1.  [Sentence Screen Fitting](#orgeafbd88)
+    1.  [Problem Statement](#org7dedb92)
+    2.  [Examples](#org02ad3ec)
+    3.  [Helpful Utilities](#org59f2444)
+    4.  [Putting it all together](#org9a5cc3d)
 
 
-<a id="org34aa856"></a>
+<a id="orgeafbd88"></a>
 
 # Sentence Screen Fitting
 
 
-<a id="orgb69f05b"></a>
+<a id="org7dedb92"></a>
 
 ## Problem Statement
 
@@ -40,11 +40,11 @@
 > The character '-' signifies an empty space on the screen.
 
 
-<a id="orga03529f"></a>
+<a id="org02ad3ec"></a>
 
 ## Examples
 
-<table id="org5229d1b" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgab136ad" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -92,7 +92,7 @@
 </table>
 
 
-<a id="orge72ab12"></a>
+<a id="org59f2444"></a>
 
 ## Helpful Utilities
 
@@ -114,17 +114,17 @@ Since we're going to be using cycles of our sentences here, a method that can cy
 
     e
 
-This is cool, but we to actually know what cycle we're in too
+This is cool, but we to actually need to know what cycle we're in too
 
-        const cycleCount = function * (collection) {
-            let cycles = 0
-            while(true) {
-                for(const x of collection)
-                    yield cycles
-                cycles += 1
-            }
+    const cycleCount = function * (collection) {
+        let cycles = 0
+        while(true) {
+            for(const x of collection)
+                yield cycles
+            cycles += 1
         }
-        const letters = `abcdefg`
+    }
+    const letters = `abcdefg`
     
     const it = cycleCount(letters)[Symbol.iterator]()
     for(let i=0; i < 25; i+=1, it.next()) {}
@@ -134,33 +134,33 @@ This is cool, but we to actually know what cycle we're in too
 
 And we can combine these by zipping, which is handy
 
-        const cycle = function * (collection) {
-            while(true) {
-                for(const x of collection)
-                    yield x
-            }
+    const cycle = function * (collection) {
+        while(true) {
+            for(const x of collection)
+                yield x
         }
+    }
     
-        const cycleCount = function * (collection) {
-            let cycles = 0
-            while(true) {
-                for(const x of collection)
-                    yield cycles
-                cycles += 1
-            }
+    const cycleCount = function * (collection) {
+        let cycles = 0
+        while(true) {
+            for(const x of collection)
+                yield cycles
+            cycles += 1
         }
+    }
     
-        const zip = function * (...collections) {
-            if(!collections.length)
+    const zip = function * (...collections) {
+        if(!collections.length)
+            return
+        const iterators = collections.map(x => x[Symbol.iterator]())
+        while(true) {
+            const nexts = iterators.map(i => i.next())
+            if(nexts.some(x => x.done))
                 return
-            const iterators = collections.map(x => x[Symbol.iterator]())
-            while(true) {
-                const nexts = iterators.map(i => i.next())
-                if(nexts.some(x => x.done))
-                    return
-                yield nexts.map(x => x.value)
-            }
+            yield nexts.map(x => x.value)
         }
+    }
     
     const letters = `abcdefg`
     
@@ -173,39 +173,39 @@ And we can combine these by zipping, which is handy
 Cool!
 
 
-<a id="org0ad1503"></a>
+<a id="org9a5cc3d"></a>
 
 ## Putting it all together
 
 So now the plan can become to create an iterator for our words, and then move through it one word at a time, eating up the space remaining on each column and then outputting the final cycle.
 
-        const cycle = function * (collection) {
-            while(true) {
-                for(const x of collection)
-                    yield x
-            }
+    const cycle = function * (collection) {
+        while(true) {
+            for(const x of collection)
+                yield x
         }
+    }
     
-        const cycleCount = function * (collection) {
-            let cycles = 0
-            while(true) {
-                for(const x of collection)
-                    yield cycles
-                cycles += 1
-            }
+    const cycleCount = function * (collection) {
+        let cycles = 0
+        while(true) {
+            for(const x of collection)
+                yield cycles
+            cycles += 1
         }
+    }
     
-        const zip = function * (...collections) {
-            if(!collections.length)
+    const zip = function * (...collections) {
+        if(!collections.length)
+            return
+        const iterators = collections.map(x => x[Symbol.iterator]())
+        while(true) {
+            const nexts = iterators.map(i => i.next())
+            if(nexts.some(x => x.done))
                 return
-            const iterators = collections.map(x => x[Symbol.iterator]())
-            while(true) {
-                const nexts = iterators.map(i => i.next())
-                if(nexts.some(x => x.done))
-                    return
-                yield nexts.map(x => x.value)
-            }
+            yield nexts.map(x => x.value)
         }
+    }
     
     const countCyclesForFitting = (rows, columns, words) => {
         const it = zip(cycle(words), cycleCount(words))[Symbol.iterator]()

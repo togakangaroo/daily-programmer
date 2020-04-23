@@ -63,7 +63,7 @@
    : e
 
 
-   This is cool, but we to actually know what cycle we're in too
+   This is cool, but we to actually need to know what cycle we're in too
 
    #+name: cycleCount
    #+begin_src  js :exports none
@@ -77,8 +77,8 @@
      }
    #+end_src
    #+begin_src js
-         <<cycleCount>>
-         const letters = `abcdefg`
+     <<cycleCount>>
+     const letters = `abcdefg`
 
      const it = cycleCount(letters)[Symbol.iterator]()
      for(let i=0; i < 25; i+=1, it.next()) {}
@@ -107,11 +107,11 @@
 
 
    #+begin_src js :results drawer
-         <<cycle>>
+     <<cycle>>
 
-         <<cycleCount>>
+     <<cycleCount>>
 
-         <<zip>>
+     <<zip>>
 
      const letters = `abcdefg`
 
@@ -133,11 +133,11 @@
    So now the plan can become to create an iterator for our words, and then move through it one word at a time, eating up the space remaining on each column and then outputting the final cycle.
 
    #+begin_src js :var examples=examples
-         <<cycle>>
+     <<cycle>>
 
-         <<cycleCount>>
+     <<cycleCount>>
 
-         <<zip>>
+     <<zip>>
 
      const countCyclesForFitting = (rows, columns, words) => {
          const it = zip(cycle(words), cycleCount(words))[Symbol.iterator]()
