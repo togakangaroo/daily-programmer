@@ -1,0 +1,321 @@
+#+STARTUP: content
+* DOTA2 Senate
+  :PROPERTIES:
+  :header-args: :noweb yes :exports both :noweb yes :eval no-export :mkdirp yes
+  :TEST_STRING: abracaadabra
+  :END:
+** Problem Statement
+   [[https://operation-code.slack.com/archives/C7JMZ5LAV/p1575633463254200][From the Operation Code Slack.]]
+
+   In the world of Dota2, there are two parties: the Radiant and the Dire.
+
+   The Dota2 senate consists of senators coming from two parties. Now the senate
+   wants to make a decision about a change in the Dota2 game. The voting for this
+   change is a round-based procedure. In each round, each senator can exercise
+   one of the two rights:
+
+   - Ban one senator's right: A senator can make another senator lose all his
+     rights in this and all the following rounds.
+   - Announce the victory: If this senator found the senators who still have
+     rights to vote are all from the same party, he can announce the victory and
+     make the decision about the change in the game.
+
+   Given a string representing each senator's party belonging. The character 'R'
+   and 'D' represent the Radiant party and the Dire party respectively. Then if
+   there are n senators, the size of the given string will be n.
+
+   The round-based procedure starts from the first senator to the last senator in
+   the given order. This procedure will last until the end of voting. All the
+   senators who have lost their rights will be skipped during the procedure.
+
+   Suppose every senator is smart enough and will play the best strategy for his
+   own party, you need to predict which party will finally announce the victory
+   and make the change in the Dota2 game. The output should be Radiant or Dire.
+
+   - Input: "RD"
+   - Output: "Radiant"
+
+   *Explanation:* The first senator comes from Radiant and he can just ban the
+   next senator's right in the round 1. And the second senator can't exercise any
+   rights any more since his right has been banned. And in the round 2, the first
+   senator can just announce the victory since he is the only guy in the senate who
+   can vote.
+
+   Input: "RDD"
+   Output: "Dire"
+
+   *Explanation:* The first senator comes from Radiant and he can just ban the
+   next senator's right in the round 1. And the second senator can't exercise any
+   rights anymore since his right has been banned. And the third senator comes
+   from Dire and he can ban the first senator's right in the round 1. And in the
+   round 2, the third senator can just announce the victory since he is the only
+   guy in the senate who can vote. Note: The length of the given string will in
+   the range [1, 10,000].
+** Drawing it out
+   | Input | Outcome | Rounds | Vote Caller |
+   |-------+---------+--------+-------------|
+   | R     | R       |      0 |           0 |
+   | D     | D       |      0 |           0 |
+   |-------+---------+--------+-------------|
+   | RR    | R       |      0 |           0 |
+   | RD    | R       |      1 |           0 |
+   | DR    | D       |      1 |           0 |
+   | DD    | D       |      0 |           0 |
+   |-------+---------+--------+-------------|
+   | RRR   | R       |      0 |           0 |
+   | RRD   | R       |      0 |           0 |
+   | RDR   | R       |      0 |           0 |
+   | RDD   | D       |      1 |           2 |
+   | DRR   | R       |      1 |           2 |
+   | DRD   | D       |      0 |           0 |
+   | DDR   | D       |      0 |           0 |
+   | DDD   | D       |      0 |           0 |
+   |-------+---------+--------+-------------|
+   | ....  | R       |      0 |           0 |
+   | ...D  | R       |      0 |           0 |
+   | ..D.  | R       |      0 |           0 |
+   | ..DD  | R       |      0 |           1 |
+   | .D..  | R       |      0 |           0 |
+   | .D.D  | R       |      0 |           2 |
+   | .DD.  | R       |      1 |           3 |
+   | .DDD  | D       |      0 |           2 |
+   | D...  | R       |      0 |           2 |
+   | D..D  | D       |      1 |           3 |
+   | D.D.  | D       |      0 |           2 |
+   | D.DD  | D       |      0 |           0 |
+   | DD..  | D       |      0 |           1 |
+   | DD.D  | D       |      0 |           0 |
+   | DDD.  | D       |      0 |           0 |
+   | DDDD  | D       |      0 |           0 |
+   |-------+---------+--------+-------------|
+   | ..... | R       |        |             |
+   | ....D | R       |        |             |
+   | ...D. | R       |        |             |
+   | ...DD | R       |        |             |
+   | ..D.. | R       |        |             |
+   | ..D.D | R       |        |             |
+   | ..DD. | R       |        |             |
+   | ..DDD | R       |        |             |
+   | .D... | R       |        |             |
+   | .D..D | R       |        |             |
+   | .D.D. | R       |        |             |
+   | .D.DD | R       |        |             |
+   | .DD.. | R       |        |             |
+   | .DD.D | D       |        |             |
+   | .DDD. | D       |        |             |
+   | .DDDD | D       |        |             |
+   | D.... | R       |        |             |
+   | D...D | R       |        |             |
+   | D..D. | R       |        |             |
+   | D..DD | D       |        |             |
+   | D.D.. | D       |        |             |
+   | D.D.D | D       |        |             |
+   | D.DD. | D       |        |             |
+   | D.DDD | D       |        |             |
+   | DD... | D       |        |             |
+   | DD..D | D       |        |             |
+   | DD.D. | D       |        |             |
+   | DD.DD | D       |        |             |
+   | DDD.. | D       |        |             |
+   | DDD.D | D       |        |             |
+   | DDDD. | D       |        |             |
+   | DDDDD | D       |        |             |
+
+   I'm tried of generating this table manually, lets automate it
+
+   #+begin_src racket :results output
+     (define (left-pad pad desired-length str)
+       (if(<= desired-length (string-length str))
+          str
+          (left-pad pad desired-length (string-append pad str))))
+
+     (define (format-pattern pattern-num)
+       (let* ([binary-string (format "~b" pattern-num)]
+              [padded-string (left-pad "0" 5 binary-string)]
+              [replaced-zero (string-replace padded-string "0" ".")]
+              [replaced-all (string-replace replaced-zero "1" "D")])
+         replaced-all))
+
+     (for ([pattern (stream-map format-pattern (in-range (expt 2 5)))])
+       (displayln pattern))
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   .....
+   ....D
+   ...D.
+   ...DD
+   ..D..
+   ..D.D
+   ..DD.
+   ..DDD
+   .D...
+   .D..D
+   .D.D.
+   .D.DD
+   .DD..
+   .DD.D
+   .DDD.
+   .DDDD
+   D....
+   D...D
+   D..D.
+   D..DD
+   D.D..
+   D.D.D
+   D.DD.
+   D.DDD
+   DD...
+   DD..D
+   DD.D.
+   DD.DD
+   DDD..
+   DDD.D
+   DDDD.
+   DDDDD
+   #+end_example
+
+** Helpers
+
+*** ~count-occurrences~
+    To take votes we need the ability to count the number of occurrences
+    #+NAME: count-occurrences
+    #+begin_src racket
+      (define (count-occurrences needle haystack)
+        (if (empty? haystack)
+            0
+            (let ([op (if (equal? needle (first haystack)) add1 identity)])
+              (op (count-occurrences needle (rest haystack))))))
+    #+end_src
+
+    Test it out
+    #+begin_src racket :var value="abbracadaabra"
+      <<count-occurrences>>
+      (count-occurrences #\a (string->list (format "~a" value)) )
+    #+end_src
+
+    #+RESULTS:
+    : 6
+
+    Nice!
+
+*** ~zip~
+
+    When working with streams or collections a =zip= function is helpful and there does not appear to be one in the standard library. In my experience, a varadic zip that can operate on streams to output lazy structures is extremely useful so lets make one (or rather get help online because I don't fully understand teh spread operation with Racket)
+
+    #+NAME: zip
+    #+begin_src racket
+      (define (zip . xs)
+        ;; from https://stackoverflow.com/a/59232230/5056
+        (match xs
+          [(list x) (for/stream ([e x]) (list e))]
+          [(list x xs ...)
+           (for/stream ([e x] [e* (apply zip xs)])
+             (cons e e*))]))
+    #+end_src
+
+    And lets test that against an infinite sequence, a stream, and a list
+    #+begin_src racket :var term="abbracadaabra"
+      <<zip>>
+      (stream->list (zip (in-naturals) (in-range 10 50) (string->list (format "~a" term))))
+    #+end_src
+
+    #+RESULTS:
+    : '((0 10 #\a) (1 11 #\b) (2 12 #\b) (3 13 #\r) (4 14 #\a) (5 15 #\c) (6 16 #\a) (7 17 #\d) (8 18 #\a) (9 19 #\a) (10 20 #\b) (11 21 #\r) (12 22 #\a))
+
+*** ~remove-with-matching-first~
+    We're going to be dealing with ~(list index item)~ structure a lot. Lets create a helper to remove an item from a stream of lists which has that first item matching
+    #+NAME: remove-with-matching-first
+    #+begin_src racket :eval no
+      (define (remove-with-matching-first index collection)
+        (stream-filter (λ (l) (not (equal? index (first l)))) collection))
+    #+end_src
+
+    Test it:
+    #+begin_src racket
+      <<remove-with-matching-first>>
+      <<zip>>
+      (stream->list (remove-with-matching-first 2 (zip (in-naturals) '(a b c d e))))
+    #+end_src
+
+    #+RESULTS:
+    : '((0 a) (1 b) (3 d) (4 e))
+
+** Getting back to it
+   
+   Looking good!
+
+   
+   Ok, so I'm thinking if we could build a list of each senator's denomination. Then the best move for a senator at a given position is;
+   - If the majority of people in the list are in my denomination then call for a ~:vote~
+   - Otherwise, treat the list as a cycle and kill the next senator from a denomination that is not mine. When a senator is killed they are removed from the list.
+     
+   You can just keep looping then
+
+   Also, I'm a fan of lazy structures so I would like to use streams as much as possible
+
+
+   #+NAME: kill-next-senator
+   #+begin_src racket :eval no
+     <<zip>>
+     <<remove-with-matching-first>>
+     (define (kill-next-senator senators current-position)
+       (define indexed-senators (zip (in-naturals) senators))
+       (define this-senator (stream-ref senators current-position))
+       (define (not-this-senator l)
+         (match l
+           [(list index senator) (not (equal? senator this-senator))]))
+
+       (define cycled-indexed-senators (stream-append (stream-tail indexed-senators (add1 current-position))
+                                                      (stream-take indexed-senators current-position)))
+       (define other-cycled-indexed-senators (stream-filter not-this-senator cycled-indexed-senators))
+
+       ;; note that in situations where a vote has not already been held, it is impossible for there to be no other senators
+       (define indexed-senator-to-kill (stream-first other-cycled-indexed-senators))
+       (define kill-index (first indexed-senator-to-kill))
+
+       (define next-position (if (< kill-index current-position)
+                                 current-position
+                                 (let ([cycled-without-killed (remove-with-matching-first kill-index cycled-indexed-senators)])
+                                   (add1 (first (stream-first cycled-without-killed))))))
+
+       (next-position (stream->list (remove-with-matching-first kill-index indexed-senators))))
+   #+end_src
+
+   
+   Lets test out the above
+   #+begin_src racket :var initial-senate="abba" :var position=2
+     <<kill-next-senator>>
+     (define initial-senators (string->list (format "~a" initial-senate)))
+     (kill-next-senator initial-senators position)
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   application: not a procedure;
+    expected a procedure that can be applied to arguments
+     given: 1
+     arguments...:
+      '((0 #\a) (1 #\b) (2 #\b))
+     context...:
+      "/var/folders/g4/0st3r3c513n6ymf2nkw11ml40000gn/T/ob-racket-Gyamsb": [running body]
+      temp37_0
+      for-loop
+      run-module-instance!125
+      perform-require!78
+   #+end_example
+
+   
+   That really is all we need isn't it? Now we just loop forever, at each step check whether you've won
+
+   #+begin_src racket
+     <<count-occurences>>
+     <<get-next-senate-state>>
+
+     (define (who-wins senators)
+       (let* ([denomination (vector-ref pattern position)])
+         (if ((is-majority pattern denomination))
+             denomination
+             ?)))
+   #+end_src
