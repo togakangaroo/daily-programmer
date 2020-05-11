@@ -1,0 +1,809 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-05-10 Sun 21:46 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="George Mauer" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org010ec3f">1. Grocery Store Spree</a>
+<ul>
+<li><a href="#orgab334a8">1.1. Problem</a>
+<ul>
+<li><a href="#challenge-1">1.1.1. Challenge 1</a></li>
+<li><a href="#challenge-2">1.1.2. Challenge 2</a></li>
+<li><a href="#challenge-3">1.1.3. Challenge 3</a></li>
+</ul>
+</li>
+<li><a href="#org908406b">1.2. Challenge 1 - Location of Words</a></li>
+<li><a href="#org8e05599">1.3. Challenge 2 - Location of Items</a></li>
+<li><a href="#orgc52355e">1.4. Challenge 3 - Line of Sight</a>
+<ul>
+<li><a href="#org601da69">1.4.1. What is Line of Sight?</a></li>
+<li><a href="#orgdd5b6f0">1.4.2. Calculate point of intersection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org010ec3f" class="outline-2">
+<h2 id="org010ec3f"><span class="section-number-2">1</span> Grocery Store Spree</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-orgab334a8" class="outline-3">
+<h3 id="orgab334a8"><span class="section-number-3">1.1</span> Problem</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+Consider the following map of a grocery store:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ditaa" id="org8c26880">+----------------------------------------------------------------------------------------------------------------------+
+|                  Meat                                                                                                |
+|Milk                                                                                                                  |
+|          +-+               +-+                             +-+                                                Seafood|
+|          |*|               |*|                             |*|             +--------------+                          |
+|          |*|               |*|                             |*|             |              |                          |
+|          |*|               |*|                             |*|             |Potatoes      |                          |
+|          |*|               |*|                         Salt|*|             |              |                          |
+|Cheese    |*|ToiletPaper    |*|                             |*|             +--------------+                          |
+|          |*|               |*|                             |*|Cilantro                                               |
+|          |*|               |*|                             |*|                                                       |
+|Eggs      |*|               |*|Mustard         +-+          |*|                                                       |
+|          |*|               |*|                |*|          |*|                                                       |
+|          |*|               |*|                |*|          |*|           +-----------+           +-----------+       |
+|          |*|               |*|       Sunscreen|*|          |*|           |           |           |           |       |
+|          |*|               |*|                |*|          |*|           |Onions     |           |Garlic     |       |
+|          |*|               |*|                |*|          |*|           |           |           |           |       |
+|          |*|               |*|                |*|          |*|           |           |           |           |       |
+|          |*|               |*|                |*|          |*|           +-----------+           +-----------+       |
+|          +-+               +-+                +-+          +-+                                                       |
+|                                                                                                                      |
+|                                                                                                                      |
+|                                                                                                                      |
+| +-------------------------+                                                                                          |
+| |                         |                                                                                          |
+| |Alcohol                  |                                                                                          |
+| |                         |                                                                                          |
++----------------------------------------------------------------------------------------------------------------------+
+</pre>
+</div>
+
+<p>
+The top left-most corner is at position <code>row=0, column=0</code>
+</p>
+</div>
+
+<div id="outline-container-orgd4b58f1" class="outline-4">
+<h4 id="challenge-1"><span class="section-number-4">1.1.1</span> Challenge 1</h4>
+<div class="outline-text-4" id="text-challenge-1">
+<p>
+Parse the map above to determine the location of each word as a <code>(row,column)</code> tuple
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbf64ff6" class="outline-4">
+<h4 id="challenge-2"><span class="section-number-4">1.1.2</span> Challenge 2</h4>
+<div class="outline-text-4" id="text-challenge-2">
+<p>
+The position of an item is determined by
+</p>
+<ul class="org-ul">
+<li>The location of its first capital letter</li>
+<li>Unless it bumps up against a wall on the right (eg Seafood, Salt) in which case it is the location is that of its last letter</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgaf30a8b" class="outline-4">
+<h4 id="challenge-3"><span class="section-number-4">1.1.3</span> Challenge 3</h4>
+<div class="outline-text-4" id="text-challenge-3">
+<p>
+Which items are line of sight to each other? Shelves (asterisk-filled) block line of sight but bins do not.
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org908406b" class="outline-3">
+<h3 id="org908406b"><span class="section-number-3">1.2</span> Challenge 1 - Location of Words</h3>
+<div class="outline-text-3" id="text-1-2">
+<ul class="org-ul">
+<li><a href="#challenge-1">Challenge statement</a></li>
+</ul>
+
+<p>
+The idea here is pretty simple actually since all text is horizontal, just read in all instances of words in each line while keeping track of rows. Simplest way to find a word in a line - regex.
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #4f97d7; font-weight: bold;">from</span> re <span style="color: #4f97d7; font-weight: bold;">import</span> finditer
+<span style="color: #4f97d7; font-weight: bold;">from</span> typing <span style="color: #4f97d7; font-weight: bold;">import</span> List
+
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">get_products_and_positions</span><span style="color: #4f97d7;">(</span>chart: List<span style="color: #bc6ec5;">[</span><span style="color: #4f97d7;">str</span><span style="color: #bc6ec5;">]</span><span style="color: #4f97d7;">)</span>:
+    <span style="color: #4f97d7; font-weight: bold;">for</span> r,line <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7;">enumerate</span><span style="color: #4f97d7;">(</span>chart<span style="color: #4f97d7;">)</span>:
+        <span style="color: #4f97d7; font-weight: bold;">try</span>:
+            <span style="color: #4f97d7; font-weight: bold;">for</span> m <span style="color: #4f97d7; font-weight: bold;">in</span> finditer<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">'[A-Z]\w+'</span>, line<span style="color: #4f97d7;">)</span>:
+                <span style="color: #4f97d7; font-weight: bold;">yield</span> <span style="color: #4f97d7;">(</span>m.group<span style="color: #bc6ec5;">()</span>, r, m.start<span style="color: #bc6ec5;">(</span><span style="color: #a45bad;">0</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+        <span style="color: #4f97d7; font-weight: bold;">except</span> <span style="color: #ce537a; font-weight: bold;">ValueError</span>:
+            <span style="color: #4f97d7; font-weight: bold;">pass</span>
+
+<span style="color: #7590db;">chart</span> = <span style="color: #4f97d7;">(</span>l.strip<span style="color: #bc6ec5;">()</span> <span style="color: #4f97d7; font-weight: bold;">for</span> l <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #2d9574;">"""</span>
+<span style="color: #2d9574;"> &lt;&lt;grocery-store-chart&gt;&gt;</span>
+<span style="color: #2d9574;">"""</span>.strip<span style="color: #bc6ec5;">()</span>.split<span style="color: #bc6ec5;">(</span><span style="color: #2d9574;">'\n'</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+
+<span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #4f97d7;">list</span><span style="color: #4f97d7;">(</span>get_products_and_positions<span style="color: #bc6ec5;">(</span>chart<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Meat</td>
+<td class="org-right">1</td>
+<td class="org-right">19</td>
+</tr>
+
+<tr>
+<td class="org-left">Milk</td>
+<td class="org-right">2</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">Seafood</td>
+<td class="org-right">3</td>
+<td class="org-right">112</td>
+</tr>
+
+<tr>
+<td class="org-left">Potatoes</td>
+<td class="org-right">6</td>
+<td class="org-right">78</td>
+</tr>
+
+<tr>
+<td class="org-left">Salt</td>
+<td class="org-right">7</td>
+<td class="org-right">57</td>
+</tr>
+
+<tr>
+<td class="org-left">Cheese</td>
+<td class="org-right">8</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">ToiletPaper</td>
+<td class="org-right">8</td>
+<td class="org-right">14</td>
+</tr>
+
+<tr>
+<td class="org-left">Cilantro</td>
+<td class="org-right">9</td>
+<td class="org-right">64</td>
+</tr>
+
+<tr>
+<td class="org-left">Eggs</td>
+<td class="org-right">11</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">Mustard</td>
+<td class="org-right">11</td>
+<td class="org-right">32</td>
+</tr>
+
+<tr>
+<td class="org-left">Sunscreen</td>
+<td class="org-right">14</td>
+<td class="org-right">39</td>
+</tr>
+
+<tr>
+<td class="org-left">Onions</td>
+<td class="org-right">15</td>
+<td class="org-right">76</td>
+</tr>
+
+<tr>
+<td class="org-left">Garlic</td>
+<td class="org-right">15</td>
+<td class="org-right">100</td>
+</tr>
+
+<tr>
+<td class="org-left">Alcohol</td>
+<td class="org-right">25</td>
+<td class="org-right">3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-org8e05599" class="outline-3">
+<h3 id="org8e05599"><span class="section-number-3">1.3</span> Challenge 2 - Location of Items</h3>
+<div class="outline-text-3" id="text-1-3">
+<ul class="org-ul">
+<li><a href="#challenge-2">Challenge Statement</a></li>
+</ul>
+
+<p>
+Similar idea but we want to know whether the word ends in a wall (<code>|</code> character) or not.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #4f97d7; font-weight: bold;">from</span> re <span style="color: #4f97d7; font-weight: bold;">import</span> finditer
+<span style="color: #4f97d7; font-weight: bold;">from</span> typing <span style="color: #4f97d7; font-weight: bold;">import</span> List
+
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">get_products_and_positions</span><span style="color: #4f97d7;">(</span>chart: List<span style="color: #bc6ec5;">[</span><span style="color: #4f97d7;">str</span><span style="color: #bc6ec5;">]</span><span style="color: #4f97d7;">)</span>:
+    <span style="color: #4f97d7; font-weight: bold;">for</span> r,line <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7;">enumerate</span><span style="color: #4f97d7;">(</span>chart<span style="color: #4f97d7;">)</span>:
+        <span style="color: #4f97d7; font-weight: bold;">try</span>:
+            <span style="color: #4f97d7; font-weight: bold;">for</span> m <span style="color: #4f97d7; font-weight: bold;">in</span> finditer<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">'[A-Z]\w+\|?'</span>, line<span style="color: #4f97d7;">)</span>:
+                <span style="color: #7590db;">c</span> = m.start<span style="color: #4f97d7;">(</span><span style="color: #a45bad;">0</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">not</span> m.group<span style="color: #4f97d7;">()</span>.endswith<span style="color: #4f97d7;">(</span><span style="color: #2d9574;">'|'</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7; font-weight: bold;">else</span> <span style="color: #4f97d7;">(</span>m.end<span style="color: #bc6ec5;">(</span><span style="color: #a45bad;">0</span><span style="color: #bc6ec5;">)</span> - <span style="color: #a45bad;">1</span><span style="color: #4f97d7;">)</span>
+                <span style="color: #4f97d7; font-weight: bold;">yield</span> <span style="color: #4f97d7;">(</span>m.group<span style="color: #bc6ec5;">()</span>.strip<span style="color: #bc6ec5;">(</span><span style="color: #2d9574;">'|'</span><span style="color: #bc6ec5;">)</span>, r, c<span style="color: #4f97d7;">)</span>
+        <span style="color: #4f97d7; font-weight: bold;">except</span> <span style="color: #ce537a; font-weight: bold;">ValueError</span>:
+            <span style="color: #4f97d7; font-weight: bold;">pass</span>
+
+<span style="color: #7590db;">chart</span> = <span style="color: #4f97d7;">(</span>l.strip<span style="color: #bc6ec5;">()</span> <span style="color: #4f97d7; font-weight: bold;">for</span> l <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #2d9574;">"""</span>
+<span style="color: #2d9574;"> &lt;&lt;grocery-store-chart&gt;&gt;</span>
+<span style="color: #2d9574;">"""</span>.strip<span style="color: #bc6ec5;">()</span>.split<span style="color: #bc6ec5;">(</span><span style="color: #2d9574;">'\n'</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+
+<span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #4f97d7;">list</span><span style="color: #4f97d7;">(</span>get_products_and_positions<span style="color: #bc6ec5;">(</span>chart<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Meat</td>
+<td class="org-right">1</td>
+<td class="org-right">19</td>
+</tr>
+
+<tr>
+<td class="org-left">Milk</td>
+<td class="org-right">2</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">Seafood</td>
+<td class="org-right">3</td>
+<td class="org-right">119</td>
+</tr>
+
+<tr>
+<td class="org-left">Potatoes</td>
+<td class="org-right">6</td>
+<td class="org-right">78</td>
+</tr>
+
+<tr>
+<td class="org-left">Salt</td>
+<td class="org-right">7</td>
+<td class="org-right">61</td>
+</tr>
+
+<tr>
+<td class="org-left">Cheese</td>
+<td class="org-right">8</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">ToiletPaper</td>
+<td class="org-right">8</td>
+<td class="org-right">14</td>
+</tr>
+
+<tr>
+<td class="org-left">Cilantro</td>
+<td class="org-right">9</td>
+<td class="org-right">64</td>
+</tr>
+
+<tr>
+<td class="org-left">Eggs</td>
+<td class="org-right">11</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">Mustard</td>
+<td class="org-right">11</td>
+<td class="org-right">32</td>
+</tr>
+
+<tr>
+<td class="org-left">Sunscreen</td>
+<td class="org-right">14</td>
+<td class="org-right">48</td>
+</tr>
+
+<tr>
+<td class="org-left">Onions</td>
+<td class="org-right">15</td>
+<td class="org-right">76</td>
+</tr>
+
+<tr>
+<td class="org-left">Garlic</td>
+<td class="org-right">15</td>
+<td class="org-right">100</td>
+</tr>
+
+<tr>
+<td class="org-left">Alcohol</td>
+<td class="org-right">25</td>
+<td class="org-right">3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgc52355e" class="outline-3">
+<h3 id="orgc52355e"><span class="section-number-3">1.4</span> Challenge 3 - Line of Sight</h3>
+<div class="outline-text-3" id="text-1-4">
+<ul class="org-ul">
+<li><a href="#challenge-3">Challenge Statement</a></li>
+</ul>
+</div>
+
+<div id="outline-container-org601da69" class="outline-4">
+<h4 id="org601da69"><span class="section-number-4">1.4.1</span> What is Line of Sight?</h4>
+<div class="outline-text-4" id="text-1-4-1">
+<p>
+So firstly I guess we need to consider what line of sight actually is when the space is two dimensional and discrete. For example lets say we're going from cell <code>F</code> to cell <code>T</code>, what cells are in our line of sight?
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ditaa">+-----+-----+-----+-----+-----+-----+-----+
+|     |     |     |     |     |     |     |
++-----+-----+-----+-----+-----+-----+-----+
+|  F  |     |     |     |     |     |     |
++-----+-----+-----+-----+-----+-----+-----+
+|     |     |     |     |     |     |     |
++-----+-----+-----+-----+-----+-----+-----+
+|     |     |     |     |     |     |  T  |
++-----+-----+-----+-----+-----+-----+-----+
+</pre>
+</div>
+
+<p>
+What I think I would like to do is to draw a natural (non-discrete) line from the mid-point of <code>F</code> to the mid-point of <code>T</code>. We can consider every square that line passes through to be a part of its line of sight (since anything occupying that cell is considered to block path through any part of that cell.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ditaa">+-----+-----+-----+-----+-----+-----+-----+
+|     |     |     |     |     |     |     |
++-----+-----+-----+-----+-----+-----+-----+
+|&#9632;&#9632;F&#9632;&#9632;|&#9632;&#9632;&#9632;&#9632;&#9632;|     |     |     |     |     |
++-----+-----+-----+-----+-----+-----+-----+
+|     |&#9632;&#9632;&#9632;&#9632;&#9632;|&#9632;&#9632;&#9632;&#9632;&#9632;|&#9632;&#9632;&#9632;&#9632;&#9632;|&#9632;&#9632;&#9632;&#9632;&#9632;|     |     |
++-----+-----+-----+-----+-----+-----+-----+
+|     |     |     |     |&#9632;&#9632;&#9632;&#9632;&#9632;|&#9632;&#9632;&#9632;&#9632;&#9632;|&#9632;&#9632;T&#9632;&#9632;|
++-----+-----+-----+-----+-----+-----+-----+
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgdd5b6f0" class="outline-4">
+<h4 id="orgdd5b6f0"><span class="section-number-4">1.4.2</span> Calculate point of intersection</h4>
+<div class="outline-text-4" id="text-1-4-2">
+<p>
+Ok, so we're going to need a way of walking along a path and announcing which cells we enter. To do that, we need to be able to tell were a line from an arbitrary point in a square to a point outside of it will intersect the square.
+</p>
+<div class="org-src-container">
+<pre class="src src-ditaa">0,0
++-----------------------+
+|                       |
+|                       |
+|    F                  |
+|                       |
+|w                      |
+|                       |
+|                       |
+|           w           |i
++-----------------------+
+
+.                                    T
+</pre>
+</div>
+
+<p>
+So on the line from <code>F</code> to <code>T</code>, what is the location at the intersection point <code>i</code>
+</p>
+
+<p>
+So for the time being let's assume that we know that the intersection point will be on the right-most wall.
+</p>
+
+<p>
+If we draw a right angle triangle from F to T it should pass through that point
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ditaa">0,0        w
++-----------------------+
+|                       |
+|                       |
+|    F                  |
+|    |---               |
+|w   |   \----          |
+|    |        \----     |
+|   a|             \--- |i
+|    |------------------+---
++----+------------------+   \----
+.    |           b           &#952;   \--
+.    +-------------------------------T
+</pre>
+</div>
+
+<p>
+So we know that \(x_i = w\). This means that what we want to solve for is \(y_i\) so we have
+</p>
+
+\begin{equation}
+a_{outer}=y_T - y_F                                 \\
+b_{outer}=x_T - x_F                                 \\
+b_{inner}=w-x_F                                     \\
+θ=\arctan{\frac{a_{outer}}{b_{outer}}}              \\
+\tan(θ) = \frac{a_{inner}}{b_{inner}}               \\
+a_{inner} = b_{inner} \tan{θ}                       \\
+a_{inner} = (w-x_F) {\tan{θ}}                       \\
+a_{inner} = (w-x_F) {\frac {a_{outer}} {b_{outer}}} \\
+a_{inner} = (w-x_F) {\frac {y_T - y_F} {x_T - x_F}} \\
+y_i = y_F + a_{inner}                               \\
+y_i = y_F + (w-x_F) \frac {y_T - y_F} {x_T - x_F}   \\
+\end{equation}
+
+<p>
+Let's do a sanity check here. if
+</p>
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><b>Square Width</b></td>
+<td class="org-left">10</td>
+</tr>
+
+<tr>
+<td class="org-left"><b>F(rom)</b></td>
+<td class="org-left">(2,7)</td>
+</tr>
+
+<tr>
+<td class="org-left"><b>T(o)</b></td>
+<td class="org-left">(15, 11)</td>
+</tr>
+
+<tr>
+<td class="org-left"><b>(i)ntersection approximation</b></td>
+<td class="org-left">~(10, 9)</td>
+</tr>
+
+<tr>
+<td class="org-left"><b>intersection calculated</b></td>
+<td class="org-left">\((10, 7 + (10-2) \frac {11-7} {15-2}) = 9.4615\)</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>
+ok yeah, that's not right. Where did this go wrong?
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: George Mauer</p>
+<p class="date">Created: 2020-05-10 Sun 21:46</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
