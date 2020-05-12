@@ -177,7 +177,7 @@
     #+end_src
 
 
-***  Calculate point of intersection
+*** Calculate point of intersection
     Ok, so we're going to need a way of walking along a path and announcing which cells we enter. To do that, we need to be able to tell were a line from an arbitrary point in a square to a point outside of it will intersect the square.
     #+begin_src ditaa
       0,0
@@ -202,7 +202,7 @@
     If we draw a right angle triangle from F to T it should pass through that point
 
     [[./trigonometry-of-path-through-square.png]]
-    
+
 
     So we know that \(x_i = w\). This means that what we want to solve for is \(y_i\) so we have
 
@@ -220,15 +220,52 @@
     y_i = y_F + (w-x_F) \frac {y_T - y_F} {x_T - x_F}   \\
     \end{equation}
 
-    Let's do a sanity check here. if
-    
+    Let's do a sanity check here.
 
     | *Square Width*                 | 10                                                |
     | *F(rom)*                       | (2,7)                                             |
     | *T(o)*                         | (15, 11)                                          |
-    | *(i)ntersection approximation* | ~(10, 9)                                          |
-    | *intersection calculated*      | \((10, 7 + (10-2) \frac {11-7} {15-2}) = 9.4615\) |
+    | *(i)ntersection approximation* | about (10, 9)                                     |
+    | *(i)ntersection calculated*    | \((10, 7 + (10-2) \frac {11-7} {15-2}) = 9.4615\) |
+
+    That looks right!
 
 
-    ok yeah, that's not right. Where did this go wrong?
+*** Find wall intersected
+
+    Consider the triangle from the previous section again. Without having someone eyeball it, how can we know /which/ side is being crossed?
+
+    We know the ratio between the sides of inner triangle and outer triangle must be true
+
+    \begin{equation}
+      \frac{a_{outer}}{b_{outer}} = tan{θ}                      \\
+      \frac{a_{inner}}{b_{inner}} = tan{θ}                      \\
+      \frac{a_{inner}}{b_{inner}} = \frac{a_{outer}}{b_{outer}} \\
+    \end{equation}
+
+    If crossing the *right* side, \(b_{inner}\) is known but \(a_{inner}\) is not.
+
+    \begin{equation}
+      a_{inner} = b_{inner}\frac{a_{outer}}{b_{outer}}
+    \end{equation}
+
+    If crossing the *bottom* side, \(b_{inner}\) is not known but \(a_{inner}\) is.
+
+    \begin{equation}
+      b_{inner} = a_{inner}\frac{b_{outer}}{a_{outer}}
+    \end{equation}
+
+    We do both calculations, if the slope from =F= to the intersection point described by that triangle is not the same as the one between =F= and =T= then we know it cannot be on that side
+
+    Lets double check this with some real numbers
+
+
+    | Side/Edge | \(x_F\) | \(y_F\) | \(x_T\) | \(y_T\) | \(a_{outer}\) | \(b_{outer}\) | \(a_inner} assuming | \(b_{inner}\) assuming | Conclusion |
+    | =w=10=    |         |         |         |         |               |               | \(b_{inner}\) known |    \(a_{inner}\) known |            |
+    |-----------+---------+---------+---------+---------+---------------+---------------+---------------------+------------------------+------------|
+    | Bottom    |       8 |       7 |      12 |      15 |             8 |             4 |                   1 |                    1.5 |            |
+    | Right     |       8 |       7 |      20 |      15 |             8 |            12 |                   3 |                    4.5 |            |
+    #+TBLFM: $6=$5-$3::$7=$4-$2
+    #+TBLFM: $8=(10-$2)*$6/$7
+    #+TBLFM: $9=(10-$3)*$7/$6
 
