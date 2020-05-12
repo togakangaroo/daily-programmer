@@ -4,7 +4,7 @@
   :header-args: :results output :exports both
   :END:
 ** Problem
-   Posted in the [[https://operationspark.slack.com/archives/C013AKCLZ9Q/p1589205993034900][Operation Code #daily-progammer Slack]]
+   Posted in the [[https://operationspark.slack.com/archives/C013AKCLZ9Q/p1589205993034900][Operation Spark #daily-progammer Slack]]
 
    You are trying to schedule all day meetings with certain groups of coworkers. Everyone at the company email you days they will be unavailable. So you have a list that looks like this:
 
