@@ -1,0 +1,58 @@
+#+TITLE: Meeting Scheduler
+* Meeting Scheduler
+  :PROPERTIES:
+  :header-args: :results output :exports both
+  :END:
+** Problem
+   Posted in the [[https://operationspark.slack.com/archives/C013AKCLZ9Q/p1589205993034900][Operation Code #daily-progammer Slack]]
+
+   You are trying to schedule all day meetings with certain groups of coworkers. Everyone at the company email you days they will be unavailable. So you have a list that looks like this:
+
+   | Name  |       From |         To |
+   |-------+------------+------------|
+   | Jason | 2020-06-10 | 2020-06-13 |
+   | Kaley | 2020-05-29 | 2020-06-12 |
+   | Ted   | 2020-06-15 | 2020-06-15 |
+   | Leigh | 2020-05-29 | 2020-06-03 |
+   | Leigh | 2020-06-19 | 2020-06-23 |
+   | Jason | 2020-05-25 | 2020-06-01 |
+   | Jonah | 2020-06-15 | 2020-06-20 |
+   | Leigh | 2020-06-22 | 2020-06-27 |
+
+
+   Dates are inclusive (so =2020-06-10= through =2020-06-11= means the person will be out for two days)
+
+   Write a function that will take a list of names who must be present for the meeting, and the earliest date the meeting could possibly happen on, and returns the earliest all of those people could meet.
+
+** Thinking through it
+
+   So first thing first, we would start by filtering down the list to only the people we care about. That's easy. Also, to do anything beyond simply checking each date against every date range, we are going to have to sort the ranges. Probably by start date is most useful, but there's probably some better indexing scheme available. I'm just going to keep it simple for now.
+
+   So lets imagine we have a layout of blocked off day ranges as follows
+
+   #+begin_src ditaa :eval no
+     |   1   |   2   |  3   |   4  |  5   |  6   |   7   |  8   |  9   |  10  |  11  |  12  |  13  |
+     |       |       |      |      |      |      |       |      |      |      |      |      |      |
+     |       |       |      |      |      |      +D------+------+------+      |      |      +H-----+
+     |       |       |      |      |      |      +-------+------+------+      |      |      +------+
+     |       |       |      |      |      |      |       |      |      |      |      |      |      |
+     |+A-----+-------+------+------+      |      |       |      |      |      |      |      |      |
+     |+------+-------+------+------+      |      |       |      |      |      |      |      |      |
+     |       |       |      |      |      |      |       |      |      |      |      |      |      |
+     |       +B------+------+      |      |      +E------+      |      |      |      |      |      |
+     |       +-------+------+      |      |      +-------+      |      |      |      |      |      |
+     |       |       |      |      |      |      |       |      |      |      |      |      |      |
+     |       |       +C-----+------+------+------+       |      |      |      +G-----+      |      |
+     |       |       +------+------+------+------+       |      |      |      +------+      |      |
+     |       |       |      |      |      |      |       |      |      |      |      |      |      |
+     |       |       |      |      |      |      +F------+------+------+      |      |      |      |
+     |       |       |      |      |      |      +-------+------+------+      |      |      |      |
+   #+end_src
+
+   - So if we start with date range =A= we know we cannot possibly have a day free till =5=.
+   - But hold on, we can't just think about day =5=, we need to track every date range that starts before then: =B, C=. Taking the max date range blocks us out through day =6=
+   - We now examine the next date range to start to see if it starts more than one day after. =D= starts on day =7= so the answer is no
+   - We re-start the process, we are now blocked out through the max end date of =D, E, F= which is =9=
+   - The range that starts after =9= starts on day =11=. Day =11= must be our solution!
+
+   An important bit we are leaving out in the above is how to start on a given day. For example if our earliest day was =4= then we should start with all ranges which have a start date before, and an end date on or after (=A, C= in consideration)
