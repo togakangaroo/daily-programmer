@@ -97,7 +97,7 @@
      }
    #+end_src
 
-   #+begin_src js :var input=diagrammed-ranges
+   #+begin_src js :var input=diagrammed-ranges :exports both
      <<getNextAvailableDay>>
      const blackoutRanges = input.map(([person, from, to]) => ({person, from, to})).sort((a, b) => a.from < b.from ? -1 : 1)
      return getNextAvailableDay("2020-01-01", blackoutRanges)
@@ -106,9 +106,9 @@
    #+RESULTS:
    : 2020-01-10
 
-   aaand...wait...I think that just solved it, did it not? Uhh...lets try this out
+   Aaand...wait...I think that just solved it, did it not? Uhh...lets try this out
 
-   #+begin_src js :var input=diagrammed-ranges
+   #+begin_src js :var input=diagrammed-ranges :exports both
      <<getNextAvailableDay>>
      const blackoutRanges = input.map(([person, from, to]) => ({person, from, to})).sort((a, b) => a.from < b.from ? -1 : 1)
      const testData = [
