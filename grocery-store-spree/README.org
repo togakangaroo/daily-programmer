@@ -260,12 +260,48 @@
     Lets double check this with some real numbers
 
 
-    | Side/Edge | \(x_F\) | \(y_F\) | \(x_T\) | \(y_T\) | \(a_{outer}\) | \(b_{outer}\) | \(a_inner} assuming | \(b_{inner}\) assuming | Conclusion |
-    | =w=10=    |         |         |         |         |               |               | \(b_{inner}\) known |    \(a_{inner}\) known |            |
-    |-----------+---------+---------+---------+---------+---------------+---------------+---------------------+------------------------+------------|
-    | Bottom    |       8 |       7 |      12 |      15 |             8 |             4 |                   1 |                    1.5 |            |
-    | Right     |       8 |       7 |      20 |      15 |             8 |            12 |                   3 |                    4.5 |            |
+    #+NAME:square-side-crossed-examples
+    | Side/Edge | \(x_F\) | \(y_F\) | \(x_T\) | \(y_T\) | \(a_{outer}\) | \(b_{outer}\) |
+    | =w=10=    |         |         |         |         |               |               |
+    |-----------+---------+---------+---------+---------+---------------+---------------|
+    | Bottom    |       8 |       7 |      12 |      15 |             8 |             4 |
+    | Right     |       9 |       4 |      13 |      12 |             8 |             4 |
+    | Right     |       4 |       1 |      12 |       3 |             2 |             8 |
+    | BR Corner |       9 |       8 |      11 |      12 |             4 |             2 |
+    
+    | Left      |       1 |       8 |      -1 |      11 |             3 |            -2 |
     #+TBLFM: $6=$5-$3::$7=$4-$2
-    #+TBLFM: $8=(10-$2)*$6/$7
-    #+TBLFM: $9=(10-$3)*$7/$6
 
+    #+begin_src python :var examples=square-side-crossed-examples :eval yes
+      width = 10
+      def is_valid_intersection(point):
+          return next((False for loc in point if loc<0 or loc>width), True)
+      def get_side_and_intersection():
+          for (side_or_edge, xF,yF,xT,yT,*_) in examples[2:]:
+              a_outer = yT-yF
+              b_outer = xT-xF
+
+              a_to_bottom = width-yF
+              b_inner_if_a_to_bottom = a_to_bottom * (1.0*b_outer/a_outer)
+              bottom_intersection = (xF+b_inner_if_a_to_bottom, yF+a_to_bottom)
+
+              b_to_right = width-xF
+              a_inner_if_b_to_right = b_to_right * (1.0*a_outer/b_outer)
+              right_intersection = (xF+b_to_right, yF+a_inner_if_b_to_right)
+              if bottom_intersection == right_intersection:
+                  yield ("BR Corner", bottom_intersection)
+              elif is_valid_intersection(bottom_intersection):
+                  yield ("Bottom", bottom_intersection)
+              elif is_valid_intersection(right_intersection):
+                  yield ("Right", right_intersection)
+              else:
+                  raise Exception(f"{a_to_bottom} {b_to_right}")
+
+      return list(get_side_and_intersection())
+    #+end_src
+
+    #+RESULTS:
+    | Bottom    | (9.5 10)  |
+    | Right     | (10 6.0)  |
+    | Right     | (10 2.5)  |
+    | BR Corner | (10.0 10) |
