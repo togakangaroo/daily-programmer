@@ -1,13 +1,14 @@
 #+TITLE: Meeting Scheduler
 * Meeting Scheduler
   :PROPERTIES:
-  :header-args: :results output :exports both
+  :header-args: :exports both :noweb no-export
   :END:
 ** Problem
    Posted in the [[https://operationspark.slack.com/archives/C013AKCLZ9Q/p1589205993034900][Operation Spark #daily-progammer Slack]]
 
    You are trying to schedule all day meetings with certain groups of coworkers. Everyone at the company email you days they will be unavailable. So you have a list that looks like this:
 
+   #+NAME: original-example
    | Name  |       From |         To |
    |-------+------------+------------|
    | Jason | 2020-06-10 | 2020-06-13 |
@@ -56,3 +57,123 @@
    - The range that starts after =9= starts on day =11=. Day =11= must be our solution!
 
    An important bit we are leaving out in the above is how to start on a given day. For example if our earliest day was =4= then we should start with all ranges which have a start date before, and an end date on or after (=A, C= in consideration)
+
+   #+NAME: diagrammed-ranges
+   | Name  |       From |         To |
+   |-------+------------+------------|
+   | Alex  | 2020-01-01 | 2020-01-04 |
+   | Bill  | 2020-01-02 | 2020-01-03 |
+   | Carol | 2020-01-03 | 2020-01-06 |
+   | Dan   | 2020-01-07 | 2020-01-09 |
+   | Bill  | 2020-01-07 | 2020-01-07 |
+   | Fran  | 2020-01-07 | 2020-01-09 |
+   | Dan   | 2020-01-13 | 2020-01-13 |
+   | Carol | 2020-01-11 | 2020-01-11 |
+
+** Implementation
+   #+NAME: getNextAvailableDay
+   #+begin_src js
+     const addDay = isoDate => {
+         const d = new Date(isoDate)
+         d.setDate(d.getDate()+1)
+         return d.toISOString().split(`T`)[0]
+     }
+
+     const getNextAvailableDay = (startingAt, blackoutRanges) => {
+         const it = blackoutRanges[Symbol.iterator]()
+         let nextProspectiveDate = startingAt
+         let nextRange = null
+
+         while(true) {
+             nextRange = it.next()
+             if(nextRange.done)
+                 return nextProspectiveDate
+             if(nextRange.value.from > nextProspectiveDate)
+                 break
+             if(nextRange.value.to >= nextProspectiveDate)
+                 nextProspectiveDate = addDay(nextRange.value.to)
+         }
+         return nextProspectiveDate
+     }
+   #+end_src
+
+   #+begin_src js :var input=diagrammed-ranges
+     <<getNextAvailableDay>>
+     const blackoutRanges = input.map(([person, from, to]) => ({person, from, to})).sort((a, b) => a.from < b.from ? -1 : 1)
+     return getNextAvailableDay("2020-01-01", blackoutRanges)
+   #+end_src
+
+   #+RESULTS:
+   : 2020-01-10
+
+   aaand...wait...I think that just solved it, did it not? Uhh...lets try this out
+
+   #+begin_src js :var input=diagrammed-ranges
+     <<getNextAvailableDay>>
+     const blackoutRanges = input.map(([person, from, to]) => ({person, from, to})).sort((a, b) => a.from < b.from ? -1 : 1)
+     const testData = [
+         //earliest     expected      //sliceRanges
+         ["2020-01-01", "2020-01-10", 0],
+         ["2020-01-07", "2020-01-10", 0],
+         ["2020-01-10", "2020-01-10", 0],
+         ["2020-01-11", "2020-01-12", 0],
+         ["2020-01-13", "2020-01-14", 0],
+         ["2020-01-18", "2020-01-18", 0],
+         ["2020-01-18", "2020-01-18", 100],
+     ]
+     return [
+         ["Earliest", "Slice", "Expected", "Calculated"],
+         ...testData.map(([earliest, expected, sliceRanges]) =>
+                         [earliest, sliceRanges, expected, getNextAvailableDay(earliest, blackoutRanges.slice(sliceRanges))])
+     ]
+   #+end_src
+
+   #+RESULTS:
+   |   Earliest | Slice |   Expected | Calculated |
+   | 2020-01-01 |     0 | 2020-01-10 | 2020-01-10 |
+   | 2020-01-07 |     0 | 2020-01-10 | 2020-01-10 |
+   | 2020-01-10 |     0 | 2020-01-10 | 2020-01-10 |
+   | 2020-01-11 |     0 | 2020-01-12 | 2020-01-12 |
+   | 2020-01-13 |     0 | 2020-01-14 | 2020-01-14 |
+   | 2020-01-18 |     0 | 2020-01-18 | 2020-01-18 |
+   | 2020-01-18 |   100 | 2020-01-18 | 2020-01-18 |
+
+   Those all match up with expected values...cool
+
+   Ok, the last step is just to add the names filtering and try it on the original data
+
+   So here we have
+
+   #+NAME: getNextAvailableDayForPeople
+   #+begin_src js :noweb yes
+     <<getNextAvailableDay>>
+     const getNextAvailableDayForPeople = (startingAt, names, blackoutRanges) => (
+        getNextAvailableDay(
+            startingAt,
+            blackoutRanges.filter(x => names.includes(x.person)).sort((a, b) => a.from < b.from ? -1 : 1)
+        )
+     )
+   #+end_src
+
+   And testing that against the original example we get our answers
+   
+   #+begin_src js :var originalExample=original-example
+     <<getNextAvailableDayForPeople>>
+
+     const blackoutRanges = originalExample.map(([person, from, to]) => ({person, from, to}))
+
+     return [
+         ["Jason", "Kaley", "Ted"],
+         ["Fran", "Jason", "Leigh"],
+         ["Jonah", "Jason"],
+         ["Jason"],
+         ["Jason", "Kaley", "Leigh", "Ted", "Jonah"],
+     ].map(names => [names.join(), getNextAvailableDayForPeople("2020-05-25", names, blackoutRanges)])
+   #+end_src
+
+   #+RESULTS:
+   | Jason,Kaley,Ted             | 2020-06-14 |
+   | Fran,Jason,Leigh            | 2020-06-04 |
+   | Jonah,Jason                 | 2020-06-02 |
+   | Jason                       | 2020-06-02 |
+   | Jason,Kaley,Leigh,Ted,Jonah | 2020-06-14 |
