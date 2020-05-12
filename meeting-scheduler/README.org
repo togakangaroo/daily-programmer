@@ -157,7 +157,7 @@
 
    And testing that against the original example we get our answers
    
-   #+begin_src js :var originalExample=original-example
+   #+begin_src js :var originalExample=original-example :exports both
      <<getNextAvailableDayForPeople>>
 
      const blackoutRanges = originalExample.map(([person, from, to]) => ({person, from, to}))
