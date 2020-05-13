@@ -37,7 +37,7 @@
     [[https://docs.racket-lang.org/reference/strings.html#%2528part._format%2529][Docs]]
 *** Hashes
     I don't like to have just random tuples in lists - I think I should learn about hashes.
-    #+begin_src racket
+    #+begin_src racket :exports both
       (define h (make-hash '((a . "apple") (b . "banana"))))
       (printf "h is: ~a\n" h)
       (printf "has a: ~a, the value is: ~a\n" (dict-has-key? h 'a) (dict-ref h 'b))
@@ -52,7 +52,7 @@
 *** Structs
     [[https://download.racket-lang.org/docs/5.1/html/guide/define-struct.html][Docs]]
     But I think structs are actually more natural for this
-    #+begin_src racket
+    #+begin_src racket :exports both
       (struct posn (x y))
       (define p (posn 139 73))
       (printf "p: ~a, prop x is: ~a\n" p (posn-x p))
@@ -64,7 +64,7 @@
 *** Array
     [[https://docs.racket-lang.org/math/array.html][Docs]]
     Arrays are different from lists, they seem to be...multidimensional? Which is after all waht I want here
-    #+begin_src racket
+    #+begin_src racket :exports both
       (require math/array)
       (array #[#['first 'row 'data] #['second 'row 'data]])
     #+end_src
@@ -72,7 +72,7 @@
     #+RESULTS:
     : (array #[#['first 'row 'data] #['second 'row 'data]])
 
-    #+begin_src racket
+    #+begin_src racket :exports both
       (require math/array)
       (build-array #(4 5) (λ (js)
                             (match-define (vector j0 j1) js)
@@ -85,7 +85,7 @@
 *** Array Slicing
     [[https://docs.racket-lang.org/math/array_slicing.html][Docs]]
     So this takes an array with a [[https://docs.racket-lang.org/math/array_indexing.html#%28form._%28%28lib._math%2Farray..rkt%29._.Slice-.Spec%29%29][Slice Spec]]. This is multidimensional. Lets figure out the slide spec for copying out ~#[#[6 7 8] #[0 1 2]]~
-    #+begin_src racket :results output
+    #+begin_src racket :results output :exports both
       (require math/array)
       (define matrix (array #[#[1 2 3 4]
                               #[5 6 7 8]
@@ -102,7 +102,7 @@
 ** Implementation
    Uhh...ok...so with the array functions above this becomes stupid simple
 
-   #+begin_src racket
+   #+begin_src racket :exports both
      (require math/array)
 
      (struct location (column row))
