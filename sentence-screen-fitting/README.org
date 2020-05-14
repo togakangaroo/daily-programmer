@@ -42,7 +42,7 @@
    Since we're going to be using cycles of our sentences here, a method that can cycle forever would be useful
 
    #+name: cycle
-   #+begin_src  js :exports none
+   #+begin_src  js :exports code
      const cycle = function * (collection) {
          while(true) {
              for(const x of collection)
@@ -51,8 +51,8 @@
      }
    #+end_src
    #+begin_src js :exports both
-         <<cycle>>
-         const letters = `abcdefg`
+     <<cycle>>
+     const letters = `abcdefg`
 
      const it = cycle(letters)[Symbol.iterator]()
      for(let i=0; i < 25; i+=1, it.next()) {}
@@ -66,7 +66,7 @@
    This is cool, but we to actually need to know what cycle we're in too
 
    #+name: cycleCount
-   #+begin_src  js :exports none
+   #+begin_src  js :exports code
      const cycleCount = function * (collection) {
          let cycles = 0
          while(true) {
@@ -91,7 +91,7 @@
    And we can combine these by zipping, which is handy
 
    #+name: zip
-   #+begin_src js :exports none
+   #+begin_src js :exports code
      const zip = function * (...collections) {
          if(!collections.length)
              return
