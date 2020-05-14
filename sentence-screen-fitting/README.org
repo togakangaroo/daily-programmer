@@ -76,7 +76,7 @@
          }
      }
    #+end_src
-   #+begin_src js
+   #+begin_src js :exports both
      <<cycleCount>>
      const letters = `abcdefg`
 
@@ -106,7 +106,7 @@
    #+end_src
 
 
-   #+begin_src js :results drawer
+   #+begin_src js :results drawer :exports both
      <<cycle>>
 
      <<cycleCount>>
@@ -132,7 +132,7 @@
    
    So now the plan can become to create an iterator for our words, and then move through it one word at a time, eating up the space remaining on each column and then outputting the final cycle.
 
-   #+begin_src js :var examples=examples
+   #+begin_src js :var examples=examples :exports both
      <<cycle>>
 
      <<cycleCount>>
@@ -167,3 +167,8 @@
 
 
    Looks like we got it! Woo.
+
+  
+** Alternate approach idea: 
+  
+   It occurs to me that each line can only start with so many words (~length(sentence)~ with =max 100= to be exact) and given a line starts with a certain word the next sentence must begin at a known location. As we calculate things, we can simply cache for each word how many lines it occupies and what word the *next* line must start with. That would simplify the speed at runtime by an amount that should be sufficient for any modern day hardware, a further step can be taken by detecting once a cycle is complete and extrapolating from ther ein constant time.
