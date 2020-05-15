@@ -1,0 +1,79 @@
+#+TITLE: Maze Generation
+* Maze Generation
+  :PROPERTIES:
+  :header-args: :noweb no-export
+  :END:
+** The Problem
+
+   Posted in the [[https://operationspark.slack.com/archives/C013AKCLZ9Q/p1589205993034900][Operation Spark #daily-progammer Slack]]
+
+   *=== Friday May 15th 2020 - Daily Programmer ===*
+
+   *[Maze Generation]*
+
+   Ok folks, its time for the weekend so this is a longer one.
+
+   One of my favorite algorithms is the one for generating mazes. It calls for you to picture a grid.
+
+   #+begin_src artist
+     +-+-+-+-+-+-+-+
+     | | | | | | | |
+     +-+-+-+-+-+-+-+
+     | | | | | | | |
+     +-+-+-+-+-+-+-+
+     | | | | | | | |
+     +-+-+-+-+-+-+-+
+     | | | | | | | |
+     +-+-+-+-+-+-+-+
+     | | | | | | | |
+     +-+-+-+-+-+-+-+
+     | | | | | | | |
+     +-+-+-+-+-+-+-+
+     | | | | | | | |
+     +-+-+-+-+-+-+-+
+   #+end_src
+
+   - You start at a given square.
+   - Pick a random direction that won't take you outside the bounds of the grid and take step through that wall removing it in the process
+   - You now pick a random direction again excluding squares you have already visited and again step through that wall, removing it
+   - Repeat the above until you cannot move any direction, then backtrack until you find a square where you *can* do this
+   - Once you work your way all the way back to the initial square you are done. You have generated a maze. Good job!
+
+   So in the following =5x5= grid we start at position =a= and then build the maze by moving to each subsequent letter
+   #+begin_src artist
+   +-+-+-+-+-+
+   |y|g d e f|
+   + + + +-+-+
+   |x|h|c b a|
+   + + +-+-+-+
+   |w|i|l m|r|
+   + + + + + +
+   |v|j k|n|q|
+   + +-+-+ + +
+   |u t s o p|
+   +-+-+-+-+-+
+   #+end_src
+   
+   generating:
+
+   #+begin_src artist
+   +-+-+-+-+-+
+   | |       |
+   + + + +-+-+
+   | | |    a|
+   + + +-+-+-+
+   | | |   | |
+   + + + + + +
+   | |   | | |
+   + +-+-+ + +
+   |         |
+   +-+-+-+-+-+
+   #+end_src
+   
+   *Challenge 1:*
+
+   Write a function that given a desired width and height generates a monospace ascii grid as above.
+
+   *Challenge 2:*
+
+   Write a function that implements the maze generation algorithm and generates an ascii maze!
