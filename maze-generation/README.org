@@ -5,7 +5,7 @@
   :END:
 ** The Problem
 
-   Posted in the [[https://operationspark.slack.com/archives/C013AKCLZ9Q/p1589205993034900][Operation Spark #daily-progammer Slack]]
+   Posted in the [[https://operationspark.slack.com/archives/C013AKCLZ9Q/p1589555660058500][Operation Spark #daily-progammer Slack]]
 
    *=== Friday May 15th 2020 - Daily Programmer ===*
 
@@ -77,3 +77,36 @@
    *Challenge 2:*
 
    Write a function that implements the maze generation algorithm and generates an ascii maze!
+
+** Challenge 1: Grid Generation
+
+   Some pretty straightforward python here
+
+   #+begin_src python :var width=5 :var height=5
+     def board(width, height):
+         def row(intersection, inner):
+             return intersection+''.join([inner+intersection]*width)
+
+         for _ in range(height):
+             yield row('+', '-')
+             yield row('|', ' ')
+
+         yield row('+', '-')
+
+     return '\n'.join(board(width, height))
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   +-+-+-+-+-+
+   | | | | | |
+   +-+-+-+-+-+
+   | | | | | |
+   +-+-+-+-+-+
+   | | | | | |
+   +-+-+-+-+-+
+   | | | | | |
+   +-+-+-+-+-+
+   | | | | | |
+   +-+-+-+-+-+
+   #+end_example
