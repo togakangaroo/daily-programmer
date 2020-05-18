@@ -10,4 +10,5 @@ What you find here, are not writeups of me solving these problems, they're the a
 - [[./sum-consecutive-elements][Sum Consecutive Elements]]
 - [[./sentence-screen-fitting][Sentence Screen Fitting]]
 - [[./meeting-scheduler][Meeting Scheduler]]
+- [[./maze-generation][Maze Generation]]
 
