@@ -1,7 +1,7 @@
 #+TITLE: Maze Generation
 * Maze Generation
   :PROPERTIES:
-  :header-args: :noweb no-export
+  :header-args: :noweb strip-export
   :END:
 ** The Problem
 
@@ -41,35 +41,35 @@
 
    So in the following =5x5= grid we start at position =a= and then build the maze by moving to each subsequent letter
    #+begin_src artist
-   +-+-+-+-+-+
-   |y|g d e f|
-   + + + +-+-+
-   |x|h|c b a|
-   + + +-+-+-+
-   |w|i|l m|r|
-   + + + + + +
-   |v|j k|n|q|
-   + +-+-+ + +
-   |u t s o p|
-   +-+-+-+-+-+
+     +-+-+-+-+-+
+     |y|g d e f|
+     + + + +-+-+
+     |x|h|c b a|
+     + + +-+-+-+
+     |w|i|l m|r|
+     + + + + + +
+     |v|j k|n|q|
+     + +-+-+ + +
+     |u t s o p|
+     +-+-+-+-+-+
    #+end_src
-   
+
    generating:
 
    #+begin_src artist
-   +-+-+-+-+-+
-   | |       |
-   + + + +-+-+
-   | | |    a|
-   + + +-+-+-+
-   | | |   | |
-   + + + + + +
-   | |   | | |
-   + +-+-+ + +
-   |         |
-   +-+-+-+-+-+
+     +-+-+-+-+-+
+     | |       |
+     + + + +-+-+
+     | | |    a|
+     + + +-+-+-+
+     | | |   | |
+     + + + + + +
+     | |   | | |
+     + +-+-+ + +
+     |         |
+     +-+-+-+-+-+
    #+end_src
-   
+
    *Challenge 1:*
 
    Write a function that given a desired width and height generates a monospace ascii grid as above.
@@ -80,10 +80,20 @@
 
 ** Challenge 1: Grid Generation
 
-   Some pretty straightforward python here
+   Some pretty straightforward python here. As always, I think about things physically and in terms of motion which makes a generator a very useful tool.
 
-   #+begin_src python :var width=5 :var height=5
-     def board(width, height):
+   We render the board one row at a time, drawing two rows of ascii text for each "height" (one for the top of the cell, an done for the center part) as so:
+
+   #+begin_src artist :eval no
+     +-+-+-+-+-+
+     | | | | | |
+   #+end_src
+
+   We render these repeatedly and finally just a single bottom line to finish things out
+
+   #+name: render_board
+   #+begin_src python :exports code
+     def render_board(width, height):
          def row(intersection, inner):
              return intersection+''.join([inner+intersection]*width)
 
@@ -92,21 +102,191 @@
              yield row('|', ' ')
 
          yield row('+', '-')
+   #+end_src
 
-     return '\n'.join(board(width, height))
+   #+begin_src python :exports=both
+     <<render_board>>
+
+     return '\n'.join(render_board(5, 3))
+   #+end_src
+
+   #+RESULTS:
+   : +-+-+-+-+-+
+   : | | | | | |
+   : +-+-+-+-+-+
+   : | | | | | |
+   : +-+-+-+-+-+
+   : | | | | | |
+   : +-+-+-+-+-+
+
+** Challenge 2
+
+   We'll do this in two parts. First we will create a generator that will yield back a path of transitions in the form of a tuple of grid locations ~(moving_from_lcoation, moving_to_location)~ where each location is itself a tuple of ~(row, column)~.
+
+   Note that while in *most* cases the next transition is starting from the same location as the the previous one ended, that is not always the case. For example in situations where we hit a dead end and have to backtrack. This is especially true when toward the end of path generation. For our purposes, it is important to keep both the info on the cell you're coming from and going to.
+
+   #+name: generate_maze_path
+   #+begin_src python :exports code
+     from sys import setrecursionlimit
+     from random import randint, shuffle
+     from itertools import islice
+
+     # We're using recursion and python's default stacklimit is 1000. Multiply by 4 since each square can be entered from each direction
+     setrecursionlimit(4*width*height)
+
+     def _generate_maze_path(move, visited):
+         _,to = move
+         if to in visited:
+             return
+
+         yield move
+         visited = visited | {to}
+         neighbors_of_to = [
+             n
+             for n in ((r+to[0],c+to[1]) for (r,c) in ((0,-1), (1,0), (0,1), (-1,0)))
+             if 0 <= n[0] < height and 0 <= n[1] < width]
+         shuffle(neighbors_of_to)
+
+         for n in neighbors_of_to:
+             for next_move in _generate_maze_path((to, n), visited):
+                 visited = visited | {next_move[1]}
+                 yield next_move
+
+     def generate_maze_path():
+         starting_point = (None, (randint(0, height-1), randint(0, width-1)))
+         return islice(_generate_maze_path(starting_point, set()), 0, None)
+
+   #+end_src
+
+   #+RESULTS: generate_maze_path
+
+   To try this out, lets run it and see if it generates different yet cohesive paths every run
+
+   #+begin_src python :exports both :results list
+     width, height = 3, 4
+
+     <<generate_maze_path>>
+
+     return list(generate_maze_path())
+   #+end_src
+
+   #+RESULTS:
+   - (None (2 0))
+   - ((2 0) (1 0))
+   - ((1 0) (1 1))
+   - ((1 1) (1 2))
+   - ((1 2) (2 2))
+   - ((2 2) (3 2))
+   - ((3 2) (3 1))
+   - ((3 1) (2 1))
+   - ((3 1) (3 0))
+   - ((1 2) (0 2))
+   - ((0 2) (0 1))
+   - ((0 1) (0 0))
+
+   Cool that works.
+
+   Now to actually chart the maze out. I've tried this several different approache including a functional one that figures out which character to emit as it goes, but the easiest to keep track of certainly seems to be a stateful approach where we first generate a grid then erase walls as in the algoritm description. An unfortunate side effect of this is that we use more memory then need be, but since this is python, the recursion limit is probably a bigger issue anyways.
+
+   #+begin_src python :exports both
+     from functools import partial
+
+     width, height = 25,15
+
+     <<generate_maze_path>>
+
+     <<render_board>>
+
+     def is_moving_up(x):
+          (frm, to) = x
+          return frm and frm[1] == to[1] and to[0] < frm[0]
+     def is_moving_right(x):
+          (frm, to) = x
+          return frm and frm[0] == to[0] and frm[1] < to[1]
+     def is_moving_down(x):
+          (frm, to) = x
+          return frm and frm[1] == to[1] and frm[0] < to[0]
+     def is_moving_left(x):
+          (frm, to) = x
+          return frm and frm[0] == to[0] and to[1] < frm[1]
+
+     def add_elements(*collections):
+          return tuple((sum(x) for x in zip(*collections)))
+
+     def render_symbol(board, symbol, board_location, middle=False, top=False, right=False, bottom=False, left=False):
+          middle_position = (1+(2*board_location[0]), 1+(2*board_location[1]))
+
+          def set_symbol(offset):
+               loc = add_elements(middle_position, offset)
+               board[loc[0]][loc[1]] = symbol
+
+          if middle:
+               set_symbol((0, 0))
+          if top:
+               set_symbol((-1, 0))
+          if right:
+               set_symbol((0, 1))
+          if bottom:
+               set_symbol((1, 0))
+          if left:
+               set_symbol((0, -1))
+
+          return board
+
+     def render_maze(path):
+          board = [list(chars) for chars in render_board(width, height)]
+          render = partial(render_symbol, board)
+
+          for move in path:
+               (frm, to) = move
+               if frm is None: #starting point
+                    render("x", to, middle=True)
+               if is_moving_up(move):
+                    render(" ", frm, top=True)
+               if is_moving_right(move):
+                    render(" ", frm, right=True)
+               if is_moving_down(move):
+                    render(" ", frm, bottom=True)
+               if is_moving_left(move):
+                    render(" ", frm, left=True)
+
+          return "\n".join((''.join(chars) for chars in board))
+
+
+     return render_maze(generate_maze_path())
    #+end_src
 
    #+RESULTS:
    #+begin_example
-   +-+-+-+-+-+
-   | | | | | |
-   +-+-+-+-+-+
-   | | | | | |
-   +-+-+-+-+-+
-   | | | | | |
-   +-+-+-+-+-+
-   | | | | | |
-   +-+-+-+-+-+
-   | | | | | |
-   +-+-+-+-+-+
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |         |         |     |   |           |       |
+   + +-+ +-+-+ +-+ +-+ + +-+ + + +-+ +-+-+-+ +-+ +-+ +
+   | | |       |   | | |   |   |   | |       |   |   |
+   + + +-+-+-+-+ +-+ + +-+ +-+-+-+ + +-+ +-+-+ + +-+-+
+   | |     |   |   |   |   |         |x|       | |   |
+   + +-+ + + + +-+ +-+ + +-+-+-+ +-+-+ +-+-+-+ +-+ + +
+   |   | | | |   |   | |       |   |   |     | |   | |
+   +-+ + + +-+ + +-+ + +-+ +-+ + +-+ +-+ +-+ + + +-+ +
+   | |   | |   | |   |   |   | | |   |   |   | | |   |
+   + +-+-+ + +-+ + +-+-+ +-+ + +-+ +-+-+ + +-+ + + +-+
+   |     | | |   |   |     | | |   |     |   | | |   |
+   + +-+-+ + + +-+-+ +-+-+ +-+ + +-+-+ +-+-+ +-+ +-+ +
+   |     |   | |   |     |     |       |   |     | | |
+   + +-+ +-+-+ +-+ +-+-+ +-+-+ +-+-+-+-+ +-+-+-+-+ + +
+   | |   |         |     |   |   |   |   |     |     |
+   +-+ + + +-+-+-+-+ +-+-+-+ +-+ + + +-+ + + +-+ +-+-+
+   |   | |   |       |         |   |   |   |   | |   |
+   + +-+-+-+ + +-+-+-+ + +-+-+-+-+-+-+ + +-+-+ + +-+ +
+   | |       |     |   |   |           | |     |   | |
+   + + +-+-+-+-+-+ +-+-+ + + +-+-+-+ +-+-+ +-+ +-+ + +
+   | |       |   |     | |   |     |     | |   | |   |
+   + +-+-+-+ + + +-+-+ +-+-+-+ +-+ +-+-+ + + +-+ +-+ +
+   |         | | |   | |       |   |       |     |   |
+   + +-+-+-+-+ + + + + + +-+-+-+ +-+-+-+-+-+-+-+ + +-+
+   |   | |   | |   |   | |     |   |     |   |   |   |
+   +-+ + + + + +-+-+-+-+ +-+ + +-+ + +-+ + + +-+-+-+ +
+   |   |   | |     |   |   | |   |   | | | | |     | |
+   + +-+-+-+ +-+-+ + + +-+ + +-+ +-+-+ + + + + +-+ + +
+   |             |   |       |         |   |     |   |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    #+end_example
