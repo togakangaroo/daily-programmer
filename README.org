@@ -11,5 +11,5 @@ What you find here, are not writeups of me solving these problems, they're the a
 - [[./sentence-screen-fitting][Sentence Screen Fitting]]
 - [[./meeting-scheduler][Meeting Scheduler]]
 - [[./maze-generation][Maze Generation]]
-- [[./Restore IP Address][Restore IP Address]]
+- [[./restore-ip-address][Restore IP Address]]
 

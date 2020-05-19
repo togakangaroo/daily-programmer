@@ -105,7 +105,7 @@
    Ok, lets do it
 
    #+name: getValidIPAddresses
-   #+begin_src js :exports code
+   #+begin_src js :exports code :noweb strip-export
          <<toValidOctet>>
 
          <<splitOnPosition>>
