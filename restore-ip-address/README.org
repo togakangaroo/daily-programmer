@@ -20,13 +20,13 @@
    | "1111111111111" | []                                               |
    | "11111"         | ["11.1.1.1", "1.11.1.1", "1.1.11.1", "1.1.1.11"] |
 
-** Idea
+** Ideation
 
-   I'm thinking we step through each of the four pairs one by one.
+   I'm thinking we step through each of the four octets one by one.
 
    Since an octet is eight bits and therefore 0-255, for each octet there might be 3 or fewer possibilities for example
    - For a string of ~255123~ there are three possibilities for the next octet ~2~, ~25~, ~255~
-   - For a string of ~261123~ there are two possibilities for the next octet ~2, ~26~
+   - For a string of ~261123~ there are two possibilities for the next octet ~2~, ~26~
 
    If you have more octets to do and no more characters then there is no solution, similarly if you are out of octets and cannot use the remaining characters there is also no solution
 
@@ -34,7 +34,7 @@
 
    #+begin_src
   o 2552551113
-      255
+    |-255
       |-255
         |-111
           |-13
@@ -42,7 +42,7 @@
           |-113
         |-1
           |-cannot use all remaining
-      25
+    |-25
       |-5
         |-255
           |-cannot use all remaining
@@ -50,7 +50,7 @@
           |-cannot use all remaining
         |-2
           |-cannot use all remaining
-      2
+    |-2
       |-5
         |-5
           |-cannot use all remaining
