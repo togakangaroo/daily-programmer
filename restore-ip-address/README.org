@@ -1,0 +1,174 @@
+* Restore IP Addresses
+  :PROPERTIES:
+  :header-args: :noweb strip-export
+  :END:
+** The Problem
+   Given a string containing only digits, restore it by returning all possible valid IP address combinations.
+
+   A valid IP address consists of exactly four integers (each integer is between 0 and 255) separated by single points.
+
+   #+name: examples
+   | Input           | Output                                           |
+   |-----------------+--------------------------------------------------|
+   | "0000"          | ["0.0.0.0"]                                      |
+   | "000255"        | ["0.0.0.255"]                                    |
+   | "123123"        | ["1.2.3.123", "123.1.2.3"]                       |
+   | "25525511135"   | ["255.255.11.135," "255.255.111.35"]             |
+   | "95525511135"   | []                                               |
+   | "123145167891"  | []                                               |
+   | "111"           | []                                               |
+   | "1111111111111" | []                                               |
+   | "11111"         | ["11.1.1.1", "1.11.1.1", "1.1.11.1", "1.1.1.11"] |
+
+** Idea
+
+   I'm thinking we step through each of the four pairs one by one.
+
+   Since an octet is eight bits and therefore 0-255, for each octet there might be 3 or fewer possibilities for example
+   - For a string of ~255123~ there are three possibilities for the next octet ~2~, ~25~, ~255~
+   - For a string of ~261123~ there are two possibilities for the next octet ~2, ~26~
+
+   If you have more octets to do and no more characters then there is no solution, similarly if you are out of octets and cannot use the remaining characters there is also no solution
+
+   Lets chart out an illustritive example
+
+   #+begin_src
+  o 2552551113
+      255
+      |-255
+        |-111
+          |-13
+        |-11
+          |-113
+        |-1
+          |-cannot use all remaining
+      25
+      |-5
+        |-255
+          |-cannot use all remaining
+        |-25
+          |-cannot use all remaining
+        |-2
+          |-cannot use all remaining
+      2
+      |-5
+        |-5
+          |-cannot use all remaining
+      |-55
+        |-255
+          |-cannot use all remaining
+        |-25
+          |-cannot use all remaining
+        |-2
+          |-cannot use all remaining
+   #+end_src
+
+   As I've said before, when in CS things fit naturally into a tree, you can know you are on the right track.
+
+** Implementation
+
+   So as always I picture this physically. I have a strand of chracters ahead of me and a number of octets to fill. I can lop off 1, 2, or 3 of the start of the strand, and if it forms a valid octet repeat on the remaining strands.
+
+   That sounds like recursion so what are my stopping conditions?
+   - If you have remaining characters but no octets left to go then you have no solution (where a solution is a valid ip address - we will keep things simple and express it as an array of 4 numbers for now]
+   - If you have no remaining characters but remaining octets then there is no solution
+   - If you have no remaining characters and are on the last octet then return an empty array (this sounds weird but will help simplify a few things, there's other ways of doing this in a few more steps)
+
+   Of course if you have both remaining characters and remaining octets, then keep recursing
+
+   Some really obvious helpers first
+
+   #+name: toValidOctet
+   #+begin_src js :exports code
+     const toValidOctet = arr => {
+         if(0 === arr.length || arr.length > 3)
+             return null
+         const n = parseInt(arr.join(''), 10)
+         if(0 == arr[0] && arr.length > 1) //for our purposes only 0 is legal and all other octets beginning with 0 are not
+             return null
+         if(!(0 <= n && n <= 255))
+             return null
+         return ""+n
+     }
+   #+end_src
+
+   and we need the ability to split a collection at a given position to get back a tuple
+
+   #+name: splitOnPosition
+   #+begin_src javascript :exports code
+     const splitOnPosition = (arr, n) => {
+         const a = [...arr]
+         return [a.splice(0, n), a]
+     }
+   #+end_src
+   
+   Ok, lets do it
+
+   #+name: getValidIPAddresses
+   #+begin_src js :exports code
+         <<toValidOctet>>
+
+         <<splitOnPosition>>
+
+     const getValidIPAddresses = (digitsString) => {
+         const getValidIPAddressesFromArrays = function * (remainingChars, octetsSoFar=[], remainingOctets=4) {
+             if(remainingOctets<0)
+                 return
+             if(!remainingChars.length && remainingOctets == 0) {
+                 yield octetsSoFar
+                 return
+             }
+             // Next we'll try peeling the first n characters off remainingChars. But if remainingChars is "35" then 
+             // you only want to do test up to length of 2 (3,35), not up to 3 (3,35,35)
+             const combosToTest = Math.min(remainingChars.length, 3)
+             for(let i=1;i<=combosToTest;i+=1) {
+                 const [octetArr, remaining] = splitOnPosition(remainingChars, i)
+                 const octet = toValidOctet(octetArr) //drop leading zeros and combine into a string
+                 if(octet !== null)
+                     yield * getValidIPAddressesFromArrays(remaining, [...octetsSoFar, octet], remainingOctets-1)
+             }
+         }
+
+         return [...getValidIPAddressesFromArrays([...digitsString], [], 4)]
+             .map(octets => octets.join('.'))
+     }
+   #+end_src
+
+   Let's try it out:
+   
+   #+begin_src js :exports both :results output :var examples=examples
+     <<getValidIPAddresses>>
+
+     examples.forEach(([a,b]) => console.log(`getValidIPAddresses("${a}") => ${getValidIPAddresses(a).join(', ')}\nExpected: ${b}\n`)) 
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   getValidIPAddresses("0000") => 0.0.0.0
+   Expected: ["0.0.0.0"]
+
+   getValidIPAddresses("000255") => 0.0.0.255
+   Expected: ["0.0.0.255"]
+
+   getValidIPAddresses("123123") => 1.2.3.123, 1.2.31.23, 1.23.1.23, 1.23.12.3, 1.231.2.3, 12.3.1.23, 12.3.12.3, 12.31.2.3, 123.1.2.3
+   Expected: ["1.2.3.123", "123.1.2.3"]
+
+   getValidIPAddresses("25525511135") => 255.255.11.135, 255.255.111.35
+   Expected: ["255.255.11.135," "255.255.111.35"]
+
+   getValidIPAddresses("95525511135") => 
+   Expected: []
+
+   getValidIPAddresses("123145167891") => 
+   Expected: []
+
+   getValidIPAddresses("111") => 
+   Expected: []
+
+   getValidIPAddresses("1111111111111") => 
+   Expected: []
+
+   getValidIPAddresses("11111") => 1.1.1.11, 1.1.11.1, 1.11.1.1, 11.1.1.1
+   Expected: ["11.1.1.1", "1.11.1.1", "1.1.11.1", "1.1.1.11"]
+
+   #+end_example
