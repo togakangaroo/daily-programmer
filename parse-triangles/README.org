@@ -1,86 +1,83 @@
 * The Problem
 ** Challenge 1 
- You are given an ascii image of a right angle triangle and the position comprising its right angle. Return the measurements of its angles by degrees
+   You are given an ascii image of a right angle triangle. Return the measurements of each angle by degrees
  
-  #+begin_src typescript :eval none :exports code
-    function measureTriangle(diagram: string, position: (int, int)) : (decimal, decimal, decimal)
-  #+end_src
- 
-  - positions always read as =row, column= eg =8, 15= indicates the 9th row and 16th column (both are 0-indexed)
-  - the diagram reads downwards left-to-right so =0, 0= is the top left corner
-    
-*** Example 1
-   Diagram: 
-   #+begin_src artist :exports code
-                /
-               /|
-              / |
-             /  |
-            /   |
-           /    |
-          /     |
-         /      |
-        /       |
-       /        |
-      /         |
-     /----------+
+   #+begin_src typescript :eval none :exports code
+     function measureTriangle(diagram: string) : (decimal, decimal, decimal)
    #+end_src
-   Position of right angle: =11, 11=
-  
+ 
+   - positions always read as =row, column= eg =8, 15= indicates the 9th row and 16th column (both are 0-indexed)
+   - the diagram reads downwards left-to-right so =0, 0= is the top left corner
+   - the location of each right angle will always be denoted with the =+= symbol. There will be exactly one =+= symbol per image.
+
+*** Example 1
+    #+begin_src artist :exports code
+      /
+      /|
+      / |
+      /  |
+      /   |
+      /    |
+      /     |
+      /      |
+      /       |
+      /        |
+      /         |
+      /----------+
+    #+end_src
 
 *** Example 2
-    Diagram:
-   #+begin_src artist :exports code
-     \---------------------------+
-       ---\                      |
-           ---\                  |
-               ---\              |
-                   ---\          |
-                       ---\      |
-                           ---\  |
-                               --+
-  #+end_src
-  Position: =7, 28=
+    #+begin_src artist :exports code
+      \---------------------------+
+      ---\                      |
+      ---\                  |
+      ---\              |
+      ---\          |
+      ---\      |
+      ---\  |
+      --|
+
+    #+end_src
   
-  Note that ends of straight lines can terminate in several different ways
 
 *** Example 3 
-    Diagram:
-  #+begin_src artist
-    |\
-    | \-
-    |   \
-    |    \
-    |     \-
-    |       \
-    +--------\
-   #+end_src
-   Position: =6,9=
+    #+begin_src artist
+
+      |\
+      | \-
+      |   \
+      |    \
+      |     \-
+      |       \
+      +--------\
+    #+end_src
   
 ** Challenge 2
    
-You are no longer given the right angle at all. And the triangles are not necessarily right angles
+   The triangles are no longer necessarily right angles. If a triangle is not a right triangle it will not have a =+= symbol at all
+  
+*** Example 1 
+    #+begin_src artist :exports code
+      -----------------------------------
+         \----                         /-
+              \-----                 /-
+                    \----          /-
+                         \----   /-
+                              \-/
+   #+end_src
 
-  #+begin_src artist :exports code
-     -----------------------------------
-        \----                         /-
-             \-----                 /-
-                   \----          /-
-                        \----   /-
-                             \-/
-  #+end_src
+*** Example 2
+   #+begin_src artist :exports code
 
-  #+begin_src artist :exports code
-
-                     -\
-                  --/  \-
-               --/       \
-            --/           \-
-         --/                \
-      --/                    \-
-    ------                     \
-          \-------              \-
-                  \-------        \
-                          \------- \-
-                                  \---
-  #+end_src
+                      -\
+                   --/  \-
+                --/       \
+             --/           \-
+          --/                \
+       --/                    \-
+     ------                     \
+           \-------              \-
+                   \-------        \
+                           \------- \-
+                                   \---
+   #+end_src
