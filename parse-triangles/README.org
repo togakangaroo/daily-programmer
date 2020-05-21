@@ -1,0 +1,86 @@
+* The Problem
+** Challenge 1 
+ You are given an ascii image of a right angle triangle and the position comprising its right angle. Return the measurements of its angles by degrees
+ 
+  #+begin_src typescript :eval none :exports code
+    function measureTriangle(diagram: string, position: (int, int)) : (decimal, decimal, decimal)
+  #+end_src
+ 
+  - positions always read as =row, column= eg =8, 15= indicates the 9th row and 16th column (both are 0-indexed)
+  - the diagram reads downwards left-to-right so =0, 0= is the top left corner
+    
+*** Example 1
+   Diagram: 
+   #+begin_src artist :exports code
+                /
+               /|
+              / |
+             /  |
+            /   |
+           /    |
+          /     |
+         /      |
+        /       |
+       /        |
+      /         |
+     /----------+
+   #+end_src
+   Position of right angle: =11, 11=
+  
+
+*** Example 2
+    Diagram:
+   #+begin_src artist :exports code
+     \---------------------------+
+       ---\                      |
+           ---\                  |
+               ---\              |
+                   ---\          |
+                       ---\      |
+                           ---\  |
+                               --+
+  #+end_src
+  Position: =7, 28=
+  
+  Note that ends of straight lines can terminate in several different ways
+
+*** Example 3 
+    Diagram:
+  #+begin_src artist
+    |\
+    | \-
+    |   \
+    |    \
+    |     \-
+    |       \
+    +--------\
+   #+end_src
+   Position: =6,9=
+  
+** Challenge 2
+   
+You are no longer given the right angle at all. And the triangles are not necessarily right angles
+
+  #+begin_src artist :exports code
+     -----------------------------------
+        \----                         /-
+             \-----                 /-
+                   \----          /-
+                        \----   /-
+                             \-/
+  #+end_src
+
+  #+begin_src artist :exports code
+
+                     -\
+                  --/  \-
+               --/       \
+            --/           \-
+         --/                \
+      --/                    \-
+    ------                     \
+          \-------              \-
+                  \-------        \
+                          \------- \-
+                                  \---
+  #+end_src
