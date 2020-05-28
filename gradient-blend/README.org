@@ -1,0 +1,34 @@
+#+TITLE: Gradient Blend
+#+OPTIONS: :toc nil
+
+* Gradient Blend
+** The Problem
+*** Challenge 1
+    Write a function that given a DOM element makes it’s background-color start fading into different colors along the visible light spectrum in an endless cycle. Have the cycle length be configurable
+    #+begin_src typescript :eval no
+      const startGradientFade = (element: DOMElement, cycleLengthMilliseconds: Number): void => { ... }
+    #+end_src
+
+    If ~cycleLengthMilliseconds~ is passed a cycle length of =5000=, this will traverse the gradient from red to purple in and back to red in 5 seconds.
+
+    #+BEGIN_EXPORT html
+        <img alt="The visible light spectrum" src="https://www.thoughtco.com/thmb/qP1_h_MKsrmAlx_MK-hDOasJXPY=/768x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/the-visible-light-spectrum-2699036_FINAL2-c0b0ee6f82764efdb62a1af9b9525050.png" />
+    #+END_EXPORT
+
+
+*** Challenge 2
+
+    Write a generator function that takes a “step” size (0 <= number <= 1) and produces an endless sequence of RGB color strings (eg `a562fe`) moving along the visible light spectrum where the `step` determines how large a step along the spectrum you are taking:
+
+    | Step | Sequence                    |
+    |------+-----------------------------|
+    |    1 | ff0000, ff0000, ....        |
+    |   .5 | ff0000, 00ffff, ff0000, ... |
+
+    (a reasonable step size to get a nice gradient might be something like `0.01` or even smaller)
+
+    #+begin_src typescript :eval none
+      const gradientColors = function * (stepSize: Number) : Iterable<string> { ... }
+    #+end_src
+
+    Use this function to implement the method from [[Challenge 1]].
