@@ -12,31 +12,30 @@
 
 *** Example 1
     #+begin_src artist :exports code
-      /
-      /|
-      / |
-      /  |
-      /   |
-      /    |
-      /     |
-      /      |
-      /       |
-      /        |
-      /         |
-      /----------+
+      \
+      |\
+      | \
+      |  \
+      |   \
+      |    \
+      |     \
+      |      \
+      |       \
+      |        \
+      +---------\
     #+end_src
 
 *** Example 2
     #+begin_src artist :exports code
-      \---------------------------+
-      ---\                      |
-      ---\                  |
-      ---\              |
-      ---\          |
-      ---\      |
-      ---\  |
-      --|
-
+      +-----------------------------/
+      |                         /---
+      |                     /---
+      |                 /---
+      |             /---
+      |         /---
+      |     /---
+      | /---
+      --
     #+end_src
   
 
@@ -54,7 +53,7 @@
   
 ** Challenge 2
    
-   The triangles are no longer necessarily right angles. If a triangle is not a right triangle it will not have a =+= symbol at all
+   The triangles are no longer necessarily right angles. If a triangle is not a right triangle it will not have a =+= symbol at all. Again return the measurements of all angles
   
 *** Example 1 
     #+begin_src artist :exports code
@@ -75,7 +74,7 @@
              --/           \-
           --/                \
        --/                    \-
-     ------                     \
+      -----                     \
            \-------              \-
                    \-------        \
                            \------- \-
