@@ -43,7 +43,7 @@
     Which 10 day time period saw the most orders? The highest order total?
 
 *** Challenge 3
-    Assuming your language supports this (most do), make the days of week from [[Challenge 1]] localized to the a passed in culture (so the [[https://www.loc.gov/standards/iso639-2/php/langcodes_name.php?iso_639_1=tr][turkish code =tr=]] should localize to days in Turkish), use the current user's culture by default.
+    Assuming your programming language supports this (most do), make the days of week from [[Challenge 1]] localized to the a passed in culture (so the [[https://www.loc.gov/standards/iso639-2/php/langcodes_name.php?iso_639_1=tr][turkish code =tr=]] should localize to days in Turkish), use the current user's culture by default.
 
 ** Mock data:
 
