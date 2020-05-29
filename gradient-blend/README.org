@@ -3,6 +3,8 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
 
 * Gradient Blend
+  This file includes executing bits of html, to view it best [[https://htmlpreview.github.io/?https://github.com/togakangaroo/daily-programmer/blob/master/gradient-blend/README.html][see the rendered html version]] rather than the org file directly.
+  
 ** The Problem
 *** Challenge 1
     Write a function that given a DOM element makes it’s background-color start fading into different colors along the visible light spectrum in an endless cycle. Have the cycle length be configurable

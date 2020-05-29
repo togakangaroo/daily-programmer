@@ -12,4 +12,5 @@ What you find here, are not writeups of me solving these problems, they're the a
 - [[./meeting-scheduler][Meeting Scheduler]]
 - [[./maze-generation][Maze Generation]]
 - [[./restore-ip-address][Restore IP Address]]
+- [[./gradient-blend][Gradient Blend]]
 
