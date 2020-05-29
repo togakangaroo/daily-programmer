@@ -1,0 +1,679 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-05-28 Thu 23:54 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gradient Blend</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="George Mauer" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Gradient Blend</h1>
+
+<div id="outline-container-org4718d59" class="outline-2">
+<h2 id="org4718d59"><span class="section-number-2">1</span> Gradient Blend</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-orga82fe77" class="outline-3">
+<h3 id="orga82fe77"><span class="section-number-3">1.1</span> The Problem</h3>
+<div class="outline-text-3" id="text-1-1">
+</div>
+<div id="outline-container-orgc3e8c71" class="outline-4">
+<h4 id="orgc3e8c71"><span class="section-number-4">1.1.1</span> Challenge 1</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<p>
+Write a function that given a DOM element makes it’s background-color start fading into different colors along the visible light spectrum in an endless cycle. Have the cycle length be configurable
+</p>
+
+<div class="org-src-container">
+<pre class="src src-typescript"><span style="color: #F92672;">const</span> <span style="color: #FD971F;">startGradientFade</span> = <span style="color: #AE81FF;">(</span>element: <span style="color: #66D9EF;">DOMElement</span>, cycleLengthMilliseconds: <span style="color: #66D9EF;">Number</span><span style="color: #AE81FF;">)</span>: <span style="color: #F92672;">void</span> <span style="color: #F92672;">=&gt;</span> <span style="color: #AE81FF;">{</span> ... <span style="color: #AE81FF;">}</span>
+</pre>
+</div>
+
+<p>
+If <code>cycleLengthMilliseconds</code> is passed a cycle length of <code>5000</code>, this will traverse the gradient from red to purple in and back to red in 5 seconds.
+</p>
+
+<img alt="The visible light spectrum" src="https://www.thoughtco.com/thmb/qP1_h_MKsrmAlx_MK-hDOasJXPY=/768x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/the-visible-light-spectrum-2699036_FINAL2-c0b0ee6f82764efdb62a1af9b9525050.png" />
+</div>
+</div>
+
+
+<div id="outline-container-org14fd9da" class="outline-4">
+<h4 id="org14fd9da"><span class="section-number-4">1.1.2</span> Challenge 2</h4>
+<div class="outline-text-4" id="text-1-1-2">
+<p>
+Write a generator function that takes a “step” size (0 &lt;= number &lt;= 1) and produces an endless sequence of RGB color strings (eg `a562fe`) moving along the visible light spectrum where the `step` determines how large a step along the spectrum you are taking:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">Step</th>
+<th scope="col" class="org-left">Sequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">ff0000, ff0000, &#x2026;.</td>
+</tr>
+
+<tr>
+<td class="org-right">.5</td>
+<td class="org-left">ff0000, 00ffff, ff0000, &#x2026;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+(a reasonable step size to get a nice gradient might be something like `0.01` or even smaller)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-typescript"><span style="color: #F92672;">const</span> <span style="color: #FD971F;">gradientColors</span> = <span style="color: #F92672;">function</span> * <span style="color: #AE81FF;">(</span>stepSize: <span style="color: #66D9EF;">Number</span><span style="color: #AE81FF;">)</span> : <span style="color: #66D9EF;">Iterable</span>&lt;<span style="color: #F92672;">string</span>&gt; <span style="color: #AE81FF;">{</span> ... <span style="color: #AE81FF;">}</span>
+</pre>
+</div>
+
+<p>
+Use this function to implement the method from <a href="#orgc3e8c71">1.1.1</a>.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org00aa750" class="outline-3">
+<h3 id="org00aa750"><span class="section-number-3">1.2</span> Solution</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+An important thing here is to know about <code>hsl</code> / <code>hsv</code> notation.
+</p>
+
+<p width="500">
+<img src="./hsl-color-wheel.png" alt="hsl-color-wheel.png" width="500" /><sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>
+</p>
+
+<p>
+In this notation, the color space is pictured as a cylinder with hue (degrees around the center) basically corresponding to the color spectrum.
+</p>
+
+<p>
+<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value">Oh look, there's a css function for it</a>
+</p>
+</div>
+
+<div id="outline-container-org52f3e7b" class="outline-4">
+<h4 id="org52f3e7b"><span class="section-number-4">1.2.1</span> Challenge 1</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<p>
+Well, this is solvable with css is it not?
+</p>
+
+<article id="gradient-colors">
+  <div></div>
+  <style>
+    #gradient-colors div {
+      width: 400px;
+      height: 200px;
+      animation: gradient 5s infinite linear;
+    }
+    @keyframes gradient {
+      0% {
+        background-color: hsl(0, 100%, 50%);
+      }
+      25% {
+        background-color: hsl(90, 100%, 50%);
+      }
+      50% {
+        background-color: hsl(180, 100%, 50%);
+      }
+      75% {
+        background-color: hsl(270, 100%, 50%);
+      }
+      100% {
+        background-color: hsl(360, 100%, 50%);
+      }
+    }
+  </style>
+</article>
+
+<div class="org-src-container">
+<pre class="src src-html">&lt;<span style="color: #A6E22E;">article</span> <span style="color: #FD971F;">id</span>=<span style="color: #E6DB74;">"gradient-colors"</span>&gt;
+  &lt;<span style="color: #A6E22E;">div</span>&gt;&lt;/<span style="color: #A6E22E;">div</span>&gt;
+  &lt;<span style="color: #A6E22E;">style</span>&gt;
+    #gradient-colors div {
+    width: 400px;
+    height: 200px;
+    animation: gradient 5s infinite linear;
+    }
+    @keyframes gradient {
+    0% {
+    background-color: hsl(0, 100%, 50%);
+    }
+    25% {
+    background-color: hsl(90, 100%, 50%);
+    }
+    50% {
+    background-color: hsl(180, 100%, 50%);
+    }
+    75% {
+    background-color: hsl(270, 100%, 50%);
+    }
+    100% {
+    background-color: hsl(360, 100%, 50%);
+    }
+    }
+  &lt;/<span style="color: #A6E22E;">style</span>&gt;
+&lt;/<span style="color: #A6E22E;">article</span>&gt;
+</pre>
+</div>
+
+<p>
+That works! To put it behind a function I would simply have the function emit a similar stylesheet. Lets just move on to&#x2026;
+</p>
+</div>
+</div>
+
+<div id="outline-container-org420fc2d" class="outline-4">
+<h4 id="org420fc2d"><span class="section-number-4">1.2.2</span> Challenge 2</h4>
+<div class="outline-text-4" id="text-1-2-2">
+<p>
+To be honest this is not much harder than the implementation of challenge 1
+</p>
+
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #F92672;">const</span> <span style="color: #FD971F;">gradientColors</span> = <span style="color: #F92672;">function</span> * <span style="color: #AE81FF;">(</span>stepSize<span style="color: #AE81FF;">)</span> <span style="color: #AE81FF;">{</span>
+    <span style="color: #F92672;">let</span> <span style="color: #FD971F;">nextHueProportion</span> = <span style="color: #AE81FF;">0</span>
+    <span style="color: #F92672;">while</span><span style="color: #66D9EF;">(</span><span style="color: #AE81FF;">true</span><span style="color: #66D9EF;">)</span> <span style="color: #66D9EF;">{</span>
+        <span style="color: #F92672;">const</span> <span style="color: #FD971F;">hue</span> = Math.floor<span style="color: #A6E22E;">(</span><span style="color: #AE81FF;">360</span> * nextHueProportion<span style="color: #A6E22E;">)</span>
+        <span style="color: #F92672;">yield</span> <span style="color: #E6DB74;">`hsl(${hue}, 100%, 50%)`</span>
+        nextHueProportion += stepSize
+        nextHueProportion -= Math.floor<span style="color: #A6E22E;">(</span>nextHueProportion<span style="color: #A6E22E;">)</span>
+    <span style="color: #66D9EF;">}</span>
+<span style="color: #AE81FF;">}</span>
+
+<span style="color: #F92672;">const</span> <span style="color: #FD971F;">it</span> = gradientColors<span style="color: #AE81FF;">(</span>.<span style="color: #AE81FF;">05</span><span style="color: #AE81FF;">)[</span>Symbol.iterator<span style="color: #AE81FF;">]()</span>
+<span style="color: #F92672;">const</span> <span style="color: #FD971F;">firstTen</span> = Array.from<span style="color: #AE81FF;">(</span><span style="color: #66D9EF;">{</span>length: <span style="color: #AE81FF;">10</span><span style="color: #66D9EF;">}</span>, <span style="color: #66D9EF;">()</span> =&gt; it.next<span style="color: #66D9EF;">()</span>.value<span style="color: #AE81FF;">)</span>
+console.log<span style="color: #AE81FF;">(</span>firstTen<span style="color: #AE81FF;">)</span>
+</pre>
+</div>
+
+<pre class="example">
+[ 'hsl(0, 100%, 50%)',
+  'hsl(18, 100%, 50%)',
+  'hsl(36, 100%, 50%)',
+  'hsl(54, 100%, 50%)',
+  'hsl(72, 100%, 50%)',
+  'hsl(90, 100%, 50%)',
+  'hsl(108, 100%, 50%)',
+  'hsl(125, 100%, 50%)',
+  'hsl(144, 100%, 50%)',
+  'hsl(161, 100%, 50%)' ]
+</pre>
+
+<p>
+Due to how the DOM/CSS interact, all of the above are perfectly valid colors to use.
+</p>
+
+<p>
+However where's the fun in that? We actually want RGB format. <a href="https://www.rapidtables.com/convert/color/hsl-to-rgb.html">This is not entirely straightforward</a> but has some reasonable equations.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-js" id="orga18f952"><span style="color: #F92672;">const</span> <span style="color: #FD971F;">isInOrder</span> = <span style="color: #AE81FF;">(</span>min, v, max<span style="color: #AE81FF;">)</span> =&gt; min &lt;= v &amp;&amp; v &lt; max
+<span style="color: #F92672;">const</span> <span style="color: #FD971F;">toHex</span> = <span style="color: #AE81FF;">(</span>num<span style="color: #AE81FF;">)</span> =&gt; Math.floor<span style="color: #AE81FF;">(</span>num<span style="color: #AE81FF;">)</span>.toString<span style="color: #AE81FF;">(</span><span style="color: #AE81FF;">16</span><span style="color: #AE81FF;">)</span>.toUpperCase<span style="color: #AE81FF;">()</span>.padStart<span style="color: #AE81FF;">(</span><span style="color: #AE81FF;">2</span>, <span style="color: #E6DB74;">`0`</span><span style="color: #AE81FF;">)</span>
+
+<span style="color: #F92672;">const</span> <span style="color: #FD971F;">hslToRgb</span> = <span style="color: #AE81FF;">(</span>h, s, l<span style="color: #AE81FF;">)</span> =&gt; <span style="color: #AE81FF;">{</span>
+    <span style="color: #F92672;">const</span> <span style="color: #FD971F;">c</span> = <span style="color: #66D9EF;">(</span><span style="color: #AE81FF;">1</span> - Math.abs<span style="color: #A6E22E;">(</span><span style="color: #AE81FF;">2</span>*l - <span style="color: #AE81FF;">1</span><span style="color: #A6E22E;">)</span><span style="color: #66D9EF;">)</span> * s
+    <span style="color: #F92672;">const</span> <span style="color: #FD971F;">x</span> = c * <span style="color: #66D9EF;">(</span><span style="color: #AE81FF;">1</span> - Math.abs<span style="color: #A6E22E;">(</span> <span style="color: #E6DB74;">(</span><span style="color: #FD971F;">(</span>h/<span style="color: #AE81FF;">60</span><span style="color: #FD971F;">)</span> % <span style="color: #AE81FF;">2</span><span style="color: #E6DB74;">)</span> - <span style="color: #AE81FF;">1</span><span style="color: #A6E22E;">)</span><span style="color: #66D9EF;">)</span>
+    <span style="color: #F92672;">const</span> <span style="color: #FD971F;">m</span> = l - c/<span style="color: #AE81FF;">2</span>
+    <span style="color: #F92672;">const</span> <span style="color: #66D9EF;">[</span><span style="color: #FD971F;">rp</span>, <span style="color: #FD971F;">gp</span>, <span style="color: #FD971F;">bp</span><span style="color: #66D9EF;">]</span> =
+          isInOrder<span style="color: #66D9EF;">(</span><span style="color: #AE81FF;">0</span>, h, <span style="color: #AE81FF;">60</span><span style="color: #66D9EF;">)</span>    ? <span style="color: #66D9EF;">[</span>c, x, <span style="color: #AE81FF;">0</span><span style="color: #66D9EF;">]</span> :
+          isInOrder<span style="color: #66D9EF;">(</span><span style="color: #AE81FF;">60</span>, h, <span style="color: #AE81FF;">120</span><span style="color: #66D9EF;">)</span>  ? <span style="color: #66D9EF;">[</span>x, c, <span style="color: #AE81FF;">0</span><span style="color: #66D9EF;">]</span> :
+          isInOrder<span style="color: #66D9EF;">(</span><span style="color: #AE81FF;">120</span>, h, <span style="color: #AE81FF;">180</span><span style="color: #66D9EF;">)</span> ? <span style="color: #66D9EF;">[</span><span style="color: #AE81FF;">0</span>, c, x<span style="color: #66D9EF;">]</span> :
+          isInOrder<span style="color: #66D9EF;">(</span><span style="color: #AE81FF;">180</span>, h, <span style="color: #AE81FF;">240</span><span style="color: #66D9EF;">)</span> ? <span style="color: #66D9EF;">[</span><span style="color: #AE81FF;">0</span>, x, c<span style="color: #66D9EF;">]</span> :
+          isInOrder<span style="color: #66D9EF;">(</span><span style="color: #AE81FF;">240</span>, h, <span style="color: #AE81FF;">300</span><span style="color: #66D9EF;">)</span> ? <span style="color: #66D9EF;">[</span>x, <span style="color: #AE81FF;">0</span>, c<span style="color: #66D9EF;">]</span> :
+          isInOrder<span style="color: #66D9EF;">(</span><span style="color: #AE81FF;">300</span>, h, <span style="color: #AE81FF;">360</span><span style="color: #66D9EF;">)</span> ? <span style="color: #66D9EF;">[</span>c, <span style="color: #AE81FF;">0</span>, x<span style="color: #66D9EF;">]</span> :
+          <span style="color: #66D9EF;">(</span><span style="color: #A6E22E;">()</span> =&gt; <span style="color: #A6E22E;">{</span> <span style="color: #F92672;">throw</span> Error<span style="color: #E6DB74;">(</span><span style="color: #E6DB74;">`Hue must be 0 &lt;= #{h} &lt; 360`</span><span style="color: #E6DB74;">)</span><span style="color: #A6E22E;">}</span><span style="color: #66D9EF;">)()</span>
+
+    <span style="color: #F92672;">const</span> <span style="color: #66D9EF;">[</span><span style="color: #FD971F;">r</span>, <span style="color: #FD971F;">g</span>, <span style="color: #FD971F;">b</span><span style="color: #66D9EF;">]</span> = <span style="color: #66D9EF;">[</span><span style="color: #A6E22E;">(</span>rp+m<span style="color: #A6E22E;">)</span>*<span style="color: #AE81FF;">255</span>, <span style="color: #A6E22E;">(</span>gp+m<span style="color: #A6E22E;">)</span>*<span style="color: #AE81FF;">255</span>, <span style="color: #A6E22E;">(</span>bp+m<span style="color: #A6E22E;">)</span>*<span style="color: #AE81FF;">255</span><span style="color: #66D9EF;">]</span>
+    <span style="color: #F92672;">return</span> <span style="color: #E6DB74;">`#${toHex(r)}${toHex(g)}${toHex(b)}`</span>
+<span style="color: #AE81FF;">}</span>
+</pre>
+</div>
+
+<p>
+Let's test that against this table
+</p>
+
+<table id="org9fd0d4c" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Color</th>
+<th scope="col" class="org-left">hsl</th>
+<th scope="col" class="org-left">rgb (hex)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Black</td>
+<td class="org-left">"0,0,0"</td>
+<td class="org-left">#000000</td>
+</tr>
+
+<tr>
+<td class="org-left">White</td>
+<td class="org-left">"0,0,1"</td>
+<td class="org-left">#FFFFFF</td>
+</tr>
+
+<tr>
+<td class="org-left">Red</td>
+<td class="org-left">"0,1,.5"</td>
+<td class="org-left">#FF0000</td>
+</tr>
+
+<tr>
+<td class="org-left">Lime</td>
+<td class="org-left">"120,1,.5"</td>
+<td class="org-left">#00FF00</td>
+</tr>
+
+<tr>
+<td class="org-left">Blue</td>
+<td class="org-left">"240,1,.5"</td>
+<td class="org-left">#0000FF</td>
+</tr>
+
+<tr>
+<td class="org-left">Yellow</td>
+<td class="org-left">"60,1,.5"</td>
+<td class="org-left">#FFFF00</td>
+</tr>
+
+<tr>
+<td class="org-left">Cyan</td>
+<td class="org-left">"180,1,.5"</td>
+<td class="org-left">#00FFFF</td>
+</tr>
+
+<tr>
+<td class="org-left">Magenta</td>
+<td class="org-left">"300,1,.5"</td>
+<td class="org-left">#FF00FF</td>
+</tr>
+
+<tr>
+<td class="org-left">Silver</td>
+<td class="org-left">"0,0,.75"</td>
+<td class="org-left">#BFBFBF</td>
+</tr>
+
+<tr>
+<td class="org-left">Gray</td>
+<td class="org-left">"0,0,.5"</td>
+<td class="org-left">#808080</td>
+</tr>
+
+<tr>
+<td class="org-left">Maroon</td>
+<td class="org-left">"0,1,.25"</td>
+<td class="org-left">#800000</td>
+</tr>
+
+<tr>
+<td class="org-left">Olive</td>
+<td class="org-left">"60,1,.25"</td>
+<td class="org-left">#808000</td>
+</tr>
+
+<tr>
+<td class="org-left">Green</td>
+<td class="org-left">"120,1,.25"</td>
+<td class="org-left">#008000</td>
+</tr>
+
+<tr>
+<td class="org-left">Purple</td>
+<td class="org-left">"300,1,.25"</td>
+<td class="org-left">#800080</td>
+</tr>
+
+<tr>
+<td class="org-left">Teal</td>
+<td class="org-left">"180,1,.25"</td>
+<td class="org-left">#008080</td>
+</tr>
+
+<tr>
+<td class="org-left">Navy</td>
+<td class="org-left">"240,1,.25"</td>
+<td class="org-left">#000080</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+<pre class="src src-js">
+<span style="color: #F92672;">return</span> colors.map<span style="color: #AE81FF;">(</span><span style="color: #66D9EF;">(</span><span style="color: #A6E22E;">[</span>color, hsl, rgb<span style="color: #A6E22E;">]</span><span style="color: #66D9EF;">)</span> =&gt; <span style="color: #66D9EF;">{</span>
+    <span style="color: #F92672;">const</span> <span style="color: #A6E22E;">[</span><span style="color: #FD971F;">h</span>,<span style="color: #FD971F;">s</span>,<span style="color: #FD971F;">l</span><span style="color: #A6E22E;">]</span> = hsl.split<span style="color: #A6E22E;">(</span><span style="color: #E6DB74;">`,`</span><span style="color: #A6E22E;">)</span>.map<span style="color: #A6E22E;">(</span>parseFloat<span style="color: #A6E22E;">)</span>
+    <span style="color: #F92672;">return</span> <span style="color: #A6E22E;">[</span>color, hsl, rgb, hslToRgb<span style="color: #E6DB74;">(</span>h, s, l<span style="color: #E6DB74;">)</span><span style="color: #A6E22E;">]</span>
+<span style="color: #66D9EF;">}</span><span style="color: #AE81FF;">)</span>
+</pre>
+</div>
+
+<p>
+Yes!
+</p>
+
+<p>
+Well now it's just a matter of using the above. But also, in the spirit of lispy-ness, since we <b>can</b> make it more flexible lets make it more flexible. I have a feeling it will come in handy. Although the step size is set, why not treat it as a default? We can then pass an optional parameter <b>to</b> the yield and if one is passed we would use <b>that</b> step size
+</p>
+
+<div class="org-src-container">
+<pre class="src src-web">&lt;article id="gradient-colors-function"&gt;
+    &lt;div style="width:400px;height:200px;"&gt;&lt;/div&gt;
+&lt;/article&gt;
+
+&lt;script&gt;
+
+
+    <span style="color: #F92672;">const</span> <span style="color: #FD971F;">gradientColors</span> = <span style="color: #F92672;">function</span> * <span style="color: #AE81FF;">(</span>defaultStepSize<span style="color: #AE81FF;">)</span> <span style="color: #AE81FF;">{</span>
+        <span style="color: #F92672;">let</span> <span style="color: #FD971F;">nextHueProportion</span> = 0
+        <span style="color: #F92672;">while</span><span style="color: #66D9EF;">(</span><span style="color: #AE81FF;">true</span><span style="color: #66D9EF;">)</span> <span style="color: #66D9EF;">{</span>
+            <span style="color: #F92672;">const</span> <span style="color: #FD971F;">hue</span> = Math.<span style="color: #A6E22E;">floor</span><span style="color: #A6E22E;">(</span>360 * nextHueProportion<span style="color: #A6E22E;">)</span>
+            <span style="color: #F92672;">const</span> <span style="color: #FD971F;">stepSize</span> = <span style="color: #F92672;">yield</span> <span style="color: #A6E22E;">hslToRgb</span><span style="color: #A6E22E;">(</span>hue, 1, .5<span style="color: #A6E22E;">)</span>
+            nextHueProportion += stepSize === <span style="color: #AE81FF;">undefined</span> ? defaultStepSize : stepSize
+            nextHueProportion -= Math.<span style="color: #A6E22E;">floor</span><span style="color: #A6E22E;">(</span>nextHueProportion<span style="color: #A6E22E;">)</span>
+        <span style="color: #66D9EF;">}</span>
+    <span style="color: #AE81FF;">}</span>
+
+    <span style="color: #F92672;">const</span> <span style="color: #A6E22E;">startGradientFade</span> = <span style="color: #AE81FF;">(</span>element, cycleLengthMilliseconds<span style="color: #AE81FF;">)</span> =&gt; <span style="color: #AE81FF;">{</span>
+        <span style="color: #F92672;">const</span> <span style="color: #FD971F;">colors</span> = <span style="color: #A6E22E;">gradientColors</span><span style="color: #66D9EF;">(</span>15.0/cycleLengthMilliseconds<span style="color: #66D9EF;">)[</span>Symbol.iterator<span style="color: #66D9EF;">]()</span> //15 is a fine default frame size, though it can be variable
+        <span style="color: #F92672;">const</span> <span style="color: #A6E22E;">adjustColor</span> = <span style="color: #66D9EF;">(</span>prevTime<span style="color: #66D9EF;">)</span> =&gt; <span style="color: #66D9EF;">{</span>
+            <span style="color: #F92672;">const</span> <span style="color: #FD971F;">now</span> = Date.<span style="color: #A6E22E;">now</span><span style="color: #A6E22E;">()</span>
+            element.style.backgroundColor = colors.<span style="color: #A6E22E;">next</span><span style="color: #A6E22E;">(</span><span style="color: #E6DB74;">(</span>now - prevTime<span style="color: #E6DB74;">)</span>/cycleLengthMilliseconds<span style="color: #A6E22E;">)</span>.value
+            window.<span style="color: #A6E22E;">requestAnimationFrame</span><span style="color: #A6E22E;">(</span><span style="color: #E6DB74;">()</span> =&gt; <span style="color: #A6E22E;">adjustColor</span><span style="color: #E6DB74;">(</span>now<span style="color: #E6DB74;">)</span><span style="color: #A6E22E;">)</span>
+        <span style="color: #66D9EF;">}</span>
+        <span style="color: #A6E22E;">adjustColor</span><span style="color: #66D9EF;">(</span>Date.<span style="color: #A6E22E;">now</span><span style="color: #A6E22E;">()</span><span style="color: #66D9EF;">)</span>
+    <span style="color: #AE81FF;">}</span>
+    <span style="color: #A6E22E;">startGradientFade</span><span style="color: #AE81FF;">(</span>document.<span style="color: #A6E22E;">querySelector</span><span style="color: #66D9EF;">(</span>"#gradient-colors-function"<span style="color: #66D9EF;">)</span>, 5000<span style="color: #AE81FF;">)</span>
+&lt;/script&gt;
+</pre>
+</div>
+
+<iframe src="./gradient-colors-function.html" />
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<a href="http://reilley4color.blogspot.com/2016/05/munsell-hue-circle.html">Image from color blog</a>
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: George Mauer</p>
+<p class="date">Created: 2020-05-28 Thu 23:54</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

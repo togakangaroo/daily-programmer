@@ -1,0 +1,46 @@
+<article id="gradient-colors-function">
+    <div style="width:400px;height:200px;"></div>
+</article>
+
+<script>
+    const isInOrder = (min, v, max) => min <= v && v < max
+    const toHex = (num) => Math.floor(num).toString(16).toUpperCase().padStart(2, `0`)
+    
+    const hslToRgb = (h, s, l) => {
+        const c = (1 - Math.abs(2*l - 1)) * s
+        const x = c * (1 - Math.abs( ((h/60) % 2) - 1))
+        const m = l - c/2
+        const [rp, gp, bp] =
+              isInOrder(0, h, 60)    ? [c, x, 0] :
+              isInOrder(60, h, 120)  ? [x, c, 0] :
+              isInOrder(120, h, 180) ? [0, c, x] :
+              isInOrder(180, h, 240) ? [0, x, c] :
+              isInOrder(240, h, 300) ? [x, 0, c] :
+              isInOrder(300, h, 360) ? [c, 0, x] :
+              (() => { throw Error(`Hue must be 0 <= #{h} < 360`)})()
+    
+        const [r, g, b] = [(rp+m)*255, (gp+m)*255, (bp+m)*255]
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+    }
+
+    const gradientColors = function * (defaultStepSize) {
+        let nextHueProportion = 0
+        while(true) {
+            const hue = Math.floor(360 * nextHueProportion)
+            const stepSize = yield hslToRgb(hue, 1, .5)
+            nextHueProportion += stepSize === undefined ? defaultStepSize : stepSize
+            nextHueProportion -= Math.floor(nextHueProportion)
+        }
+    }
+
+    const startGradientFade = (element, cycleLengthMilliseconds) => {
+        const colors = gradientColors(15.0/cycleLengthMilliseconds)[Symbol.iterator]() //15 is a fine default frame size, though it can be variable
+        const adjustColor = (prevTime) => {
+            const now = Date.now()
+            element.style.backgroundColor = colors.next((now - prevTime)/cycleLengthMilliseconds).value
+            window.requestAnimationFrame(() => adjustColor(now))
+        }
+        adjustColor(Date.now())
+    }
+    startGradientFade(document.querySelector("#gradient-colors-function"), 5000)
+</script>
