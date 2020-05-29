@@ -1,0 +1,90 @@
+#+TITLE: Order Analysis
+#+OPTIONS: toc:nil
+#+OPTIONS: num:nil
+
+* Order Analysis
+
+** The Problem
+   Read in the big list of mock orders [[file:mock_orders.json][from this json file]]. An order is a record of a customer who placed the order for products and quantities on a given date. An order has many order lines each of which contains a quantity that was ordered and the price per item (so the total price of that order line is \(price \times quantity\).
+
+   #+begin_src json :eval no
+     {
+         "id": "feeab806-1fd0-4986-af86-4af9e6b98068",
+         "customerId": "a489bdd9-3f4e-4181-9a94-a123b9b5ea08",
+         "isFulfilled": true,
+         "placedOn": "2020-05-10",
+         "orderLines": [
+             {
+                 "id": "7968e6ca-9f24-419e-9d5c-8088e7354e33",
+                 "productName": "Bagelers",
+                 "quantity": 10,
+                 "price": 1.98,
+                 "productId": "395b4411-a748-49a7-8bc4-2a2debcfa75e"
+             },
+             {
+                 "id": "0747ad3d-b814-4200-b47e-732e87469a0a",
+                 "productName": "Chinese Lemon Pork",
+                 "quantity": 9,
+                 "price": 2.89,
+                 "productId": "03c6b0a8-bc00-496e-b91d-11f5e9152360"
+             }
+         ]
+     }
+   #+end_src
+
+   If the below seems too easy, then do it in your second strongest language or one that you are learning.
+
+*** Challenge 1
+    Write a function that returns a map/dictionary/object/any associative structure that has all the days as week as keys ("Sunday, Monday, etc...") and the average total price of all orders placed on each day. If a day does not appear in the dataset (hint - there are no Satrudays), then it should still have a key with a value of =0=.
+
+*** Challenge 2
+    Which customer ordered the most items? If more than one customer ordered the most then which one *of those* spent the most money?
+    
+    Which 10 day time period saw the most orders? The highest order total?
+
+*** Challenge 3
+    Assuming your language supports this (most do), make the days of week from [[Challenge 1]] localized to the a passed in culture (so the [[https://www.loc.gov/standards/iso639-2/php/langcodes_name.php?iso_639_1=tr][turkish code =tr=]] should localize to days in Turkish), use the current user's culture by default.
+
+** Mock data:
+
+   I generated [[file:original_mock_orders.json][a bunch of mock data]] from [[https://www.mockaroo.com/][from Mockaroo]]. To make it work for the problem I need to remove all orders on Saturdays from it. We also want some repeat customers. Mockaroo's interface was not flexible enough to do this, so a bit of python will help
+
+   #+begin_src python :results silent
+     import json
+     from datetime import datetime
+     from random import sample, choice
+
+     with open("./original_mock_orders.json") as f:
+         orders = json.load(f)
+
+     orders = [o for o in orders if (day := datetime.fromisoformat(o["placedOn"]).strftime("%A")) != "Saturday"]
+     customers = list(sample(set(o["customerId"] for o in orders), 30))
+
+     for o in orders:
+         o["customerId"] = choice(customers)
+
+     with open("./mock_orders.json", "w") as f:
+         json.dump(orders, f)
+   #+end_src
+
+   And now to test that I did this correctly
+   #+begin_src python :results drawer
+     import json
+     from datetime import datetime
+
+     with open("./mock_orders.json") as f:
+         all_orders = json.load(f)
+
+     return {
+         "total": len(all_orders),
+         "placed on Saturday": len([o for o in all_orders if datetime.fromisoformat(o["placedOn"]).strftime("%A") == "Saturday"]),
+         "unique customers": len(set([o["customerId"] for o in all_orders])),
+     }
+   #+end_src
+
+   #+RESULTS:
+   :results:
+   {'total': 83, 'placed on Saturday': 0, 'unique customers': 28}
+   :end:
+
+   Perfect.
