@@ -39,7 +39,7 @@
 
 *** Challenge 2
     Which customer ordered the most items? If more than one customer ordered the most then which one *of those* spent the most money?
-    
+
     Which 10 day time period saw the most orders? The highest order total?
 
 *** Challenge 3
@@ -88,3 +88,47 @@
    :end:
 
    Perfect.
+
+** Playground
+   I want to do this in racket so...lets do this in racket
+
+   First, can I even run racket in this thing? I remember I had it running once and then I kinda broke things.
+
+   #+begin_src racket
+     (* 3 4 6)
+   #+end_src
+
+   #+RESULTS:
+   : 72
+
+   Ok, cool, I fixed it.
+
+   #+begin_src racket :require json :results output
+     (define foo (list-ref (call-with-input-file "mock_orders.json" read-json)
+                           1))
+     (println foo)
+     (println (hash-ref foo 'customerId))
+   #+end_src
+
+   #+RESULTS:
+   : '#hasheq((customerId . "a489bdd9-3f4e-4181-9a94-a123b9b5ea08") (id . "feeab806-1fd0-4986-af86-4af9e6b98068") (isFulfilled . #t) (orderLines . (#hasheq((id . "7968e6ca-9f24-419e-9d5c-8088e7354e33") (price . 1.98) (productId . "395b4411-a748-49a7-8bc4-2a2debcfa75e") (productName . "Bagelers") (quantity . 10)) #hasheq((id . "0747ad3d-b814-4200-b47e-732e87469a0a") (price . 2.89) (productId . "03c6b0a8-bc00-496e-b91d-11f5e9152360") (productName . "Chinese Lemon Pork") (quantity . 9)))) (placedOn . "2020-05-10"))
+   : "a489bdd9-3f4e-4181-9a94-a123b9b5ea08"
+
+   Alright so it looks like reading the json file returns a list of [[https://docs.racket-lang.org/reference/hashtables.html][Racket hashtables]]. With the above I know
+   - how to read json
+   - what the resulting structure is
+   - how to access a keyed value
+
+     What about how to map over a collection?
+     
+     #+begin_src racket :require json
+       (define orders (call-with-input-file "mock_orders.json" read-json))
+       (define customer-ids (map (lambda (o) (hash-ref o 'customerId) ) orders))
+       (remove-duplicates customer-ids)
+     #+end_src
+
+     #+RESULTS:
+     : '("6c5aca11-a54b-4a64-9233-ebfda91ea1e6" "a489bdd9-3f4e-4181-9a94-a123b9b5ea08" "b80b0360-28fd-4677-9a9d-a8ce7a86a56e" "2f32fb34-a687-4f52-aa29-be4acb338660" "2491fb3d-6ab9-4192-9538-50477820d716" "977f6c1e-668b-4fa7-aeff-ea91f5242636" "59e85288-7b5c-413b-a340-1f4f1d8468ff" "26626efd-510b-4269-ba3f-37ed4e42a52a" "87799be6-e4c2-48b2-993d-c7e3367920e4" "260bbce1-298a-49cf-9a2e-53c6680dfc47" "3d5e4eea-ff32-4ca1-8bb9-5d02186cea54" "1a22fd10-7e4a-401e-a05e-bb13a8e55e57" "c12b6025-663d-49ed-b099-e05562fa4473" "63c897fe-3f57-4d34-91a1-57ad1798b8c7" "47c70cc7-e8b7-4d5a-84c1-1da97e2e0a7c" "e18c9c9f-0a11-4755-b234-41de4ea4ec37" "d0e31ec2-626a-455e-9e43-44bd98b4785f" "df9b7ed0-e69d-46ed-9c4d-e271e7687399" "8445e094-72ec-48b1-b3d3-b955fe3c70e2" "53131378-35af-411f-bf95-a43170138f13" "74e4a051-7d72-4fd0-abb8-1a6b85fdfadd" "3835e5df-cd95-48b5-a530-71f48cf8d775" "62cef68d-25ec-4b61-b5ec-d7c1aafc87d6" "6139a129-fb1c-4b1a-9446-0c2b06622b76" "c66cbbb2-4136-4e60-ab2f-1843f33b70dc" "32039908-c2d9-4f88-ac42-0342063702ce" "ec176281-84b5-4f2c-bc83-4378473b0b75" "54939d94-8613-49e1-9198-1104ffcd1686")
+
+     Nice! We also know how to uniqueify.
+** Implementation
