@@ -35,7 +35,7 @@
    If the below seems too easy, then do it in your second strongest language or one that you are learning.
 
 *** Challenge 1
-    Write a function that returns a map/dictionary/object/any associative structure that has all the days as week as keys ("Sunday, Monday, etc...") and the average total price of all orders placed on each day. If a day does not appear in the dataset (hint - there are no Satrudays), then it should still have a key with a value of =0=.
+    Write a function that returns a map/dictionary/object/any associative structure that has all the days as week as keys ("Sunday, Monday, etc...") and the average total price of all orders placed on each day. If a day does not appear in the dataset (hint - there are no Saturdays), then it should still have a key with a value of =0=.
 
 *** Challenge 2
     Which customer ordered the most items? If more than one customer ordered the most then which one *of those* spent the most money?
@@ -120,7 +120,7 @@
    - how to access a keyed value
 
      What about how to map over a collection?
-     
+
      #+begin_src racket :require json
        (define orders (call-with-input-file "mock_orders.json" read-json))
        (define customer-ids (map (lambda (o) (hash-ref o 'customerId) ) orders))
@@ -131,4 +131,196 @@
      : '("6c5aca11-a54b-4a64-9233-ebfda91ea1e6" "a489bdd9-3f4e-4181-9a94-a123b9b5ea08" "b80b0360-28fd-4677-9a9d-a8ce7a86a56e" "2f32fb34-a687-4f52-aa29-be4acb338660" "2491fb3d-6ab9-4192-9538-50477820d716" "977f6c1e-668b-4fa7-aeff-ea91f5242636" "59e85288-7b5c-413b-a340-1f4f1d8468ff" "26626efd-510b-4269-ba3f-37ed4e42a52a" "87799be6-e4c2-48b2-993d-c7e3367920e4" "260bbce1-298a-49cf-9a2e-53c6680dfc47" "3d5e4eea-ff32-4ca1-8bb9-5d02186cea54" "1a22fd10-7e4a-401e-a05e-bb13a8e55e57" "c12b6025-663d-49ed-b099-e05562fa4473" "63c897fe-3f57-4d34-91a1-57ad1798b8c7" "47c70cc7-e8b7-4d5a-84c1-1da97e2e0a7c" "e18c9c9f-0a11-4755-b234-41de4ea4ec37" "d0e31ec2-626a-455e-9e43-44bd98b4785f" "df9b7ed0-e69d-46ed-9c4d-e271e7687399" "8445e094-72ec-48b1-b3d3-b955fe3c70e2" "53131378-35af-411f-bf95-a43170138f13" "74e4a051-7d72-4fd0-abb8-1a6b85fdfadd" "3835e5df-cd95-48b5-a530-71f48cf8d775" "62cef68d-25ec-4b61-b5ec-d7c1aafc87d6" "6139a129-fb1c-4b1a-9446-0c2b06622b76" "c66cbbb2-4136-4e60-ab2f-1843f33b70dc" "32039908-c2d9-4f88-ac42-0342063702ce" "ec176281-84b5-4f2c-bc83-4378473b0b75" "54939d94-8613-49e1-9198-1104ffcd1686")
 
      Nice! We also know how to uniqueify.
+
+   Ok, grouping is going to be a thing here. How do we [[https://docs.racket-lang.org/reference/pairs.html?q=group#%28def._%28%28lib._racket%2Flist..rkt%29._group-by%29%29][group-by]]?
+   #+begin_src racket
+     (group-by first (cartesian-product '(4 5 6) '(a b c d)))
+   #+end_src
+
+   #+RESULTS:
+   : '(((4 a) (4 b) (4 c) (4 d)) ((5 a) (5 b) (5 c) (5 d)) ((6 a) (6 b) (6 c) (6 d)))
+
+   cool, and that returns a straightforward list of lists
+
+   What about getting days of the week? Nothing in the built in ~racket/date~ [[https://docs.racket-lang.org/gregor/index.html][the gregor package]] looks promising
+
+*** Packages
+    It occurs to me that I don't know the first thing about racket packages. Let's [[https://docs.racket-lang.org/guide/module-basics.html#%28tech._collection%29][start by learning about modules]].
+
+    A collections is a hierarchical grouping of installed library modules. Basically =this-part/of-the-require-statement=. They tend to correspond to filesystem directories (though sounds like that's not 100%). Here is where the racket collection resides for example
+
+    #+begin_src racket :results output
+      (require setup/dirs)
+
+      (build-path (find-collects-dir) "racket")
+    #+end_src
+
+    #+RESULTS:
+    : #<path:/usr/local/Cellar/minimal-racket/7.7/share/racket/collects/racket>
+
+    #+begin_src shell :results drawer
+      ls /usr/local/Cellar/minimal-racket/7.7/share/racket/collects/racket
+    #+end_src
+
+    #+RESULTS:
+    :results:
+    HISTORY.txt
+    MzScheme_200.txt
+    MzScheme_300.txt
+    MzScheme_4.txt
+    Racket_5.txt
+    async-channel.rkt
+    base
+    base.rkt
+    block.rkt
+    bool.rkt
+    bytes.rkt
+    class.rkt
+    cmdline.rkt
+    compiled
+    contract
+    contract.rkt
+    control.rkt
+    date.rkt
+    dict.rkt
+    engine.rkt
+    enter.rkt
+    exn.rkt
+    extflonum.rkt
+    fasl.rkt
+    file.rkt
+    fixnum.rkt
+    flonum.rkt
+    format.rkt
+    function.rkt
+    future.rkt
+    generator.rkt
+    generic.rkt
+    gui
+    hash.rkt
+    help.rkt
+    include.rkt
+    info.rkt
+    init.rkt
+    interactive.rkt
+    kernel
+    kernel.rkt
+    keyword-transform.rkt
+    keyword.rkt
+    lang
+    language-info.rkt
+    lazy-require.rkt
+    linklet.rkt
+    list.rkt
+    load
+    load.rkt
+    local.rkt
+    logging.rkt
+    main.rkt
+    match
+    match.rkt
+    math.rkt
+    os.rkt
+    path.rkt
+    performance-hint.rkt
+    place
+    place.rkt
+    port.rkt
+    prefab.rkt
+    pretty.rkt
+    private
+    promise.rkt
+    provide-syntax.rkt
+    provide-transform.rkt
+    provide.rkt
+    racket.1
+    random.rkt
+    repl.rkt
+    require-syntax.rkt
+    require-transform.rkt
+    require.rkt
+    rerequire.rkt
+    runtime-config.rkt
+    runtime-path.rkt
+    sequence.rkt
+    serialize.rkt
+    set.rkt
+    shared.rkt
+    signature
+    splicing.rkt
+    stream.rkt
+    string.rkt
+    struct-info.rkt
+    struct.rkt
+    stxparam-exptime.rkt
+    stxparam.rkt
+    surrogate.rkt
+    symbol.rkt
+    syntax.rkt
+    system.rkt
+    tcp.rkt
+    trace.rkt
+    trait.rkt
+    udp.rkt
+    undefined.rkt
+    unit
+    unit-exptime.rkt
+    unit.rkt
+    unsafe
+    vector.rkt
+    :end:
+
+    [[https://docs.racket-lang.org/pkg/index.html][Package management]]
+
+
+    Ok, in eshell (because it took a while I ran ~racko pkg install --auto gregor~)
+    #+begin_src racket :require gregor
+      (displayln (~t (today) "EEEE"))
+    #+end_src
+
+    #+RESULTS:
+    : Saturday
+
+    Huh, and look right [[https://docs.racket-lang.org/gregor/time-format.html][in the docs]] there's an example of how to control cultur
+    #+begin_src racket :require gregor
+      (parameterize ([current-locale "tr"])
+        (~t (today) "EEEE"))
+    #+end_src
+
+    #+RESULTS:
+    : "Cumartesi"
+
+
+    I think that might be all I need to solve this thing..
+
 ** Implementation
+
+   First we read in the file of course
+
+   #+name: get-all-orders
+   #+begin_src racket
+     (define get-all-orders () (call-with-input-file "mock_orders.json" read-json))
+   #+end_src
+
+   So as I see it, to fulfill [[Challenge 3]] I need to be able to generate the full list of week day names automatically. Additionally this would be needed to fulfill the requirement of [[Challenge 1]] that days absent from the dataset (Saturdays) be listed.
+
+   The plan here will be to just start on a known day, and iterate through the following 7 days formatting the day name out of each
+
+   #+name: days-of-the-week
+   #+begin_src racket :require gregor :eval no
+     (define first-day-of-a-week (date 2020 5 31))
+     (define (nth-day-of-the-week n) (+days first-day-of-a-week n))
+     (define (get-day d) (~t d "EEEE"))
+     (define (days-of-the-week)
+       (map (compose get-day nth-day-of-the-week) (range 0 7)))
+   #+end_src
+
+   #+begin_src racket :noweb strip-export :require gregor
+     <<days-of-the-week>>
+     (days-of-the-week)
+   #+end_src
+
+   #+RESULTS:
+   : '("Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday")
+
+   Sweet deal
