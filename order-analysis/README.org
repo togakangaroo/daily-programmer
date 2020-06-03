@@ -5,7 +5,7 @@
 * Order Analysis
 
 ** The Problem
-   Read in the big list of mock orders [[file:mock_orders.json][from this json file]]. An order is a record of a customer who placed the order for products and quantities on a given date. An order has many order lines each of which contains a quantity that was ordered and the price per item (so the total price of that order line is \(price \times quantity\).
+   Read in the big list of mock orders [[file:mock_orders.json][from this json file]]. An order is a record of a customer who placed the order for products and quantities on a given date. An order has many order lines each of which contains a quantity that was ordered and the price per item (so the total price of that order line is \(price \times quantity\).)
 
    #+begin_src json :eval no
      {
@@ -13,23 +13,23 @@
          "customerId": "a489bdd9-3f4e-4181-9a94-a123b9b5ea08",
          "isFulfilled": true,
          "placedOn": "2020-05-10",
-         "orderLines": [
-             {
-                 "id": "7968e6ca-9f24-419e-9d5c-8088e7354e33",
-                 "productName": "Bagelers",
-                 "quantity": 10,
-                 "price": 1.98,
-                 "productId": "395b4411-a748-49a7-8bc4-2a2debcfa75e"
-             },
-             {
-                 "id": "0747ad3d-b814-4200-b47e-732e87469a0a",
-                 "productName": "Chinese Lemon Pork",
-                 "quantity": 9,
-                 "price": 2.89,
-                 "productId": "03c6b0a8-bc00-496e-b91d-11f5e9152360"
-             }
-         ]
-     }
+         "orderLines": []
+         {
+             "id": "7968e6ca-9f24-419e-9d5c-8088e7354e33",
+             "productName": "Bagelers",
+             "quantity": 10,
+             "price": 1.98,
+             "productId": "395b4411-a748-49a7-8bc4-2a2debcfa75e"}
+         ,
+         {
+             "id": "0747ad3d-b814-4200-b47e-732e87469a0a",
+             "productName": "Chinese Lemon Pork",
+             "quantity": 9,
+             "price": 2.89,
+             "productId": "03c6b0a8-bc00-496e-b91d-11f5e9152360"}}
+
+
+
    #+end_src
 
    If the below seems too easy, then do it in your second strongest language or one that you are learning.
@@ -68,18 +68,18 @@
    #+end_src
 
    And now to test that I did this correctly
-   #+begin_src python :results drawer
+   #+begin_src python :results drawer :exports both
      import json
      from datetime import datetime
 
      with open("./mock_orders.json") as f:
          all_orders = json.load(f)
 
-     return {
+     return {}
          "total": len(all_orders),
          "placed on Saturday": len([o for o in all_orders if datetime.fromisoformat(o["placedOn"]).strftime("%A") == "Saturday"]),
          "unique customers": len(set([o["customerId"] for o in all_orders])),
-     }
+
    #+end_src
 
    #+RESULTS:
@@ -94,7 +94,7 @@
 
    First, can I even run racket in this thing? I remember I had it running once and then I kinda broke things.
 
-   #+begin_src racket
+   #+begin_src racket :exports both
      (* 3 4 6)
    #+end_src
 
@@ -103,7 +103,7 @@
 
    Ok, cool, I fixed it.
 
-   #+begin_src racket :require json :results output
+   #+begin_src racket :require json :results output :exports both
      (define foo (list-ref (call-with-input-file "mock_orders.json" read-json)
                            1))
      (println foo)
@@ -121,7 +121,7 @@
 
      What about how to map over a collection?
 
-     #+begin_src racket :require json
+     #+begin_src racket :require json :exports both
        (define orders (call-with-input-file "mock_orders.json" read-json))
        (define customer-ids (map (lambda (o) (hash-ref o 'customerId) ) orders))
        (remove-duplicates customer-ids)
@@ -133,7 +133,7 @@
      Nice! We also know how to uniqueify.
 
    Ok, grouping is going to be a thing here. How do we [[https://docs.racket-lang.org/reference/pairs.html?q=group#%28def._%28%28lib._racket%2Flist..rkt%29._group-by%29%29][group-by]]?
-   #+begin_src racket
+   #+begin_src racket :exports both
      (group-by first (cartesian-product '(4 5 6) '(a b c d)))
    #+end_src
 
@@ -149,7 +149,7 @@
 
     A collections is a hierarchical grouping of installed library modules. Basically =this-part/of-the-require-statement=. They tend to correspond to filesystem directories (though sounds like that's not 100%). Here is where the racket collection resides for example
 
-    #+begin_src racket :results output
+    #+begin_src racket :results output :exports both
       (require setup/dirs)
 
       (build-path (find-collects-dir) "racket")
@@ -158,7 +158,7 @@
     #+RESULTS:
     : #<path:/usr/local/Cellar/minimal-racket/7.7/share/racket/collects/racket>
 
-    #+begin_src shell :results drawer
+    #+begin_src shell :results drawer :exports code
       ls /usr/local/Cellar/minimal-racket/7.7/share/racket/collects/racket
     #+end_src
 
@@ -274,7 +274,7 @@
 
 
     Ok, in eshell (because it took a while I ran ~racko pkg install --auto gregor~)
-    #+begin_src racket :require gregor
+    #+begin_src racket :require gregor :exports both
       (displayln (~t (today) "EEEE"))
     #+end_src
 
@@ -282,7 +282,7 @@
     : Saturday
 
     Huh, and look right [[https://docs.racket-lang.org/gregor/time-format.html][in the docs]] there's an example of how to control cultur
-    #+begin_src racket :require gregor
+    #+begin_src racket :require gregor :exports both
       (parameterize ([current-locale "tr"])
         (~t (today) "EEEE"))
     #+end_src
@@ -290,8 +290,56 @@
     #+RESULTS:
     : "Cumartesi"
 
+    One thing that could be helpful here is to use the [[https://docs.racket-lang.org/threading/index.html][threading]] macro
 
-    I think that might be all I need to solve this thing..
+    #+begin_src racket :require threading :exports both
+      (~> 1 add1 sqrt)
+    #+end_src
+
+    #+RESULTS:
+    : 1.4142135623730951
+
+    Hold on, in the docs it gives the following more complicated example where we can achieve this
+
+    #+begin_src racket :require threading :exports both
+      (- (bytes-ref
+          (string->bytes/utf-8 (symbol->string 'abc))
+          1)
+         2)
+    #+end_src
+
+    #+RESULTS:
+    : 96
+
+    by doing this instead
+
+    #+begin_src racket :require threading :exports both
+      (~> 'abc
+          symbol->string
+          string->bytes/utf-8
+          (bytes-ref 1)
+          (- 2))
+
+    #+end_src
+
+    #+RESULTS:
+    : 96
+
+    Note that in the case of both ~bytes-ref~ and ~-~, not only are functions curried automatically but they're curried right to left where the threaded parameter will be in the first argument position! If racket does that by default, it seems likely that this is what is usually useful in racket
+
+    Ok, what about pattern matching?
+    #+begin_src racket :require racket/match :exports both
+      (define (try-match a)
+        (match a
+          [0 'zero]
+          [a (cons 'val a)]))
+      (list (try-match 0) (try-match 123))
+    #+end_src
+
+    #+RESULTS:
+    : '(zero (val . 123))
+
+    Ok nice! that's the simple case but it works well
 
 ** Implementation
 
@@ -309,18 +357,85 @@
    #+name: days-of-the-week
    #+begin_src racket :require gregor :eval no
      (define first-day-of-a-week (date 2020 5 31))
-     (define (nth-day-of-the-week n) (+days first-day-of-a-week n))
-     (define (get-day d) (~t d "EEEE"))
-     (define (days-of-the-week)
-       (map (compose get-day nth-day-of-the-week) (range 0 7)))
+     (define (nth-date-of-the-week n) (+days first-day-of-a-week n))
+     (define (date-day-name d) (~t d "EEEE"))
+     (define days-of-the-week (map (compose date-day-name nth-date-of-the-week) (range 0 7)))
    #+end_src
 
    #+begin_src racket :noweb strip-export :require gregor
      <<days-of-the-week>>
-     (days-of-the-week)
+     days-of-the-week
    #+end_src
 
    #+RESULTS:
    : '("Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday")
 
    Sweet deal
+
+   Now lets create a hash with all orders grouped by day
+
+   #+name: group-by-day
+   #+begin_src racket :eval no
+     (define order-day-name (lambda~>
+                             (hash-ref 'placedOn)
+                             iso8601->date
+                             date-day-name))
+     (define (first-order-day-name orders) (order-day-name (first orders)))
+     (define (cons-day-name-orders orders) (cons (first-order-day-name orders) orders))
+     (define group-by-day (lambda~>>
+                           (group-by (curryr hash-ref 'placedOn))
+                           (map cons-day-name-orders)
+                           make-immutable-hash))
+   #+end_src
+
+   #+name: group-orders-by-day
+   #+begin_src racket :noweb strip-export :results output :exports both :eval no
+     (require gregor)
+     (require json)
+     (require threading)
+     (require racket/hash)
+     (require racket/match)
+
+     <<group-by-day>>
+     <<days-of-the-week>>
+
+     (define order-day-of-the-week-name (lambda~> (hash-ref 'placedOn)
+                                                  iso8601->date
+                                                  date-day-name))
+     (define cons-with-empty-list (curryr cons (list)))
+     (define (order-line-price ol)
+       (let* ([price (hash-ref ol 'price)]
+              [quantity (hash-ref ol 'quantity)])
+         (* price quantity)))
+     (define order-total (lambda~>> (hash-ref _ 'orderLines)
+                                    (map order-line-price)
+                                    (apply +)))
+     (define (orders-average-total orders)
+       (let* ([orders-total (~>> orders
+                                 (map order-total)
+                                 (apply +)
+                                 (* 1.0))])
+         (match (length orders)
+           [0 0]
+           [n (/ orders-total n)])))
+     (define (empty-list-per-day-of-week)
+       (~>> days-of-the-week
+            (map cons-with-empty-list)
+            make-immutable-hash))
+     (define group-orders-by-day (lambda~> group-by-day
+                                           (hash-union (empty-list-per-day-of-week) #:combine append))) ;;fill in empty days
+   #+end_src
+
+   #+begin_src racket :noweb strip-export :results output :exports both
+     <<group-orders-by-day>>
+     (let* ([orders (call-with-input-file "mock_orders.json" read-json)]
+            [orders-by-day (group-orders-by-day orders)])
+       (for/hash ([k (hash-keys orders-by-day)])
+         (values k (orders-average-total (hash-ref orders-by-day k)))))
+   #+end_src
+
+   #+RESULTS:
+   : '#hash(("Friday" . 53.315) ("Monday" . 68.96000000000001) ("Saturday" . 0) ("Sunday" . 102.53) ("Thursday" . 14.219999999999999) ("Tuesday" . 58.42) ("Wednesday" . 41.459999999999994))
+
+
+** Challenge 3
