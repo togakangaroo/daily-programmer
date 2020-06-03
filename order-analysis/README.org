@@ -376,14 +376,16 @@
 
    #+name: group-by-day
    #+begin_src racket :eval no
+     (define order-grouping-fn (make-parameter (lambda~> (hash-ref 'placedOn))))
+
      (define order-day-name (lambda~>
-                             (hash-ref 'placedOn)
+                             ((order-grouping-fn))
                              iso8601->date
                              date-day-name))
      (define (first-order-day-name orders) (order-day-name (first orders)))
      (define (cons-day-name-orders orders) (cons (first-order-day-name orders) orders))
      (define group-by-day (lambda~>>
-                           (group-by (curryr hash-ref 'placedOn))
+                           (group-by (order-grouping-fn))
                            (map cons-day-name-orders)
                            make-immutable-hash))
    #+end_src
@@ -456,3 +458,18 @@
    : '#hash(("Cuma" . 53.315) ("Cumartesi" . 0) ("Pazar" . 102.53) ("Pazartesi" . 68.96000000000001) ("Perşembe" . 14.219999999999999) ("Salı" . 58.42) ("Çarşamba" . 41.459999999999994))
 
    Nice!
+
+** Challenge 2
+   
+*** Customer with most items
+
+   #+begin_src racket :noweb strip-export :results output :exports both
+     <<group-orders-by-day>>
+     (let* ([orders (load-orders)]
+            [orders-by-day (group-orders-by-day orders)])
+       (for/hash ([k (hash-keys orders-by-day)])
+         (values k (orders-average-total (hash-ref orders-by-day k)))))
+   #+end_src
+
+   #+RESULTS:
+   : '#hash(("Friday" . 53.315) ("Monday" . 68.96000000000001) ("Saturday" . 0) ("Sunday" . 102.53) ("Thursday" . 14.219999999999999) ("Tuesday" . 58.42) ("Wednesday" . 41.459999999999994))
