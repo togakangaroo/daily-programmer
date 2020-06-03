@@ -359,12 +359,12 @@
      (define first-day-of-a-week (date 2020 5 31))
      (define (nth-date-of-the-week n) (+days first-day-of-a-week n))
      (define (date-day-name d) (~t d "EEEE"))
-     (define days-of-the-week (map (compose date-day-name nth-date-of-the-week) (range 0 7)))
+     (define (days-of-the-week) (map (compose date-day-name nth-date-of-the-week) (range 0 7)))
    #+end_src
 
    #+begin_src racket :noweb strip-export :require gregor
      <<days-of-the-week>>
-     days-of-the-week
+     (days-of-the-week)
    #+end_src
 
    #+RESULTS:
@@ -399,6 +399,7 @@
      <<group-by-day>>
      <<days-of-the-week>>
 
+     (define (load-orders) (call-with-input-file "mock_orders.json" read-json))
      (define order-day-of-the-week-name (lambda~> (hash-ref 'placedOn)
                                                   iso8601->date
                                                   date-day-name))
@@ -419,7 +420,7 @@
            [0 0]
            [n (/ orders-total n)])))
      (define (empty-list-per-day-of-week)
-       (~>> days-of-the-week
+       (~>> (days-of-the-week)
             (map cons-with-empty-list)
             make-immutable-hash))
      (define group-orders-by-day (lambda~> group-by-day
@@ -428,7 +429,7 @@
 
    #+begin_src racket :noweb strip-export :results output :exports both
      <<group-orders-by-day>>
-     (let* ([orders (call-with-input-file "mock_orders.json" read-json)]
+     (let* ([orders (load-orders)]
             [orders-by-day (group-orders-by-day orders)])
        (for/hash ([k (hash-keys orders-by-day)])
          (values k (orders-average-total (hash-ref orders-by-day k)))))
@@ -439,3 +440,19 @@
 
 
 ** Challenge 3
+
+   Just skipping ahead here but challenge 3 becomes really simple now with dynamic parameters. Let's see it in turkish
+
+   #+begin_src racket :noweb strip-export :results output :exports both
+     <<group-orders-by-day>>
+     (parameterize ([current-locale "tr"])
+       (let* ([orders (load-orders)]
+              [orders-by-day (group-orders-by-day orders)])
+         (for/hash ([k (hash-keys orders-by-day)])
+           (values k (orders-average-total (hash-ref orders-by-day k))))))
+   #+end_src
+
+   #+RESULTS:
+   : '#hash(("Cuma" . 53.315) ("Cumartesi" . 0) ("Pazar" . 102.53) ("Pazartesi" . 68.96000000000001) ("Perşembe" . 14.219999999999999) ("Salı" . 58.42) ("Çarşamba" . 41.459999999999994))
+
+   Nice!
