@@ -1,0 +1,36 @@
+* Problem
+
+  *Get Directories*
+
+  You are given a list of strings which represent absolute paths. Identify all unique directories.
+
+  Similar to linux notation, a name which has a slash to the right of it is a directory:
+
+  - =/foo/bar/= both foo and bar are directories
+  - =/foo/bar= here foo is a directory but bar is not
+
+  You can assume all paths will be absolute and therefore start with a =/=
+
+  *Example:*
+
+  Input:
+  #+begin_src js :eval no
+    "/a/b/c/"
+    "/a/d"
+    "/b/c/"
+    "/a/b/d"
+    "/a"
+    "/d"
+    "/a/b/c/e"
+  #+end_src
+
+  Output (in no particular order):
+  
+  #+begin_src js :eval no
+    "/"
+    "/a"
+    "/a/b"
+    "/a/b/c/"
+    "/b"
+    "/b/c/"
+  #+end_src
