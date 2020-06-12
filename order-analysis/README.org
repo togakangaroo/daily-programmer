@@ -352,124 +352,219 @@
 
    So as I see it, to fulfill [[Challenge 3]] I need to be able to generate the full list of week day names automatically. Additionally this would be needed to fulfill the requirement of [[Challenge 1]] that days absent from the dataset (Saturdays) be listed.
 
-   The plan here will be to just start on a known day, and iterate through the following 7 days formatting the day name out of each
 
-   #+name: days-of-the-week
-   #+begin_src racket :require gregor :eval no
-     (define first-day-of-a-week (date 2020 5 31))
-     (define (nth-date-of-the-week n) (+days first-day-of-a-week n))
-     (define (date-day-name d) (~t d "EEEE"))
-     (define (days-of-the-week) (map (compose date-day-name nth-date-of-the-week) (range 0 7)))
-   #+end_src
+***  Challenge 1
+    The plan here will be to just start on a known day, and iterate through the following 7 days formatting the day name out of each
 
-   #+begin_src racket :noweb strip-export :require gregor
-     <<days-of-the-week>>
-     (days-of-the-week)
-   #+end_src
+    #+name: days-of-the-week
+    #+begin_src racket :require gregor :eval no
+      (define first-day-of-a-week (date 2020 5 31))
+      (define (nth-date-of-the-week n) (+days first-day-of-a-week n))
+      (define (date-day-name d) (~t d "EEEE"))
+      (define (days-of-the-week) (map (compose date-day-name nth-date-of-the-week) (range 0 7)))
+    #+end_src
 
-   #+RESULTS:
-   : '("Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday")
+    #+begin_src racket :noweb strip-export :require gregor
+      <<days-of-the-week>>
+      (days-of-the-week)
+    #+end_src
 
-   Sweet deal
+    #+RESULTS:
+    : '("Sunday" "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday")
 
-   Now lets create a hash with all orders grouped by day
+    Sweet deal
 
-   #+name: group-by-day
-   #+begin_src racket :eval no
-     (define order-grouping-fn (make-parameter (lambda~> (hash-ref 'placedOn))))
+    Now lets create a hash with all orders grouped by day
 
-     (define order-day-name (lambda~>
-                             ((order-grouping-fn))
-                             iso8601->date
-                             date-day-name))
-     (define (first-order-day-name orders) (order-day-name (first orders)))
-     (define (cons-day-name-orders orders) (cons (first-order-day-name orders) orders))
-     (define group-by-day (lambda~>>
-                           (group-by (order-grouping-fn))
-                           (map cons-day-name-orders)
-                           make-immutable-hash))
-   #+end_src
+    #+name: group-by-day
+    #+begin_src racket :eval no
+      (define order-placed-on (lambda~> (hash-ref 'placedOn)))
 
-   #+name: group-orders-by-day
-   #+begin_src racket :noweb strip-export :results output :exports both :eval no
-     (require gregor)
-     (require json)
-     (require threading)
-     (require racket/hash)
-     (require racket/match)
+      (define order-day-name (lambda~>
+                              (order-placed-on)
+                              iso8601->date
+                              date-day-name))
+      (define (first-order-day-name orders) (order-day-name (first orders)))
+      (define (cons-day-name-orders orders) (cons (first-order-day-name orders) orders))
+      (define group-by-day (lambda~>>
+                            (group-by order-placed-on)
+                            (map cons-day-name-orders)
+                            make-immutable-hash))
+    #+end_src
 
-     <<group-by-day>>
-     <<days-of-the-week>>
+    #+name: group-orders-by-day
+    #+begin_src racket :noweb strip-export :results output :exports both :eval no
+      (require gregor)
+      (require json)
+      (require threading)
+      (require racket/hash)
+      (require racket/match)
 
-     (define (load-orders) (call-with-input-file "mock_orders.json" read-json))
-     (define order-day-of-the-week-name (lambda~> (hash-ref 'placedOn)
-                                                  iso8601->date
-                                                  date-day-name))
-     (define cons-with-empty-list (curryr cons (list)))
-     (define (order-line-price ol)
-       (let* ([price (hash-ref ol 'price)]
-              [quantity (hash-ref ol 'quantity)])
-         (* price quantity)))
-     (define order-total (lambda~>> (hash-ref _ 'orderLines)
-                                    (map order-line-price)
-                                    (apply +)))
-     (define (orders-average-total orders)
-       (let* ([orders-total (~>> orders
-                                 (map order-total)
-                                 (apply +)
-                                 (* 1.0))])
-         (match (length orders)
-           [0 0]
-           [n (/ orders-total n)])))
-     (define (empty-list-per-day-of-week)
-       (~>> (days-of-the-week)
-            (map cons-with-empty-list)
-            make-immutable-hash))
-     (define group-orders-by-day (lambda~> group-by-day
-                                           (hash-union (empty-list-per-day-of-week) #:combine append))) ;;fill in empty days
-   #+end_src
+      <<group-by-day>>
+      <<days-of-the-week>>
 
-   #+begin_src racket :noweb strip-export :results output :exports both
-     <<group-orders-by-day>>
-     (let* ([orders (load-orders)]
-            [orders-by-day (group-orders-by-day orders)])
-       (for/hash ([k (hash-keys orders-by-day)])
-         (values k (orders-average-total (hash-ref orders-by-day k)))))
-   #+end_src
+      (define (load-orders) (call-with-input-file "mock_orders.json" read-json))
+      (define order-day-of-the-week-name (lambda~> (hash-ref 'placedOn)
+                                                   iso8601->date
+                                                   date-day-name))
+      (define cons-with-empty-list (curryr cons (list)))
+      (define (order-line-price ol)
+        (let* ([price (hash-ref ol 'price)]
+               [quantity (hash-ref ol 'quantity)])
+          (* price quantity)))
+      (define order-total (lambda~>> (hash-ref _ 'orderLines)
+                                     (map order-line-price)
+                                     (apply +)))
+      (define (orders-average-total orders)
+        (let* ([orders-total (~>> orders
+                                  (map order-total)
+                                  (apply +)
+                                  (* 1.0))])
+          (match (length orders)
+            [0 0]
+            [n (/ orders-total n)])))
+      (define (empty-list-per-day-of-week)
+        (~>> (days-of-the-week)
+             (map cons-with-empty-list)
+             make-immutable-hash))
+      (define group-orders-by-day (lambda~> group-by-day
+                                            (hash-union (empty-list-per-day-of-week) #:combine append))) ;;fill in empty days
+    #+end_src
 
-   #+RESULTS:
-   : '#hash(("Friday" . 53.315) ("Monday" . 68.96000000000001) ("Saturday" . 0) ("Sunday" . 102.53) ("Thursday" . 14.219999999999999) ("Tuesday" . 58.42) ("Wednesday" . 41.459999999999994))
+    #+begin_src racket :noweb strip-export :results output :exports both
+      <<group-orders-by-day>>
+      (let* ([orders (load-orders)]
+             [orders-by-day (group-orders-by-day orders)])
+        (for/hash ([k (hash-keys orders-by-day)])
+          (values k (orders-average-total (hash-ref orders-by-day k)))))
+    #+end_src
+
+    #+RESULTS:
+    : '#hash(("Friday" . 53.315) ("Monday" . 68.96000000000001) ("Saturday" . 0) ("Sunday" . 102.53) ("Thursday" . 14.219999999999999) ("Tuesday" . 58.42) ("Wednesday" . 41.459999999999994))
 
 
-** Challenge 3
+*** Challenge 3
 
-   Just skipping ahead here but challenge 3 becomes really simple now with dynamic parameters. Let's see it in turkish
+    Just skipping ahead here but challenge 3 becomes really simple now with dynamic parameters. Let's see it in turkish
 
-   #+begin_src racket :noweb strip-export :results output :exports both
-     <<group-orders-by-day>>
-     (parameterize ([current-locale "tr"])
-       (let* ([orders (load-orders)]
-              [orders-by-day (group-orders-by-day orders)])
-         (for/hash ([k (hash-keys orders-by-day)])
-           (values k (orders-average-total (hash-ref orders-by-day k))))))
-   #+end_src
+    #+begin_src racket :noweb strip-export :results output :exports both
+      <<group-orders-by-day>>
+      (parameterize ([current-locale "tr"])
+        (let* ([orders (load-orders)]
+               [orders-by-day (group-orders-by-day orders)])
+          (for/hash ([k (hash-keys orders-by-day)])
+            (values k (orders-average-total (hash-ref orders-by-day k))))))
+    #+end_src
 
-   #+RESULTS:
-   : '#hash(("Cuma" . 53.315) ("Cumartesi" . 0) ("Pazar" . 102.53) ("Pazartesi" . 68.96000000000001) ("Perşembe" . 14.219999999999999) ("Salı" . 58.42) ("Çarşamba" . 41.459999999999994))
+    #+RESULTS:
+    : '#hash(("Cuma" . 53.315) ("Cumartesi" . 0) ("Pazar" . 102.53) ("Pazartesi" . 68.96000000000001) ("Perşembe" . 14.219999999999999) ("Salı" . 58.42) ("Çarşamba" . 41.459999999999994))
 
-   Nice!
+    Nice!
 
-** Challenge 2
-   
-*** Customer with most items
+*** Challenge 2
 
-   #+begin_src racket :noweb strip-export :results output :exports both
-     <<group-orders-by-day>>
-     (let* ([orders (load-orders)]
-            [orders-by-day (group-orders-by-day orders)])
-       (for/hash ([k (hash-keys orders-by-day)])
-         (values k (orders-average-total (hash-ref orders-by-day k)))))
-   #+end_src
+**** Customer with most items
 
-   #+RESULTS:
-   : '#hash(("Friday" . 53.315) ("Monday" . 68.96000000000001) ("Saturday" . 0) ("Sunday" . 102.53) ("Thursday" . 14.219999999999999) ("Tuesday" . 58.42) ("Wednesday" . 41.459999999999994))
+     So to find the best customer we
+     - group orders by customer
+     - group results by largest size
+     - sort
+     - take last: this will be the customers and their orders that ordered the most items (length, (list (customer, (list order))))
+     - unwrap and sort by order total
+     - take last: (customer, (list order))
+     - get customer
+
+     #+begin_src racket :noweb strip-export :results output :exports both
+       <<group-orders-by-day>>
+       (define orders-total (lambda~>>
+                             (map order-total)
+                             (apply +)))
+       (~>> (load-orders)
+            (group-by (lambda~> (hash-ref 'customerId)))
+            (group-by length)
+            (sort _ > #:key length)
+            (first) ;;list (customerId grouped) of list of orders
+            (sort _ > #:key orders-total)
+            (first) ;; list of orders for a given customer
+            (map (lambda~> (hash-ref 'customerId)))
+            (first))
+     #+end_src
+
+     #+RESULTS:
+     : "260bbce1-298a-49cf-9a2e-53c6680dfc47"
+
+**** 10 day period with the most orders
+
+     So this has the need to chunk orders by their `placedOn` date within 10 of each other. Lets create a generic funciton thats easier to think about we're going to take a sequence of ordered numbers and lets group them so that they are within 3 of each other
+
+     #+name: chunk-by-input
+     | 1 | 3 | 6 | 6 | 10 | 12 | 12 | 14 |
+
+     So we process these one by one, accumulating them into a list which
+     - always contains the item being iterated on
+     - guarantees that all items are within - in this case - 3 of each other. Any items preventing counter to this guarantee from being kept are not included
+
+     So in this case the output would be
+     - 1
+     - 1 3
+     - 3 6
+     - 3 6 6
+     - 10
+     - 10 12
+     - 10 12 12
+     - 12 12 14
+
+     #+begin_src racket :noweb strip-export :results output :exports both :var data=chunk-by-input
+       (require rebellion/streaming/transducer)
+       (require rebellion/collection/list)
+
+       (define (ducky x acc)
+         (cons x acc))
+       ;;(filter (curryr < (- x 3)) (cons x acc)))
+       (transduce (first data)
+                  (folding (lambda (a b) (cons b a)) '())
+                  (mapping first)
+                  #:into into-list)
+     #+end_src
+
+     #+RESULTS:
+     : '(1 3 6 6 10 12 12 14)
+       
+     A second step will filter this collection for only lists that are not proper supersets of the previous item
+
+     #+begin_src racket :noweb strip-export :results output :exports both :var data=chunk-by-input
+       (require racket/generator)
+       (require racket/match)
+
+       (define (fold-by transform-queue collection)
+         (in-generator (let ([queue '()])
+                         (for ([item collection])
+                           (let-values ([(to-yield new-queue) (transform-queue item queue)])
+                             (set! queue new-queue)
+                             (yield (cons to-yield new-queue)))))))
+       (define (ducky item collection)
+         (partition (curryr < (- item 3))
+                    collection))
+
+       (sequence->list (fold-by ducky (first data)))
+     #+end_src
+
+     #+RESULTS:
+     : '((()) (()) (()) (()) (()) (()) (()) (()))
+
+     #+begin_src racket :noweb strip-export :results output :exports both
+       <<group-orders-by-day>>
+
+       (~>> (load-orders)
+            (sort _ string<? #:key (lambda~> (hash-ref 'placedOn))))
+     #+end_src
+
+
+     #+begin_src racket :noweb strip-export :results output :exports both :var data=chunk-by-input
+       (partition (curryr < (- 12 3))
+                  (first data))
+     #+end_src
+
+     #+RESULTS:
+     : '(1 3 6 6)
+     : '(10 12 12 14)
