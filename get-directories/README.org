@@ -14,23 +14,140 @@
   *Example:*
 
   Input:
-  #+begin_src js :eval no
-    "/a/b/c/"
-    "/a/d"
-    "/b/c/"
-    "/a/b/d"
-    "/a"
-    "/d"
-    "/a/b/c/e"
-  #+end_src
+  
+    #+name: sample-input
+    - /a/b/c/
+    - /a/d
+    - /b/c/
+    - /a/b/d
+    - /a
+    - /d
+    - /a/b/c/e
 
   Output (in no particular order):
   
-  #+begin_src js :eval no
-    "/"
-    "/a"
-    "/a/b"
-    "/a/b/c/"
-    "/b"
-    "/b/c/"
-  #+end_src
+    #+name: sample-output
+    - /
+    - /a
+    - /a/b
+    - /a/b/c/
+    - /b
+    - /b/c/
+
+ 
+* Solution
+  
+So the idea is going to be to iterate through each string path component and build up a tree then just gather up all nodes in the tree.
+
+First thing is first we want to parse the string into directories. I believe we can do that with regex. Bonus, I believe we can ignore all non-directories in the same step by grabbing only strings that have a slash to the right
+
+#+name: get_directory_fragments
+#+begin_src python :eval no
+  import re
+
+  def get_directory_fragments(path):
+      return re.findall(r"([^/]*/)", path)
+#+end_src
+
+So we're going to grab all strings of [[https://docs.python.org/3/library/re.html#re.finditer][non-overlapping]] characters that include a slash to the right
+
+#+begin_src python :results drawer :noweb strip-export :exports both
+  <<get_directory_fragments>>
+  return get_directory_fragments("/a/bc/de/f")
+#+end_src
+
+#+RESULTS:
+:results:
+['/', 'a/', 'bc/', 'de/']
+:end:
+
+Perfect, we get the directories and not any files
+
+Ok, so now we can just build up the tree. Just to keep things nice lets create a structure for out tree
+
+
+#+name: DirectoryNode
+#+begin_src python :eval no
+  from collections import namedtuple
+
+  DirectoryNode = namedtuple('DirectoryNode', ['name', 'children'])
+#+end_src
+
+And now lets use the above to build out our structure. We are going to pass in an array of nodes which represent the "level" we're at currently (the children of the parent node/all directories in the current one). If the next directory in the path fragments exists in this list then use that directory's children to recurse, otherwise create a new node, add it to the parent's childeren, and recurse on its children (which will be empty so the process should in theory repeat)
+
+
+#+name: build_up_tree_paths
+#+begin_src python :eval no :noweb strip-export
+  <<DirectoryNode>>
+  def build_up_tree_paths(parent_nodes, path_fragments):
+      if not path_fragments:
+          return
+      [directory, *other_directories] = path_fragments
+
+      try:
+          directory_node = next((n for n in parent_nodes if n.name == directory))
+      except StopIteration:
+          directory_node = DirectoryNode(directory, [])
+          parent_nodes.append(directory_node)
+
+      build_up_tree_paths(directory_node.children, other_directories)
+#+end_src
+
+#+begin_src python :noweb strip-export :exports both
+  <<build_up_tree_paths>>
+  rootNodes = []
+  build_up_tree_paths(rootNodes, ['/', '/a', '/b'])
+  build_up_tree_paths(rootNodes, ['/', '/c'])
+  return rootNodes
+#+end_src
+
+#+RESULTS:
+| DirectoryNode | (name= / children= (DirectoryNode (name= /a children= (DirectoryNode (name= /b children= nil))) DirectoryNode (name= /c children= nil))) |
+
+Now we just need some way to walk the three and generate the final list
+
+#+name: collect_names
+#+begin_src python :eval no
+  def collect_names(root):
+      if root:
+          yield root.name
+          for c in root.children:
+              yield from (f'{root.name}{x}' for x in collect_names(c))
+#+end_src
+
+#+begin_src python :noweb strip-export :exports both :results drawer
+  <<collect_names>>
+  <<DirectoryNode>>
+  return list(collect_names(DirectoryNode('/', [DirectoryNode('a/', []), DirectoryNode('b/', [DirectoryNode('d/', [])])])))
+#+end_src
+
+#+RESULTS:
+:results:
+['/', '/a/', '/b/', '/b/d/']
+:end:
+
+Excellent
+
+So now lets put it all together
+
+#+begin_src python :noweb strip-export :var data=sample-input :results drawer
+  from itertools import chain
+  import json
+  <<get_directory_fragments>>
+  <<build_up_tree_paths>>
+  <<collect_names>>
+
+  data = [d for [d,] in data]
+  root_directories = []
+  for path in data:
+      build_up_tree_paths(root_directories, get_directory_fragments(path))
+
+  return list(chain.from_iterable((collect_names(paths) for paths in root_directories)))
+#+end_src
+
+#+RESULTS:
+:results:
+['/', '/a/', '/a/b/', '/a/b/c/', '/b/', '/b/c/']
+:end:
+
+Cool!
