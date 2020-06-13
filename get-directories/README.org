@@ -130,7 +130,7 @@ Excellent
 
 So now lets put it all together
 
-#+begin_src python :noweb strip-export :var data=sample-input :results drawer
+#+begin_src python :noweb strip-export :var data=sample-input :exports both :results drawer
   from itertools import chain
   import json
   <<get_directory_fragments>>
