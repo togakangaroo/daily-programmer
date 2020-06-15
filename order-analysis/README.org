@@ -405,23 +405,12 @@
                             (map cons-day-name-orders)
                             make-immutable-hash))
     #+end_src
-
+    
     #+name: group-orders-by-day
-    #+begin_src racket :noweb strip-export :results output :exports both :eval no
-      (require gregor)
-      (require json)
+    
+    #+name: orders-total
+    #+begin_src racket :noweb strip-export :eval no
       (require threading)
-      (require racket/hash)
-      (require racket/match)
-
-      <<group-by-day>>
-      <<days-of-the-week>>
-      <<load-orders>>
-
-      (define order-day-of-the-week-name (lambda~> (hash-ref 'placedOn)
-                                                   iso8601->date
-                                                   date-day-name))
-      (define cons-with-empty-list (curryr cons (list)))
       (define (order-line-price ol)
         (let* ([price (hash-ref ol 'price)]
                [quantity (hash-ref ol 'quantity)])
@@ -429,14 +418,31 @@
       (define order-total (lambda~>> (hash-ref _ 'orderLines)
                                      (map order-line-price)
                                      (apply +)))
+
+      (define orders-total (lambda~>>
+                            (map order-total)
+                            (apply +)
+                            (* 1.0)))
+
+    #+end_src
+
+    #+name: group-orders-by-day
+    #+begin_src racket :noweb strip-export :eval no
+      (require gregor)
+      (require json)
+      (require racket/hash)
+      (require racket/match)
+
+      <<group-by-day>>
+      <<days-of-the-week>>
+      <<load-orders>>
+      <<orders-total>>
+
+      (define cons-with-empty-list (curryr cons (list)))
       (define (orders-average-total orders)
-        (let* ([orders-total (~>> orders
-                                  (map order-total)
-                                  (apply +)
-                                  (* 1.0))])
-          (match (length orders)
-            [0 0]
-            [n (/ orders-total n)])))
+        (match (length orders)
+          [0 0]
+          [n (/ (orders-total orders) n)]))
       (define (empty-list-per-day-of-week)
         (~>> (days-of-the-week)
              (map cons-with-empty-list)
@@ -455,6 +461,7 @@
 
     #+RESULTS:
     : '#hash(("Friday" . 53.315) ("Monday" . 68.96000000000001) ("Saturday" . 0) ("Sunday" . 102.53) ("Thursday" . 14.219999999999999) ("Tuesday" . 58.42) ("Wednesday" . 41.459999999999994))
+
 
 
 *** Challenge 3
@@ -583,37 +590,65 @@
      #+begin_src racket :eval no
        (define (minimum-maximum less-than? lst)
          (let ([sorted-lst (sort lst less-than?)])
-           (values (last sorted-lst) (first sorted-lst))))
+           (values (first sorted-lst) (last sorted-lst))))
      #+end_src
-
 
 
      We should now be able to take all orders sorted by their =placedOn= date and to group them into windows
 
-     #+begin_src racket :noweb strip-export :results output :exports both
+     #+name: date-stats-on-orders-in-window
+     #+begin_src racket :noweb strip-export :eval no
        (require json)
        <<group-into-sliding-distance-windows>>
-       <<orders-within-10-days?>>
        <<load-orders>>
        <<minimum-maximum>>
+       <<orders-total>>
+
        (define placed-on (curryr hash-ref 'placedOn))
-       (struct date-stats (min-date max-date order-count) #:transparent)
+
+       (struct date-stats (min-date max-date order-count orders-total) #:transparent)
        (define (date-stats-of-order-group orders)
          (let-values ([(min max) (~>> orders
                                       (map placed-on)
                                       (minimum-maximum string<?))])
-           (date-stats min max (length orders))))
+           (date-stats min max
+                       (length orders)
+                       (orders-total orders))))
 
-       (~>> (load-orders)
-            (sort _ string<? #:key placed-on)
-            (group-into-sliding-distance-windows orders-within-10-days?)
-            (sort _ > #:key length)
-            (group-by length)
-            first
-            (map date-stats-of-order-group))
+       (define (date-stats-on-orders-in-window within-distance? select-interesting-order-group-charecteristic)
+         (~>> (load-orders)
+              (sort _ string<? #:key placed-on)
+              (group-into-sliding-distance-windows within-distance?)
+              (sort _ > #:key select-interesting-order-group-charecteristic)
+              (group-by select-interesting-order-group-charecteristic)
+              first
+              (map date-stats-of-order-group)))
+     #+end_src
+     
+     #+begin_src racket :noweb strip-export :results output :exports both
+       <<date-stats-on-orders-in-window>>
+       <<orders-within-10-days?>>
+       (date-stats-on-orders-in-window orders-within-10-days? length)
      #+end_src
 
      #+RESULTS:
-     : (list (date-stats "2019-09-11" "2019-09-01" 7) (date-stats "2020-03-16" "2020-03-08" 7))
+     : (list (date-stats "2019-09-01" "2019-09-11" 7 373.27) (date-stats "2020-03-08" "2020-03-16" 7 228.75))
+
      
      Perfect. looks like there are two groups of seven orders that fit within a span of ten days with the dates above.
+
+**** 10 day period with the highest order total
+     
+     We can use the above function we made to do this easily
+     
+     #+begin_src racket :noweb strip-export :results output :exports both
+       <<date-stats-on-orders-in-window>>
+       <<orders-within-10-days?>>
+       (date-stats-on-orders-in-window orders-within-10-days? orders-total)
+     #+end_src
+
+     #+RESULTS:
+     : (list (date-stats "2019-07-30" "2019-08-05" 5 387.82))
+
+
+     And there we go. Between =2019-07-30= and =2019-08-05= there were =5= orders totalling =$387.82=.
