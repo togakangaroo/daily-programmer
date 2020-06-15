@@ -378,7 +378,7 @@
       (define (days-of-the-week) (map (compose date-day-name nth-date-of-the-week) (range 0 7)))
     #+end_src
 
-    #+begin_src racket :noweb strip-export :require gregor
+    #+begin_src racket :noweb strip-export :require gregor :exports both
       <<days-of-the-week>>
       (days-of-the-week)
     #+end_src
