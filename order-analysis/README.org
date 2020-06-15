@@ -281,7 +281,7 @@
     #+RESULTS:
     : Saturday
 
-    Huh, and look right [[https://docs.racket-lang.org/gregor/time-format.html][in the docs]] there's an example of how to control cultur
+    Huh, and look right [[https://docs.racket-lang.org/gregor/time-format.html][in the docs]] there's an example of how to control culture
     #+begin_src racket :require gregor :exports both
       (parameterize ([current-locale "tr"])
         (~t (today) "EEEE"))
@@ -341,13 +341,27 @@
 
     Ok nice! that's the simple case but it works well
 
+    What about subtracting to dates to find out the amount of days that have passed?
+    #+begin_src racket :exports both :results output
+      (require gregor)
+      (require gregor/period)
+      (define d1 (iso8601->date "2020-06-12"))
+      (define d2 (iso8601->date "2020-05-21"))
+      (period-ref (date-period-between d1 d2 '(days)) 'days)
+    #+end_src
+
+    #+RESULTS:
+    : -22
+
+    On a side note, I am really impressed with racket documentation and language design. I barely know what I'm doing here and am able to find everything that I need.
+
 ** Implementation
 
    First we read in the file of course
 
-   #+name: get-all-orders
+   #+name: load-orders
    #+begin_src racket
-     (define get-all-orders () (call-with-input-file "mock_orders.json" read-json))
+     (define (load-orders) (call-with-input-file "mock_orders.json" read-json))
    #+end_src
 
    So as I see it, to fulfill [[Challenge 3]] I need to be able to generate the full list of week day names automatically. Additionally this would be needed to fulfill the requirement of [[Challenge 1]] that days absent from the dataset (Saturdays) be listed.
@@ -402,8 +416,8 @@
 
       <<group-by-day>>
       <<days-of-the-week>>
+      <<load-orders>>
 
-      (define (load-orders) (call-with-input-file "mock_orders.json" read-json))
       (define order-day-of-the-week-name (lambda~> (hash-ref 'placedOn)
                                                    iso8601->date
                                                    date-day-name))
@@ -495,7 +509,24 @@
 
 **** 10 day period with the most orders
 
-     So this has the need to chunk orders by their `placedOn` date within 10 of each other. Lets create a generic funciton thats easier to think about we're going to take a sequence of ordered numbers and lets group them so that they are within 3 of each other
+     So this has the need to chunk orders by their `placedOn` date within 10 of each other. Lets start by creating a function that takes two orders and determines if they're within ten days of each other
+
+
+     #+name: orders-within-10-days?
+     #+begin_src racket :eval no
+       (require gregor)
+       (require gregor/period)
+       (define placed-on-date (lambda~> (hash-ref 'placedOn)
+                                        iso8601->date))
+       (define (date-within-days? max-days d1 d2)
+         (~> (days-between d1 d2)
+             abs
+             (<= max-days)))
+       (define (orders-within-10-days? o1 o2)
+         (date-within-days? 10 (placed-on-date o1) (placed-on-date o2)))
+     #+end_src
+
+     Now let's create a generic function that takes a sequence of ordered items and moves a sliding window over them that ensures they are within some distance of each other. To test it we can take a sequence of numbers and create sliding windows of groups that are within 3 of each other
 
      #+name: chunk-by-input
      | 1 | 3 | 6 | 6 | 10 | 12 | 12 | 14 |
@@ -514,57 +545,75 @@
      - 10 12 12
      - 12 12 14
 
-     #+begin_src racket :noweb strip-export :results output :exports both :var data=chunk-by-input
+     Here would be a good implementation. We use dynamic scope via ~make-parameter~
+
+     #+name: group-into-sliding-distance-windows
+     #+begin_src racket :eval no
+       (require threading)
        (require rebellion/streaming/transducer)
        (require rebellion/collection/list)
 
-       (define (ducky x acc)
-         (cons x acc))
-       ;;(filter (curryr < (- x 3)) (cons x acc)))
-       (transduce (first data)
-                  (folding (lambda (a b) (cons b a)) '())
-                  (mapping first)
-                  #:into into-list)
-     #+end_src
+       (define (prepend-to-elements-within-distance within-distance? items item)
+         (~>> items
+              (filter (curry within-distance? item))
+              (cons item)))
 
-     #+RESULTS:
-     : '(1 3 6 6 10 12 12 14)
-       
-     A second step will filter this collection for only lists that are not proper supersets of the previous item
+       (define (group-into-sliding-distance-windows within-distance? data)
+         (transduce data
+                    (folding (curry prepend-to-elements-within-distance within-distance?) '())
+                    #:into into-list))
+     #+end_src
 
      #+begin_src racket :noweb strip-export :results output :exports both :var data=chunk-by-input
-       (require racket/generator)
-       (require racket/match)
-
-       (define (fold-by transform-queue collection)
-         (in-generator (let ([queue '()])
-                         (for ([item collection])
-                           (let-values ([(to-yield new-queue) (transform-queue item queue)])
-                             (set! queue new-queue)
-                             (yield (cons to-yield new-queue)))))))
-       (define (ducky item collection)
-         (partition (curryr < (- item 3))
-                    collection))
-
-       (sequence->list (fold-by ducky (first data)))
+       <<group-into-sliding-distance-windows>>
+       (define (within-3? a b) (~> a
+                                   (- b)
+                                   (abs)
+                                   (<= 3)))
+       (group-into-sliding-distance-windows within-3? (first data))
      #+end_src
 
      #+RESULTS:
-     : '((()) (()) (()) (()) (()) (()) (()) (()))
+     : '((1) (3 1) (6 3) (6 6 3) (10) (12 10) (12 12 10) (14 12 12))
+
+     We also just need a simple utility that can get both min and max from a list. We could do it easiest by sorting and getting the first and last. This isn't the most efficient way to go about it because we're then at =O(n*log(n))= instead of just =O(n)= but meh, we don't have all that many orders here for it to matter.
+
+
+     #+name: minimum-maximum
+     #+begin_src racket :eval no
+       (define (minimum-maximum less-than? lst)
+         (let ([sorted-lst (sort lst less-than?)])
+           (values (last sorted-lst) (first sorted-lst))))
+     #+end_src
+
+
+
+     We should now be able to take all orders sorted by their =placedOn= date and to group them into windows
 
      #+begin_src racket :noweb strip-export :results output :exports both
-       <<group-orders-by-day>>
+       (require json)
+       <<group-into-sliding-distance-windows>>
+       <<orders-within-10-days?>>
+       <<load-orders>>
+       <<minimum-maximum>>
+       (define placed-on (curryr hash-ref 'placedOn))
+       (struct date-stats (min-date max-date order-count) #:transparent)
+       (define (date-stats-of-order-group orders)
+         (let-values ([(min max) (~>> orders
+                                      (map placed-on)
+                                      (minimum-maximum string<?))])
+           (date-stats min max (length orders))))
 
        (~>> (load-orders)
-            (sort _ string<? #:key (lambda~> (hash-ref 'placedOn))))
-     #+end_src
-
-
-     #+begin_src racket :noweb strip-export :results output :exports both :var data=chunk-by-input
-       (partition (curryr < (- 12 3))
-                  (first data))
+            (sort _ string<? #:key placed-on)
+            (group-into-sliding-distance-windows orders-within-10-days?)
+            (sort _ > #:key length)
+            (group-by length)
+            first
+            (map date-stats-of-order-group))
      #+end_src
 
      #+RESULTS:
-     : '(1 3 6 6)
-     : '(10 12 12 14)
+     : (list (date-stats "2019-09-11" "2019-09-01" 7) (date-stats "2020-03-16" "2020-03-08" 7))
+     
+     Perfect. looks like there are two groups of seven orders that fit within a span of ten days with the dates above.
