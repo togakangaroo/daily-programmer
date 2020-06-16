@@ -39,16 +39,9 @@
 *** Python 
     
     #+begin_src python :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper
-      def missing_ranges(lower, upper, nums_sequence):
+      def missing_ranges(lower, upper, nums):
           current = lower
-          while True:
-              num = next(nums_sequence, None)
-              if num is None:
-                  if current == upper:
-                      yield f'{current}'
-                  elif current < upper:
-                      yield f'{current}->{upper}'
-                  return
+          for num in nums:
               if current < num:
                   if current + 1 == num:
                       yield f'{current}'
@@ -57,6 +50,12 @@
                   current = num
               else:
                   current += 1
+
+          if current == upper:
+              yield f'{current}'
+          elif current < upper:
+              yield f'{current}->{upper}'
+        
       return list(missing_ranges(int(lower), int(upper), iter(nums[0])))
     #+end_src
 
