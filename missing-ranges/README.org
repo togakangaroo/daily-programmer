@@ -54,11 +54,49 @@
                       yield f'{current}'
                   else:
                       yield f'{current}->{num-1}'
-                      current = num
+                  current = num
               else:
                   current += 1
       return list(missing_ranges(int(lower), int(upper), iter(nums[0])))
     #+end_src
 
     #+RESULTS:
-    | 2 | 2->49 | 50->74 | 75->99 |
+    | 2 | 3->49 | 50->74 | 75->99 |
+
+*** C#
+    I want to do this the simple way - no writing classes and such. C#9 will actually support a native top-level scripting mode, but barring that, we can use the [[https://github.com/filipw/dotnet-script][=dotnet script=]] tool.
+    
+    #+begin_src csharp :tangle Implementation.cs :eval no
+      IEnumerable<string> MissingRanges(int lower, int upper, IEnumerable<int> nums) {
+          var current = lower;
+          foreach(var num in nums){
+              if(current < num) {
+                  if(current + 1 == num)
+                      yield return $"{current}";
+                  else
+                      yield return $"{current}->{num-1}";
+                  current = num;
+              } else
+                  current += 1;
+          }
+          if(current == upper)
+              yield return $"{current}";
+          else if (current < upper)
+              yield return $"{current}->{upper}";
+      }
+
+      IEnumerable<int> nums = Args[0].Split("\n").Select(n => Int32.Parse(n));
+      var (lower, upper) = (Int32.Parse(Args[1]), Int32.Parse(Args[2]));
+      Console.WriteLine(String.Join(", ", MissingRanges(lower, upper, nums)));
+    #+end_src
+    
+    Becaue c# has an explicitly stateful iterator object, we can make this a bit prettier than they python version and not have to `while true`
+    
+    #+begin_src shell :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper
+      dotnet script ./Implementation.cs -- "$nums" $lower $upper
+    #+end_src
+
+    #+RESULTS:
+    | 0 | 1->2 | 3->49 | 50->74 | 75->99 |
+    
+    Note that while the answer *is* different it is due to the org mode shell provider for some reason dropping the leading ~0~ from vars. The algorithm itself is correct.
