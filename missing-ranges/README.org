@@ -22,7 +22,7 @@
    This sounds like a problem of synchronizing iteration so my mind as always reaches for generators. I picture this as you holding the input nums written down on a roll of paper. You unroll this one at a time and depending on the values that are unrolled you take certain actions. Hey! That sure sounds like a state machine.
 
 
-   #+begin_src plantuml :file ./ideation-state-machine.png
+   #+begin_src plantuml :file ./ideation-state-machine.png :exports both
      @startuml
      [*] --> BuildingRange: until next number
      BuildingRange --> TakingNumbers: as long as they are next in sequence
@@ -38,7 +38,7 @@
 
 *** Python
 
-    #+begin_src python :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper
+    #+begin_src python :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper :exports both
       def missing_ranges(lower, upper, nums):
           current = lower
           for num in nums:
@@ -91,7 +91,7 @@
 
     Becaue c# has an explicitly stateful iterator object, we can make this a bit prettier than they python version and not have to `while true`
 
-    #+begin_src shell :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper
+    #+begin_src shell :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper :exports both
       dotnet script ./Implementation.cs -- "$nums" $lower $upper
     #+end_src
 
@@ -101,7 +101,7 @@
     Note that while the answer *is* different it is due to the org mode shell provider for some reason dropping the leading ~0~ from vars. The algorithm itself is correct.
 
 *** Racket
-    #+begin_src racket :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper :results output
+    #+begin_src racket :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper :results output :exports both
       (require racket/generator)
       (require racket/format)
       (require threading)
@@ -130,7 +130,7 @@
     Here I realized that I could simplify the in-loop yield. Since we yield either way, its just a matter of what we append to that yielded statement.
     
 *** Javascript
-    #+begin_src js :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper
+    #+begin_src js :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper :exports both
       const missingRanges = function * (nums, lower, upper) {
           let current = lower
           for(const num of nums) {
