@@ -99,3 +99,30 @@
     | 0 | 1->2 | 3->49 | 50->74 | 75->99 |
     
     Note that while the answer *is* different it is due to the org mode shell provider for some reason dropping the leading ~0~ from vars. The algorithm itself is correct.
+
+*** Racket
+    #+begin_src racket :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper :results output
+      (require racket/generator)
+      (require racket/format)
+      (require threading)
+      (define (missing-ranges nums lower upper)
+        (in-generator 
+         (define current lower)
+         (for ([num nums])
+           (if (< current num)
+               (begin
+                 (if (~> current (+ 1) (eq? num))
+                     (yield (~a current))
+                     (yield (~a current "->" (- num 1))))
+                 (set! current num))
+               (set! current (+ 1 current))))
+         (cond [(eq? current upper)
+                (yield (~a current))]
+               [(< current upper)
+                (yield (~a current "->" upper))])))
+
+      (sequence->list (missing-ranges (first nums) lower upper))
+    #+end_src
+
+    #+RESULTS:
+    : '("2" "3->49" "50->74" "75->99")
