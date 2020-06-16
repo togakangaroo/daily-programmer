@@ -1,0 +1,64 @@
+* Missing Ranges
+** Problem 
+ Given a sorted integer array nums, where the range of elements are in the inclusive range [lower, upper], return its missing ranges.
+ 
+ #+name: sample-input-nums
+ | 0 | 1 | 3 | 50 | 75 |
+ 
+ =Lower:=
+ #+name: sample-input-lower
+ 0
+ 
+ =Upper:=
+ #+name: sample-input-upper
+ 99
+ 
+ *Expected Output:*
+ 
+  =["2", "4->49", "51->74", "76->99"]=
+  
+** Ideation 
+
+   This sounds like a problem of synchronizing iteration so my mind as always reaches for generators. I picture this as you holding the input nums written down on a roll of paper. You unroll this one at a time and depending on the values that are unrolled you take certain actions. Hey! That sure sounds like a state machine.
+   
+
+#+begin_src plantuml :file ./ideation-state-machine.png
+  @startuml
+  [*] --> BuildingRange: until next number
+  BuildingRange --> TakingNumbers: as long as they are next in sequence
+  TakingNumbers --> BuildingRange: the next number is not in sequence
+  TakingNumbers --> [*]: done
+  @enduml
+#+end_src
+
+#+RESULTS:
+[[file:./ideation-state-machine.png]]
+
+** Implementation
+  
+*** Python 
+    
+    #+begin_src python :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper
+      def missing_ranges(lower, upper, nums_sequence):
+          current = lower
+          while True:
+              num = next(nums_sequence, None)
+              if num is None:
+                  if current == upper:
+                      yield f'{current}'
+                  elif current < upper:
+                      yield f'{current}->{upper}'
+                  return
+              if current < num:
+                  if current + 1 == num:
+                      yield f'{current}'
+                  else:
+                      yield f'{current}->{num-1}'
+                      current = num
+              else:
+                  current += 1
+      return list(missing_ranges(int(lower), int(upper), iter(nums[0])))
+    #+end_src
+
+    #+RESULTS:
+    | 2 | 2->49 | 50->74 | 75->99 |
