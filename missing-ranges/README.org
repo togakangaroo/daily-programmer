@@ -56,7 +56,7 @@
           elif current < upper:
               yield f'{current}->{upper}'
 
-      return list(missing_ranges(int(lower), int(upper), iter(nums[0])))
+      return list(missing_ranges(int(lower), int(upper), nums[0]))
     #+end_src
 
     #+RESULTS:
@@ -88,8 +88,6 @@
       var (lower, upper) = (Int32.Parse(Args[1]), Int32.Parse(Args[2]));
       Console.WriteLine(String.Join(", ", MissingRanges(lower, upper, nums)));
     #+end_src
-
-    Becaue c# has an explicitly stateful iterator object, we can make this a bit prettier than they python version and not have to `while true`
 
     #+begin_src shell :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper :exports both
       dotnet script ./Implementation.cs -- "$nums" $lower $upper
@@ -128,7 +126,40 @@
     : '("2" "3->49" "50->74" "75->99")
 
     Here I realized that I could simplify the in-loop yield. Since we yield either way, its just a matter of what we append to that yielded statement.
-    
+
+**** More Idomatic Racket?
+     Ok, I don't know what's more Rackety, but I feel like it should include pattern matching and recursion.
+
+     #+begin_src racket :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper :results output :exports both
+       (require racket/generator)
+       (require racket/format)
+       (require racket/match)
+       (require threading)
+
+       (define (missing-ranges nums lower upper)
+         (in-generator
+          (define (yield-missing-range current num)
+            (yield (if (eq? num (add1 current))
+                       (~a current)
+                       (~a current "->" (sub1 num)))))
+          (let recur ([remaining-nums nums]
+                      [current lower])
+            (match remaining-nums
+              [(cons num rest-nums) (if (< current num)
+                                        (begin
+                                          (yield-missing-range current num)
+                                          (recur rest-nums num))
+                                        (recur rest-nums (add1 current)))]
+              ['() (cond [(<= current upper)
+                          (yield-missing-range current (add1 upper))])]))))
+
+       (sequence->list (missing-ranges (first nums) lower upper))
+     #+end_src
+
+     #+RESULTS:
+     : '("2" "3->49" "50->74" "75->99")
+
+
 *** Javascript
     #+begin_src js :var nums=sample-input-nums :var lower=sample-input-lower :var upper=sample-input-upper :exports both
       const missingRanges = function * (nums, lower, upper) {
