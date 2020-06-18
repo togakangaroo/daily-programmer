@@ -17,7 +17,7 @@
 ** Implementation
   
 *** Racket 
-    #+begin_src racket :results output
+    #+begin_src racket :results output :exports both
       (require racket/generator)
       (require racket/format)
 
@@ -36,8 +36,32 @@
                    (again "" "()")]))))
 
       (list->set (sequence->list (parens-combos 3)))
-
     #+end_src
 
     #+RESULTS:
     : (set "(())()" "((()))" "()(())" "()()()" "(()())")
+
+*** Javascript 
+    
+    #+begin_src js :exports both
+      const parensCombos = function * (n) {
+          if(n < 1)
+              return
+          if(n === 1) {
+              yield `()`
+              return
+          }
+          for(const innerCombo of parensCombos(n-1)) {
+              yield `(${innerCombo})`
+              yield `()${innerCombo}`
+              yield `${innerCombo}()`
+          }
+      }
+
+      return [...new Set(parensCombos(3))]
+    #+end_src
+
+    #+RESULTS:
+    | ((())) | ()(()) | (())() | (()()) | ()()() |
+
+   
