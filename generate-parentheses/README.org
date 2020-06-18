@@ -14,6 +14,9 @@
  ]
  #+end_src
  
+** The Idea
+   Not a lot of thought here. Just the idea that ~3~ parens is simply all the combinations returned by ~2~ parens and then surrounded by parentheses., prepended by parentheses., and appended with parentheses. Just de-dupe the entire thing and we're done.
+ 
 ** Implementation
   
 *** Racket 

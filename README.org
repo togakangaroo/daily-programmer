@@ -16,4 +16,5 @@ What you find here, are not writeups of me solving these problems, they're the a
 - [[./get-directories][Get Directories]]
 - [[./order-analysis][Order Analysis]]
 - [[./missing-ranges][Missing Ranges]]
+- [[./generate-parentheses][Generate Parentheses]]
 
