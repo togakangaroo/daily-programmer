@@ -1,0 +1,43 @@
+* Generate Parentheses
+** The Problem
+ Given ~n~ pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
+
+ For example, given ~n = 3~, a solution set is:
+
+ #+begin_src js :eval no :exports code
+ [
+   "((()))",
+   "(()())",
+   "(())()",
+   "()(())",
+   "()()()",
+ ]
+ #+end_src
+ 
+** Implementation
+  
+*** Racket 
+    #+begin_src racket :results output
+      (require racket/generator)
+      (require racket/format)
+
+      (define (parens-combos n)
+        (in-generator
+         (let recur ([prefix ""]
+                     [n n]
+                     [suffix ""])
+           (define (again new-prefix new-suffix)
+             (recur (~a prefix new-prefix) (sub1 n) (~a new-suffix suffix)))
+           (cond 
+             [(< n 1) (yield (~a prefix suffix))]
+             [(eq? n 1) (again "()" "")]
+             [else (again "(" ")")
+                   (again "()" "")
+                   (again "" "()")]))))
+
+      (list->set (sequence->list (parens-combos 3)))
+
+    #+end_src
+
+    #+RESULTS:
+    : (set "(())()" "((()))" "()(())" "()()()" "(()())")
