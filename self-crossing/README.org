@@ -40,3 +40,243 @@
    | 2 | 2 | 2 | 1 |
 
    Expected Output: =true=
+
+   #+begin_src artist
+     .        +--+
+     .        |  |
+     .    +---+  |
+     .    |      |
+     .    x------+
+   #+end_src
+   #+name: example-4-crossing
+   | 2 | 0 | 0 | 4 | 2 | 0 | 0 | 3 | 0 | 0 | 4 | 0 | 0 | 7 |
+
+   Expected Output: =true=
+
+** Implementation
+
+   If we can generate the list of points then at each point we can check if we crossed one of the lines that came before. Because I prefer to work with generators and its idiomatic Racket to make functions as flexible as possible, I want to stream back a sequence of points defining the lines and whether each line crosses any of the predecessors.
+
+*** Generate points
+
+    We start by simply generating the points that define the lines. The interesting thing is that every four cells in a row indicate a different direction to move. We could define the directions a cell in each position would move as a vector that we're multipling by and then adding.
+
+    So each new point is found as follows
+
+    | Move | Direction Vector | Move Vector (A*B) | New Point (C+PrevPoint) |
+    |------+------------------+-------------------+-------------------------|
+    |    2 | (0 1)            | (0 2)             | (0 2)                   |
+    |    1 | (-1 0)           | (-1 0)            | (-1 2)                  |
+    |    3 | (0 -1)           | (0 -3)            | (-1 -1)                 |
+    |    0 | (1 0)            | (0 0)             | (-1 -1)                 |
+    |    1 | (0 1)            | (0 1)             | (-1 0)                  |
+
+
+    First we define the directions sequence. In code this is as simple as defining the direction vector and cycling all the options forever.
+
+    #+name: directions
+    #+begin_src racket :eval no :noweb strip-export
+      (define directions (in-cycle (map list->vec '((0 1) (-1 0) (0 -1) (1 0)))))
+    #+end_src
+
+    A helpful utility function here would be one that can work as a =fold= but return a stream that yields back intermediate steps. That exists within transducers but I haven't found a way to make that works with streams. Regardless, its easy enough to implement
+
+    #+name: folding-sequence
+    #+begin_src racket :eval no
+      (require racket/generator)
+
+      (define (folding-sequence initial fn seq)
+        (define-values (has-more? next) (sequence-generate seq))
+        (sequence->stream
+         (in-generator
+          (let recur ([acc initial])
+            (cond [(has-more?) (let ([next-val (fn acc (next))])
+                                 (yield next-val)
+                                 (recur next-val))])))))
+    #+end_src
+
+    #+begin_src racket :results output :exports both :noweb strip-export
+      <<requires>>
+      <<folding-sequence>>
+      (sequence->list (folding-sequence 0 + '(1 2 3 4 5)))
+    #+end_src
+
+    #+RESULTS:
+    : '(1 3 6 10 15)
+
+    Since when we move 0 spaces we end up at the same point as before, we will want the ability to de-dupe consecutive points. Lets write a helper for that too.
+
+    #+name: dedupe-consequitive
+    #+begin_src racket :eval no :noweb strip-export
+      (define (dedupe-consequitive seq #:eq? [eq? eq?])
+        (sequence->stream
+         (in-generator
+          (let recur ([prev 'dedupe-consequitive-a-value-that-never-matches]
+                      [remaining seq])
+            (match remaining
+              [(sequence) (void)]
+              [(sequence next next-rest ...)
+               (cond [(not (eq? prev next))
+                      (yield next)])
+               (recur next next-rest)])))))
+    #+end_src
+
+    Note that we also accept an optional keyword arg that we will use later to supply a custom comparison function
+
+    #+begin_src racket :results output :exports both :noweb strip-export
+      <<requires>>
+      <<dedupe-consequitive>>
+      (~> '(1 1 2 3 3 4 4 4 5 6 7 7 9 9 7) dedupe-consequitive sequence->list)
+    #+end_src
+
+    #+RESULTS:
+    : '(1 2 3 4 5 6 7 9 7)
+
+    We now have just about everything necessary to get our points. We simply zip up our directions and our moves, multiplying each through to get the amount of steps along the x and y axis that happen at each point. We then just sum these up from the starting point streaming back each point.
+
+    #+name: get-points
+    #+begin_src racket :eval no :noweb strip-export
+      <<folding-sequence>>
+      <<directions>>
+      <<dedupe-consequitive>>
+      (define (vec-eq? vec1 . other-vecs)
+        (and (vec? vec1)
+             (andmap (lambda (v) (and (vec? v) (vec= v vec1))) other-vecs)))
+
+      (define starting-point (make-parameter (vec 0 0)))
+
+      (define (get-points moves)
+        (define direction-moves (for/stream ([d directions]
+                                             [m moves])
+                                  (vec* d m)))
+        (~> (starting-point)
+            (folding-sequence vec+ direction-moves)
+            (dedupe-consequitive #:eq? vec-eq?)))
+    #+end_src
+
+
+    #+begin_src racket :results output :exports both :noweb strip-export :var data=example-4-crossing
+      <<requires>>
+      <<get-points>>
+      (~> (first data)
+          get-points
+          sequence->list)
+    #+end_src
+
+    #+RESULTS:
+    : (list (vec 0 2) (vec 4 2) (vec 4 4) (vec 7 4) (vec 7 0) (vec 0 0))
+    
+   Now we get the line segments simply by zipping its sequence with itself (and padding iwth the starting point of course)
+
+
+   #+name: line-segments-from-points   
+    #+begin_src racket :eval no :noweb strip-export
+     <<get-points>>
+     (define (line-segments-from-points points)
+       (for/stream ([p1 (stream-cons (starting-point) points)] 
+                    [p2 points])
+         (cons p1 p2)))
+    #+end_src
+
+    #+begin_src racket :results output :exports both :noweb strip-export :var data=example-4-crossing
+      <<requires>>
+      <<line-segments-from-points>>
+      (~> (first data)
+          get-points
+          line-segments-from-points
+          sequence->list)
+    #+end_src
+
+    #+RESULTS:
+    : (list (cons (vec 0 0) (vec 0 2)) (cons (vec 0 2) (vec 4 2)) (cons (vec 4 2) (vec 4 4)) (cons (vec 4 4) (vec 7 4)) (cons (vec 7 4) (vec 7 0)) (cons (vec 7 0) (vec 0 0)))
+    
+    
+*** Includes Used
+
+    #+name: requires
+    #+begin_src racket :eval no
+      (require racket/generator)
+      (require racket/match)
+      (require threading)
+      (require (except-in data/collection sequence->list)) ;;https://stackoverflow.com/a/62505165/5056
+      (require sfont/geometry)
+    #+end_src
+** Playground
+
+
+   Lets define some lines. These can be defined by vectors, and hey! Racket has some packages for this already.
+
+   #+begin_src racket :results output :exports both
+     (require sfont/geometry)
+
+     (segment-intersection (vec 0 0) (vec 0 2) (vec -1 1) (vec 0 1))
+     (segment-intersection (vec 0 0) (vec 0 2) (vec -1 1) (vec -1 2))
+   #+end_src
+
+   #+RESULTS:
+   : (vec 0 1)
+   : #f
+
+   #+begin_src racket :results output :exports both :noweb strip-export :var data=example-4-crossing
+     (define (foo #:arg [arg 1]) arg)
+     (foo)
+     (require sfont/geometry)
+     (vec= (vec 1 0) (vec 1 0))
+     (define-values (has-more? next) (sequence-generate '(1 2 3)))
+     (next)
+     (next)
+     (define acc 8)
+     (let ([next-val (+ acc (next))])
+       next-val)
+     (define (values-first . vals) (first vals))
+     (call-with-values (lambda () (values 4 1 2)) values-first)
+   #+end_src
+
+   #+RESULTS:
+   : 1
+   : #t
+   : 1
+   : 2
+   : 11
+   : 4
+
+
+   #+begin_src racket :results output :exports both :noweb strip-export :var data=example-4-crossing
+     (require threading)
+     <<get-points>>
+     (~> (list (vec 0 2) (vec 0 2) (vec 0 2) (vec 4 2) (vec 4 4) (vec 4 4) (vec 4 4) (vec 7 4) (vec 7 4) (vec 7 4) (vec 7 0) (vec 7 0) (vec 7 0) (vec 0 0))
+         (dedupe-consequitive #:eq? vec-eq?)
+         sequence->list)
+   #+end_src
+
+   #+RESULTS:
+   : (list (vec 0 2) (vec 4 2) (vec 4 4) (vec 7 4) (vec 7 0) (vec 0 0))
+
+   #+begin_src racket :results output :exports both :noweb strip-export :var data=example-4-crossing
+     <<get-points>>
+     (~> (list (vec 0 2) (vec 0 2) (vec 0 2) (vec 4 2) (vec 4 4) (vec 4 4) (vec 4 4) (vec 7 4) (vec 7 4) (vec 7 4) (vec 7 0) (vec 7 0) (vec 7 0) (vec 0 0))
+         (dedupe-consequitive #:eq? vec-eq?)
+         sequence->list)
+   #+end_src
+
+   #+RESULTS:
+   : (list (vec 0 2) (vec 4 2) (vec 4 4) (vec 7 4) (vec 7 0) (vec 0 0))
+
+
+   #+begin_src racket :results output :exports both :noweb strip-export :var data=example-4-crossing
+     (require racket/match)
+     (require racket/generator)
+     (require data/collection)
+     (sequence->list
+      (sequence->stream
+       (in-generator
+        (let recur ([seq '(1 2 3)])
+          (match seq
+            [(sequence) (void)]
+            [(sequence next next-rest ...)
+             (yield next)
+             (recur next-rest)])))))
+   #+end_src
+
+   #+RESULTS:
+   : '(1 2 3)
