@@ -104,6 +104,16 @@
     #+RESULTS:
     : '(1 3 6 10 15)
 
+    Oh, I just found [[https://docs.racket-lang.org/collections/collections-api.html?q=sequence#%28def._%28%28lib._data%2Fcollection..rkt%29._foldl%2Fsteps%29%29][data/collections:foldl/steps]]
+
+    #+begin_src racket :results output :exports both :noweb strip-export
+      <<requires>>
+      (sequence->list (foldl/steps + 0 '(1 2 3 4 5)))
+    #+end_src
+
+    #+RESULTS:
+    : '(0 1 3 6 10 15)
+
     Since when we move 0 spaces we end up at the same point as before, we will want the ability to de-dupe consecutive points. Lets write a helper for that too.
 
     #+name: dedupe-consequitive
@@ -165,17 +175,17 @@
 
     #+RESULTS:
     : (list (vec 0 2) (vec 4 2) (vec 4 4) (vec 7 4) (vec 7 0) (vec 0 0))
-    
-   Now we get the line segments simply by zipping its sequence with itself (and padding iwth the starting point of course)
+
+    Now we get the line segments simply by zipping its sequence with itself (and padding iwth the starting point of course)
 
 
-   #+name: line-segments-from-points   
+    #+name: line-segments-from-points
     #+begin_src racket :eval no :noweb strip-export
-     <<get-points>>
-     (define (line-segments-from-points points)
-       (for/stream ([p1 (stream-cons (starting-point) points)] 
-                    [p2 points])
-         (cons p1 p2)))
+      <<get-points>>
+      (define (line-segments-from-points points)
+        (for/stream ([p1 (stream-cons (starting-point) points)]
+                     [p2 points])
+          (cons p1 p2)))
     #+end_src
 
     #+begin_src racket :results output :exports both :noweb strip-export :var data=example-4-crossing
@@ -189,8 +199,50 @@
 
     #+RESULTS:
     : (list (cons (vec 0 0) (vec 0 2)) (cons (vec 0 2) (vec 4 2)) (cons (vec 4 2) (vec 4 4)) (cons (vec 4 4) (vec 7 4)) (cons (vec 7 4) (vec 7 0)) (cons (vec 7 0) (vec 0 0)))
-    
-    
+
+    We want to be able to pair each line segment with each line segment that follows it forming a sort of combinations triangle.
+
+    #+name: combination-triangle
+    #+begin_src racket :eval no
+      (define (generate-sequence fn-sequence-generate*)
+        (sequence->stream
+         (in-generator
+          (define (keep-going front continue)
+            (when front
+              (yield (first front))
+              (call-with-values continue keep-going)))
+          (call-with-values fn-sequence-generate* keep-going))))
+
+      (define (combination-triangle seq)
+        (sequence->stream
+         (in-generator
+          (define (keep-going front continue)
+            (when front
+              (yield (list (first front)
+                           (generate-sequence continue)))
+              (call-with-values continue keep-going)))
+          (call-with-values (thunk (sequence-generate* seq)) keep-going))))
+    #+end_src
+
+
+
+    #+begin_src racket :results output :exports both :noweb strip-export :var data=example-4-crossing
+      <<requires>>
+      <<combination-triangle>>
+
+      (~> (naturals)
+          (take 5 _)
+          combination-triangle
+          sequence->list
+          (map (lambda (x) (list (first x) (sequence->list (second x)))) _)
+          sequence->list)
+    #+end_src
+
+    #+RESULTS:
+    : '((0 (1 2 3 4)) (1 (2 3 4)) (2 (3 4)) (3 (4)) (4 ()))
+
+    We then check its line segment against the "others" to check for intersection
+
 *** Includes Used
 
     #+name: requires
@@ -253,6 +305,7 @@
    : (list (vec 0 2) (vec 4 2) (vec 4 4) (vec 7 4) (vec 7 0) (vec 0 0))
 
    #+begin_src racket :results output :exports both :noweb strip-export :var data=example-4-crossing
+     <<requires>>
      <<get-points>>
      (~> (list (vec 0 2) (vec 0 2) (vec 0 2) (vec 4 2) (vec 4 4) (vec 4 4) (vec 4 4) (vec 7 4) (vec 7 4) (vec 7 4) (vec 7 0) (vec 7 0) (vec 7 0) (vec 0 0))
          (dedupe-consequitive #:eq? vec-eq?)
@@ -280,3 +333,15 @@
 
    #+RESULTS:
    : '(1 2 3)
+
+   #+begin_src racket :results output :exports both :noweb strip-export :var data=example-4-crossing
+     <<requires>>
+
+     (define (foo v1 v2)
+       (+ v1 v2))
+
+     (call-with-values (thunk (values 3 4)) foo)
+   #+end_src
+
+   #+RESULTS:
+   : 7
