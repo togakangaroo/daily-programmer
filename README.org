@@ -17,4 +17,5 @@ What you find here, are not writeups of me solving these problems, they're the a
 - [[./order-analysis][Order Analysis]]
 - [[./missing-ranges][Missing Ranges]]
 - [[./generate-parentheses][Generate Parentheses]]
+- [[./self-crossing][Self Crossing]]
 
