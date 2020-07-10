@@ -1,0 +1,131 @@
+#+TITLE: Battleship Board
+* Battleship Board
+
+  You are given a string representing a "battleship board" of arbitrary width and height.
+
+  Each line is a row and each ~.~ is an empty cell. A series of the same letter in a row represents a ship positioned either vertically or horizontally.
+
+  How many ships of each length are on the board?
+
+  Example:
+
+  #+name: sample-board
+  #+begin_quote
+  ..AAA.......
+  ..........CC
+  ......B.....
+  ......B.....
+  .AAAAAB..B.A
+  .........B.A
+  ..BBBB..CCCA
+  .....CCC...A
+  ........AA.A
+  #+end_quote
+
+  Answer:
+  - Size 2: 3
+  - Size 3: 4
+  - Size 4: 1
+  - Size 5: 2
+
+* Implementation - the easy way (Racket)
+
+  There are a couple ways to do this - we can use a trick to go line by line and us regex to pull out all instances of letters A-Z with more than one of the same letter in a row
+
+  Something like this will pull out all instances of capital letters that occur more than once consequitively in a row
+
+  #+begin_src racket
+    (regexp-match* #px"([A-Z])\\1+" "C.BBBB..CCCA")
+  #+end_src
+
+  #+RESULTS:
+  : '("BBBB" "CCC")
+
+  We could run this on all lines giving us all horizontal ships
+
+
+  #+name: lines->horizontal-ships
+  #+begin_src racket  :eval no
+    (require threading)
+
+    (define get-ships (lambda~>> (regexp-match* #px"([A-Z])\\1+")))
+
+    (define lines->horizontal-ships (lambda~>> (map get-ships)
+                                               flatten))
+  #+end_src
+
+  #+begin_src racket :exports both :noweb strip-export :var board=sample-board
+    <<requires>>
+    <<lines->horizontal-ships>>
+    (define board-lines (string-split board "\n"))
+    (lines->horizontal-ships board-lines)
+  #+end_src
+
+  #+RESULTS:
+  : '("AAA" "CC" "AAAAA" "BBBB" "CCC" "CCC" "AA")
+
+  Then rotate the board and check again giving us all veritcal ships. See [[https://stackoverflow.com/a/30776501/5056][this StackOverflow for an explanation on matrix rotation.]]
+
+
+  #+name: rotate-lines
+  #+begin_src racket :eval no
+    (define rotate-lines (lambda~>> (map string->list)
+                                    (apply map list)
+                                    (map list->string)))
+  #+end_src
+
+  #+begin_src racket :exports both :noweb strip-export :var board=sample-board
+    <<requires>>
+    <<rotate-lines>>
+    (rotate-lines (string-split board "\n"))
+  #+end_src
+
+  #+RESULTS:
+  : '("........." "....A...." "A...A.B.." "A...A.B.." "A...A.B.." "....A.BC." "..BBB..C." ".......C." "......C.A" "....BBC.A" ".C....C.." ".C..AAAAA")
+
+
+
+  #+name: lines->all-ships
+  #+begin_src racket :eval no :noweb strip-export
+    <<rotate-lines>>
+    <<lines->horizontal-ships>>
+    (define (lines->all-ships board-lines)
+      (~>> board-lines
+           rotate-lines
+           lines->horizontal-ships
+           (append (lines->horizontal-ships board-lines))))
+  #+end_src
+
+  #+begin_src racket :exports both :noweb strip-export :var board=sample-board
+    <<requires>>
+    <<lines->all-ships>>
+    (lines->all-ships (string-split board "\n"))
+  #+end_src
+
+  #+RESULTS:
+  : '("AAA" "CC" "AAAAA" "BBBB" "CCC" "CCC" "AA" "BBB" "BB" "AAAAA")
+
+  And now we just group by length and sum up each group
+  
+  #+begin_src racket :exports both :noweb strip-export :var board=sample-board
+    <<requires>>
+    <<lines->all-ships>>
+    (~>> board
+         (string-split _ "\n")
+         lines->all-ships
+         (group-by string-length)
+         (map (lambda (ships) (~a "number of ships of length " (string-length (first ships)) ": " (length ships)))))
+#+end_src
+
+#+RESULTS:
+: '("number of ships of length 3: 4" "number of ships of length 2: 3" "number of ships of length 5: 2" "number of ships of length 4: 1")
+
+There we go!
+
+** Utils
+   #+name: requires
+   #+begin_src racket :eval no
+     (require threading)
+     (require racket/format)
+   #+end_src
+* Implementation (Js)
