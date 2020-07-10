@@ -106,7 +106,7 @@
   : '("AAA" "CC" "AAAAA" "BBBB" "CCC" "CCC" "AA" "BBB" "BB" "AAAAA")
 
   And now we just group by length and sum up each group
-  
+
   #+begin_src racket :exports both :noweb strip-export :var board=sample-board
     <<requires>>
     <<lines->all-ships>>
@@ -115,12 +115,12 @@
          lines->all-ships
          (group-by string-length)
          (map (lambda (ships) (~a "number of ships of length " (string-length (first ships)) ": " (length ships)))))
-#+end_src
+  #+end_src
 
-#+RESULTS:
-: '("number of ships of length 3: 4" "number of ships of length 2: 3" "number of ships of length 5: 2" "number of ships of length 4: 1")
+  #+RESULTS:
+  : '("number of ships of length 3: 4" "number of ships of length 2: 3" "number of ships of length 5: 2" "number of ships of length 4: 1")
 
-There we go!
+  There we go!
 
 ** Utils
    #+name: requires
@@ -128,4 +128,63 @@ There we go!
      (require threading)
      (require racket/format)
    #+end_src
+
 * Implementation (Js)
+
+  The Racket version with regex works, but its multiple passes what we could do in one (sorta). Instead, lets walk the board top left accross and down, skipping over previously visited cells. When we hit a letter, we try to find all instances of it downward and accross to find the current ship (because of how we're moving down the board, only down and to the right are possibilities).
+
+  #+begin_src js :exports both :noweb strip-export :var board=sample-board 
+    const isLetter = c => /^[A-Z]$/.test(c)
+    const valuesToTuple = (...args) => args
+    const zipLongest = function * (padding, ...collections) {
+        if(!collections.length) return
+        const its = collections.map(c => c[Symbol.iterator]())
+        while(true) {
+            const nexts = its.map(it => it.next())
+            if(nexts.every(n => n.done))
+                return
+            yield nexts.map(n => n.done ? null : n.value)
+        }
+    }
+
+    const getShips = function * (boardLines) {
+        const rowCount = boardLines.length
+        const visitedVerticalShipCells = new Set()
+        for(const [line, row] of boardLines.map(valuesToTuple)) {
+            const enumeratedLineWithNext = Array.from(zipLongest(null, line, line.substring(1))).map(valuesToTuple)
+            const lineIt = enumeratedLineWithNext[Symbol.iterator]()
+            for(let [[c, nextC], col] of lineIt) {
+                //console.log(`${c}=>${nextC} (${row}, ${col})`)
+                if(isLetter(c) && !visitedVerticalShipCells.has(`${row}, ${col}`)) {
+                    let ship = c
+                    if(c === nextC) { // the ship is horizontal
+                        let {done, value: [[c2, nextC2], col]} = lineIt.next()
+                        while(!done && c2 === c) {
+                            ship += c2
+                            if(nextC2 !== c)
+                                break
+                            ({done, value: [[c2, nextC2], col]} = lineIt.next())
+                        }
+                        yield ship
+                    } else { // the ship is vertical
+                        for(let r2 = row+1; r2 < rowCount; r2+=1)
+                            if(c === boardLines[r2][col]) {
+                                ship += c
+                                visitedVerticalShipCells.add(`${r2}, ${col}`)
+                            }
+                        yield ship
+                    }
+                }
+            }
+        }
+    }
+
+    const ships = [...getShips(board.split(`\n`))]
+    const lengthCounts = new Map()
+    for(const s of ships)
+        lengthCounts.set(s.length, (lengthCounts.get(s.length)||0)+1)
+    return lengthCounts 
+  #+end_src
+
+  #+RESULTS:
+  : Map { 3 => 4, 2 => 3, 5 => 2, 4 => 1 }

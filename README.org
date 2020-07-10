@@ -19,4 +19,5 @@ What you find here, are not writeups of me solving these problems, they're the a
 - [[./generate-parentheses][Generate Parentheses]]
 - [[./self-crossing][Self Crossing]]
 - [[./sort-matrix-diagonally][Sort the Matrix Diagonally]]
+- [[./battleship-board][Battleship Board]]
 
