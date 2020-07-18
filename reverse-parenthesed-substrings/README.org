@@ -23,38 +23,150 @@
    - s only contains lower case English characters and parentheses.
    - It is guaranteed that all parentheses are balanced
 
-*** Ideation
+** Ideation
 
-    The fact that I want to do this in Racket (a LISP focused on building your own language) could give me an edge.
+   The fact that I want to do this in Racket (a LISP focused on building your own language) could give me an edge.
 
-    What if this example ~a(bcdefghijkl(mno)p)q~ could be converted to
+   What if this example ~a(bcdefghijkl(mno)p)q~ could be converted to
 
-    #+begin_src racket :eval no
-      (string-append "a" (reverse-contents "bcdefghijkl" (reverse-contents "mno") "p") "q")
+   #+begin_src racket :eval no
+     (string-contents a (reverse-string-contents bcdefghijkl (reverse-string-contents mno) p) q)
+   #+end_src
 
-      ;;=> (string-append "a" (reverse-contents "bcdefghijkl" "onm" "p") "q")
-      ;;=> (string-append "a" "pmnolkjihgfedcb" "q")
-      ;;=> "apmnolkjihgfedcbq"
-    #+end_src
+   where ~string-contents~ is a macro that will stringify all non-list contents, evaluate all lists and then concatenate the results
 
-    where ~reverse-contents~ takes a list of strings, reverses each, reverses the list itself, then appends the results together into a single string
-    
-    #+begin_src racket 
-      (require (for-syntax racket/match))
-      (require threading)
 
-      (define reverse-string (lambda~> string->list reverse list->string))
+   #+name: requires
+   #+begin_src racket
+     (require (for-syntax (only-in racket/format ~a)))
+     (require threading)
+     (require (for-syntax threading))
+     (require (for-syntax (only-in racket/function identity)))
+   #+end_src
 
-      (define (reverse-contents . strs)
-        (reverse (map reverse-string strs)))
+   #+RESULTS: requires
 
-      (string-append* (reverse-contents "abcdefg" "hijk" "l"))
-    #+end_src
+   #+name: compute
+   #+begin_src racket :eval no
+     (define-for-syntax (compute stx )
+       (syntax-case stx ()
+         [(a . b) #`(~a (a . b))]
+         [_ (identity (~a (syntax-e stx)))]))
+   #+end_src
 
-    #+RESULTS:
-    : "lkjihgfedcba"
 
-    Looks like that would work
+   #+name: string-contents
+   #+begin_src racket :eval no
+     (define-syntax (string-contents stx)
+       (syntax-case stx ()
+         [(_ args ...)
+          #`(string-append #,@(map compute (syntax->list #'(args ...))))]))
+   #+end_src
+
+   #+begin_src racket :noweb strip-export :exports both
+     <<requires>>
+     <<compute>>
+     <<string-contents>>
+     (string-contents '() one 2 (add1 2))
+   #+end_src
+
+   #+RESULTS:
+   : "()one23"
+
+   and ~reverse-string-contents~ does the same but reverses the list before condatenation
+
+   #+name: reverse-string-contents
+   #+begin_src racket :eval no
+     (define-for-syntax reverse-string (lambda~> string->list reverse list->string))
+     (define-syntax (reverse-string-contents stx)
+       (syntax-case stx ()
+         [(_ args ...)
+          #`(string-append #,@(reverse (map (compose reverse-string compute) (syntax->list #'(args ...)))))]))
+   #+end_src
+
+
+   #+begin_src racket :noweb strip-export :exports both
+     <<requires>>
+     <<compute>>
+     <<string-contents>>
+     <<reverse-string-contents>>
+     (string-contents a (reverse-string-contents bcdefghijkl (reverse-string-contents mno) p) q)
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   string->list: contract violation
+     expected: string?
+     given: #<syntax:/var/folders/g4/0st3r3c513n6ymf2nkw11ml40000gn/T/ob-racket-ZaCuzE:8:15 (~a (reverse-string-contents mno))>
+     context...:
+      /usr/local/Cellar/minimal-racket/7.7/share/racket/collects/racket/private/map.rkt:35:13: map
+      apply-transformer-in-context
+      apply-transformer
+      dispatch-transformer
+      for-loop
+      [repeats 2 more times]
+      finish-bodys
+      lambda-clause-expander
+      for-loop
+      loop
+      [repeats 8 more times]
+      module-begin-k
+      expand-module
+      expand-capturing-lifts
+      temp98_0
+      temp71_0
+      ...
+   #+end_example
+
+   should be 
    
-***  Language
+(rsc mno)
+onm
+(rsc bcdefghijkl onm p)
+pmnolkjihgfedcb
+(sc a pmnolkjihgfedcb p)
+   
+   #+begin_src racket :eval no :noweb strip-export :tangle ./reader.rkt
+     #lang br/quicklang
 
+     <<requires>>
+     <<compute>>
+     <<string-contents>>
+     <<reverse-string-contents>>
+
+     (define (read-syntax path port)
+       (define src-lines (~>> port
+                              port->lines
+                              (filter non-empty-string?)
+                              (map (lambda~> (string-replace "(" "(reverse-string-contents " #:all? #t)))))
+       (define src-datums (format-datums '(string-contents ~a) src-lines))
+       (define module-datum `(module my-mod "../../../../../Users/gmauer/code/daily-programmer/reverse-parenthesed-substrings/reader.rkt"
+                               (string-contents ,@src-datums )))
+       (datum->syntax #f module-datum))
+     (provide read-syntax)
+
+
+     (define-macro (my-module-begin HANDLE-EXPR ...)
+       #'(#%module-begin
+          HANDLE-EXPR ...))
+     (provide (rename-out [my-module-begin #%module-begin]))
+     (provide string-contents reverse-string-contents)
+   #+end_src
+    
+   #+begin_src racket
+     #lang reader "../../../../../Users/gmauer/code/daily-programmer/reverse-parenthesed-substrings/reader.rkt"
+     a(bcdefghijkl(mno)p)q
+   #+end_src
+
+   bcdefghijkl onm p
+   p mno lkjihgfedcb
+   a p mno lkjihgfedcb q
+   #+RESULTS:
+   : "a p mno bcdefghijkl q"
+   
+   #+name: example-input-1
+   a(bcdefghijkl(mno)p)q
+
+   Output: ~"a p mno lkjihgfedcb q"~
+
+**  Language
