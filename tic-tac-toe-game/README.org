@@ -1,0 +1,405 @@
+#+TITLE: Tic Tac Toe Game
+* Tic Tac Toe Game
+** Problem Statement
+   [[https://operation-code.slack.com/archives/C7JMZ5LAV/p1632137523014200][From the Operation Code Slack]]
+
+   Tic-tac-toe is played by two players =A= and =B= on a =3 x 3= grid.
+
+   Here are the rules of Tic-Tac-Toe:
+   - Players take turns placing characters into empty squares (=" "=).
+   - The first player =A= always places ="X"= characters, while the second player =B= always places ="O"= characters.
+   - ="X"= and ="O"= characters are always placed into empty squares, never on filled ones.
+   - The game ends when there are 3 of the same (non-empty) character filling any row, column, or diagonal.
+   - The game also ends if all squares are non-empty.
+   - No more moves can be played if the game is over.
+
+   Given an array moves where each element is another array of size =2= corresponding to the row and column of the grid where they mark their respective character in the order in which =A= and =B= play.
+
+   Return the winner of the game if it exists (=A= or =B=), in case the game ends in a draw return ~"Draw"~, if there are still movements to play return ~"Pending"~.
+
+   You can assume that moves is valid (It follows the rules of Tic-Tac-Toe), the grid is initially empty and A will play first.
+
+*** Example 1
+
+    - Input :: ~moves = [[0,0],[2,0],[1,1],[2,1],[2,2]]~
+    - Output :: ~"A"~
+    - Explanation :: ~"A"~ wins, he always plays first.
+      | X |   |   |
+      |   | X |   |
+      | 0 | 0 | X |
+
+*** Example 2
+
+    - Input :: ~moves = [[0,0],[1,1],[0,1],[0,2],[1,0],[2,0]]~
+    - Output :: ~"B"~
+    - Explanation :: ~"B"~ wins
+      | X | X | 0 |
+      | X | 0 |   |
+      | 0 |   |   |
+
+*** Example 3
+    - Input :: ~moves = [[0,0],[1,1],[2,0],[1,0],[1,2],[2,1],[0,1],[0,2],[2,2]]~
+    - Output :: ~"Draw"~
+    - Explanation :: The game ends in a draw since there are no moves to make.
+      | X | X | 0 |
+      | 0 | 0 | X |
+      | X | 0 | X |
+
+
+*** Example 4
+    - Input :: ~moves = [[0,0],[1,1]]~
+    - Output :: ~"Pending"~
+    - Explanation :: The game has not finished yet
+      | X |   |   |
+      |   | 0 |   |
+      |   |   |   |
+
+*** Constraints
+    - ~1 <= moves.length <= 9~
+    - ~moves[i].length == 2~
+    - ~0 <= moves[i][j] <= 2~
+      - There are no repeated elements on moves.
+      - moves follow the rules of tic tac toe.
+
+* Brainstorm
+
+  So how might this work?
+
+
+** Iterator-style interface
+
+   The most straightforward interface is a stateful iterator function. Each time you call it the location goes in and the result comes out.
+
+   That's a good one. It's not necessarily the most efficient one but I do love that sort of thing. Let's just go with it.
+
+   Now what about how it works under the hood?
+
+
+** Brute force
+   Well again, the most straightforward thing would be to just maintain a 2d matrix and check all the possibilities.
+
+   - This handles the draw condition just fine, its just what happens when you don't win otherwise
+   - But its hardly the most efficient thing
+
+** Something something recursion
+   What about recursion? This soft of thing is always "something something recursion".
+
+   What if the board is =1x1= - easy cenario, =A=, =B= or =Pending=
+
+   | A |
+
+   So now if you know that outcome, and you're on a =2x2= board, what does that tell you?
+
+   If the upper right is an =A= or =B= then you're checking 3 cells and that gives you a difinitive answer of =Same= or =Pending=
+
+   | X |   |
+   |   |   |
+
+   If the upper right is =Pending= then =Pending=, =A=, or =B= are possible. Oddly a =Draw= would not be possible.
+
+   |   | A |
+   | B |   |
+
+   Ehh...so yeah maybe isn't this the right sort of recursion to use here since you can't even be sure of a winner
+
+   Yeah, I'm not really sure about this.
+
+** Check along each winning trajectory
+
+   So yet another approach is to just store the counts along each winning trajectory.
+
+   8 vectors for winning are possible. 2 on each diagonal, 3 horizontal, 3 vertical.
+
+   Doable, but sounds like a lot
+
+** Consider each player's moves in isolation
+
+   What about just considering each user's moves on their own? Should be easy enough to see if someone won on the horizontal or vertical
+
+   This is the most promising one as you can do it by going through the list justa single time
+
+   Best approach would be to abandon our neat interface. Not a ton of benefit from the one I proposed above as this would evaluate the whole list at once
+
+   It's also worth mentioning that with this approach we're assuming that only valid moves are sent. It makes no attempt to detect invalid ones.
+
+   Now to run through a few examples
+
+   We alternate the moves between the two players, at each step we can check if of the moves so far are there 3 in the same row (indicating a horizontal win for the player) or column (indicating a vertical one). We also check if there's a 3 on either of the two diagonals. We therefore can make a statement about each player after a move
+
+   - either they have won, in which case that's our answer since its not possible to draw by *both* players winning simultaneously
+   - or they have not won, in which case we keep looking at the next value but with the next player
+   - As a straightforward optimization, it is impossible to have won if you haven't made three moves
+
+     When we are done going through all the moves, if no one has won and we've considered 9 moves then its a =draw=, otherwise =pending=
+
+
+*** [[Example 1]]
+
+    | MoveA | Win? | Why                               | MoveB | Win? | Why      |
+    |-------+------+-----------------------------------+-------+------+----------|
+    | 0,0   |      | <3 moves                          | 2,0   |      | <3 moves |
+    | 2,0   |      | <3 moves                          | 1,1   |      | <3 moves |
+    | 1,1   |      | <3 moves                          | 2,1   |      | <3 moves |
+    | 2,2   | A    | Matches on the top->down diagonal |       |      |          |
+
+
+*** [[Example 3]]
+
+    | MoveA | Win? | Why                   | MoveB | Win? | Why                   |
+    |-------+------+-----------------------+-------+------+-----------------------|
+    | 0,0   |      | <3 moves              | 1,1   |      | <3 moves              |
+    | 2,0   |      | <3 moves              | 1,0   |      | <3 moves              |
+    | 1,2   |      | <3 moves              | 2,1   |      | <3 moves              |
+    | 0,1   |      | no row, col, diagonal | 0,2   |      | no row, col, diagonal |
+    | 2,2   |      | no row, col, diagonal |       |      |                       |
+
+    At this point we don't have a winner and we have seen 9 moves. It must be a ~Draw~
+
+
+*** [[Example 4]]
+
+    | MoveA | Win? | Why      | MoveB | Win? | Why      |
+    |-------+------+----------+-------+------+----------|
+    | 0,0   |      | <3 moves | 1,1   |      | <3 moves |
+
+    We haven't hit 9 moves yet. Must be ~Pending~
+
+
+* Python Implementation
+  :PROPERTIES:
+  :header-args:python: :noweb strip-export :exports both :eval no :results output
+  :END:
+
+  Alright so with that explanation I think we can get going
+
+  We'll start at the high level. We will want to take our move coordinates one by one and identify which player each move is for.
+
+  We could do this by matching up our list of coordinates with an iterable of player moves
+
+  The later just cycles between =A= and =B=, easy enough. And because the board has only 9 coordinates possible, we might as well set an upper limit to the moves we care about so that no one can mess with us by sending it *too many* moves.
+
+  Once we have that, we will evaluate each player's moves against the coordinates they are moving to which will give us whether that player has won. If we run through the whole list of coordinates then we can decide what happened based on the number of moves we've seen.
+
+  From there, it's just a matter of figuring out typing
+
+  #+name: python-tictactoe_game_state
+  #+begin_src python
+    <<python-imports>>
+    Coordinate = Tuple[int, int]
+
+    _Player = Literal['A', 'B']
+    TicTacToeState = Literal[_Player, 'Draw', 'Pending']
+
+    max_to_moves_to_consider = 9
+
+    def tictactoe_game_state(move_coordinates: Iterable[Coordinate]) -> TicTacToeState:
+        player_moves = islice(cycle([move_evaluator('A'), move_evaluator('B')]), max_to_moves_to_consider)
+        move_count = 0
+
+        for coordinate, move in zip(move_coordinates, player_moves):
+            winner = move(coordinate)
+            if winner:
+                return winner
+            move_count +=1
+
+        if move_count >= max_to_moves_to_consider:
+            return 'Draw'
+        return 'Pending'
+
+  #+end_src
+
+  We can test this by hard coding some of the results we know so for example if ~move~ always returns ~None~ we should get a draw, and if we don't send in enough items we want it to pend
+
+  #+begin_src python :eval yes
+    <<python-tictactoe_game_state>>
+
+    def move_evaluator(_):
+        return lambda _: None
+
+    print('draw:', tictactoe_game_state([[0,0],[1,1],[2,0],[1,0],[1,2],[2,1],[0,1],[0,2],[2,2]]) )
+    print('pending:', tictactoe_game_state([[0,0],[1,1]]) )
+  #+end_src
+
+  #+RESULTS:
+  : draw: Draw
+  : pending: Pending
+
+  What if we hard code the victory of 'A' on the third move?
+
+  #+begin_src python :eval yes
+    <<python-tictactoe_game_state>>
+
+    def move_evaluator(player):
+        it = iter([None, None, player])
+        return lambda _: next(it)
+
+    print('player A:', tictactoe_game_state([[0,0],[2,0],[1,1],[2,1],[2,2]]) )
+  #+end_src
+
+  #+RESULTS:
+  : player A: A
+
+  Well, that's pretty good evidence that the above logic is correct. So let's create a proper ~move_evaluator~
+
+  We can start by considering how we will check for victory conditions. No one is asking us to track *where* each coordinate we've seen is placed, we can simply track the victory conditions. So under this plan here we want to track *how many* coordinates we've seen for all the possible ways we can win - 3 rows, 3 columns, and two diagonals. With that in hand we could simply check if any victory condition has been met 3 times. That is to say if we've seen 3 coordinates that fall in the same row that must be a win.
+
+  #+name: python-coordinate_state
+  #+begin_src python
+    coordinates_in_row = [0, 0, 0]
+    coordinates_in_column = [0, 0, 0]
+    coordinates_on_diagonal = [0, 0] # ⇘,	⇙
+
+    all_coordinate_slots = chain(coordinates_in_row, coordinates_in_column, coordinates_on_diagonal)
+    has_won = lambda: any(filter(lambda n : n>=3, all_coordinate_slots))
+  #+end_src
+
+  How do we increment these? Well, for rows and columns it is easy. If a coordinate is ~2,1~ then you've seen a coordinate in row 2 and column 1 and increment these accordingly.
+
+  For diagonals it gets a bit harder.
+  - Diagonal 0 (=⇘=) :: We observe that for a coordinate to fall on this diagonal it must be true that ~row == column~
+  - Diagonal 1 (=⇙=) :: We can actually do the same check as in Diagonal 0 but we must imagine that the column is reflected around the vertical midpoint so ~row == abs(2-column)~
+
+  We can now create function to  ~record~ a coordinate
+
+  #+name: python-record_state
+  #+begin_src python
+    def record(coordinate: Coordinate):
+        r,c = coordinate
+        coordinates_in_row[r] += 1
+        coordinates_in_column[c] += 1
+        if r == c:
+            coordinates_on_diagonal[0] += 1
+        if r == abs(2-c): # would be the same as above if reflected around y axis
+            coordinates_on_diagonal[1] += 1
+            logging.debug(f'recorded: {coordinate}, tracked state: { coordinates_in_row }, { coordinates_in_column }, { coordinates_on_diagonal }')
+  #+end_src
+
+  Now what about the actual evaluation function that is called each time with a different coordinate?
+
+  It's got this implicit state where we can optimize the first 2 calls by recording the coordinates and replying that there is no victory without even checking. After that we've got to start checking.
+
+  That sort of pattern is a form of generator isn't it?  Interestingly, since you are receiving a coordinate each time, then maybe we should style it as the more "advanced" form of a generator which is sent values (in this case the coordinate). This is supported in python with the generator's ~send~ function but its a totally weird, anti-intuitive syntax where you basically have to call ~next~ once and *afterwards* call ~send~ to advance the iterator properly. Still, a good idea here, even if the python approach to it is bizarre.
+
+  Because of the awkward syntax we actually need an extra ~yield~ out front. This is what the first ~next~ runs to
+
+  #+name: python-evaluate
+  #+begin_src python
+    def evaluate() -> Generator[Optional[_MoveEvaluatorPlayer], Coordinate, None]:
+        for _ in range(3):
+            coordinate = yield None
+            record(coordinate)
+
+        while True:
+            coordinate = yield (player if has_won() else None)
+            record(coordinate)
+  #+end_src
+  
+  And now all that remains is to put these things together around a well typed interface. Turns out the function we want to return is identical to the ~generator.send~ function, so lets just return that
+  
+  #+name: python-move_evaluator
+  #+begin_src python
+    _MoveEvaluatorPlayer = TypeVar('_MoveEvaluatorPlayer', bound=_Player)
+
+    def move_evaluator(player: _MoveEvaluatorPlayer) -> Callable[[Coordinate], Optional[_MoveEvaluatorPlayer]]:
+        <<python-coordinate_state>>
+        <<python-record_state>>
+        <<python-evaluate>>
+
+        evaluation = evaluate()
+        next(evaluation) # advance to the first yield
+        return evaluation.send
+  #+end_src
+
+  And I think that's it? Lets test it
+
+  #+begin_src python :eval yes
+    <<python-tictactoe_game_state>>
+
+    <<python-move_evaluator>>
+
+    print('player A:', tictactoe_game_state([[0,0],[2,0],[1,1],[2,1],[2,2]]) )
+    print('player B:', tictactoe_game_state([[0,0],[1,1],[0,1],[0,2],[1,0],[2,0]]) )
+    print('draw:', tictactoe_game_state([[0,0],[1,1],[2,0],[1,0],[1,2],[2,1],[0,1],[0,2],[2,2]]) )
+    print('pending:', tictactoe_game_state([[0,0],[1,1]]) )
+  #+end_src
+
+  #+RESULTS:
+  : player A: A
+  : player B: B
+  : draw: Draw
+  : pending: Pending
+
+  Yay!
+
+** Imports and Utils
+
+   #+name: python-imports
+   #+begin_src python
+     from typing import Tuple, Iterable, Literal, Callable, TypeVar, Optional, Generator
+     from itertools import cycle, islice, chain
+     import logging
+   #+end_src
+
+** Playground
+
+*** Sending to python generators
+    Two-way to python generators are super weird. You have to first ~next()~ and afterwards *only* ~send~. Lets practice the timing
+
+    #+begin_src python :eval yes
+      def gen():
+          x = 0
+          while True:
+              print('^', x)
+              x = yield x*x
+              print('$', x)
+
+      g = gen()
+
+      print('a')
+      print('b', next(g))
+      print('c', g.send(3))
+      print('e', g.send(5))
+      print('f', g.send(8))
+    #+end_src
+
+    #+RESULTS:
+    #+begin_example
+    a
+    ^ 0
+    b 0
+    $ 3
+    ^ 3
+    c 9
+    $ 5
+    ^ 5
+    e 25
+    $ 8
+    ^ 8
+    f 64
+    #+end_example
+
+*** Debugging A winning too early
+    Something was wrong..that's not it. We're getting false positives from player A. Lets check it in isolation. We can also enable logging
+
+    #+begin_src python :eval yes
+      import sys
+
+      <<python-tictactoe_game_state>>
+
+      <<python-move_evaluator>>
+
+      logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+      logging.debug('ready')
+      move = move_evaluator('A')
+      print('not A', [move(c) for c in [[0,0], [1,1], [2,1], [2,2]]])
+    #+end_src
+
+    #+RESULTS:
+    : DEBUG:root:ready
+    : DEBUG:root:recorded: [0, 0], tracked state: [1, 0, 0], [1, 0, 0], [1, 0]
+    : DEBUG:root:recorded: [1, 1], tracked state: [1, 1, 0], [1, 1, 0], [2, 1]
+    : DEBUG:root:recorded: [2, 1], tracked state: [1, 1, 1], [1, 2, 0], [2, 1]
+    : DEBUG:root:recorded: [2, 2], tracked state: [1, 1, 2], [1, 2, 1], [3, 1]
+    : not A [None, None, None, 'A']
+
+    Ah, fixed it
