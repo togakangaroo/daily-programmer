@@ -10,7 +10,7 @@
   Example:
 
   #+name: sample-board
-  #+begin_sample
+  #+begin_example
   ..AAA.......
   ..........CC
   ......B.....
@@ -20,7 +20,7 @@
   ..BBBB..CCCA
   .....CCC...A
   ........AA.A
-  #+end_sample
+  #+end_example
 
   Answer:
   - Size 2: 3
