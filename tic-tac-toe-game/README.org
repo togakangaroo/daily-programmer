@@ -52,7 +52,7 @@
     - Explanation :: The game has not finished yet
       | X |   |   |
       |   | 0 |   |
-      |   |   |   |
+      | . |   |   |
 
 *** Constraints
     - ~1 <= moves.length <= 9~
@@ -65,12 +65,11 @@
 
   So how might this work?
 
-
 ** Iterator-style interface
 
    The most straightforward interface is a stateful iterator function. Each time you call it the location goes in and the result comes out.
 
-   That's a good one. It's not necessarily the most efficient one but I do love that sort of thing. Let's just go with it.
+   That's a good one. It's not necessarily the most efficient one but I do love that sort of thing. Let's just go with it for now.
 
    Now what about how it works under the hood?
 
@@ -82,7 +81,7 @@
    - But its hardly the most efficient thing
 
 ** Something something recursion
-   What about recursion? This soft of thing is always "something something recursion".
+   What about recursion? This sort of thing is always "something something recursion".
 
    What if the board is =1x1= - easy cenario, =A=, =B= or =Pending=
 
@@ -93,14 +92,14 @@
    If the upper right is an =A= or =B= then you're checking 3 cells and that gives you a difinitive answer of =Same= or =Pending=
 
    | X |   |
-   |   |   |
+   | . |   |
 
    If the upper right is =Pending= then =Pending=, =A=, or =B= are possible. Oddly a =Draw= would not be possible.
 
    |   | A |
    | B |   |
 
-   Ehh...so yeah maybe isn't this the right sort of recursion to use here since you can't even be sure of a winner
+   Ehh...so yeah maybe isn't this the right sort of recursion to use here - you can't even be sure of a winner
 
    Yeah, I'm not really sure about this.
 
@@ -110,24 +109,24 @@
 
    8 vectors for winning are possible. 2 on each diagonal, 3 horizontal, 3 vertical.
 
-   Doable, but sounds like a lot
+   Doable, but sounds like a lot. (Keep this in our back pocket though, this will come up later.)
 
 ** Consider each player's moves in isolation
 
    What about just considering each user's moves on their own? Should be easy enough to see if someone won on the horizontal or vertical
 
-   This is the most promising one as you can do it by going through the list justa single time
+   This is the most promising one as you can do it by going through the full list just a single time
 
-   Best approach would be to abandon our neat interface. Not a ton of benefit from the one I proposed above as this would evaluate the whole list at once
+   Might need to abandon our neat interface; there is not a ton of benefit to be gained from the one I proposed above as this approach would be evaluating the whole list at once.
 
-   It's also worth mentioning that with this approach we're assuming that only valid moves are sent. It makes no attempt to detect invalid ones.
+   It's also worth mentioning that with this approach we're assuming that *only valid moves are sent*. It makes no attempt to detect invalid ones.
+   
+   With that, how we actually calculate whether a player won can be the previous idea of tracking possible win vectors explicitly.
 
-   Now to run through a few examples
+   We alternate the moves between the two players, at each step we can check if of the moves so far are there 3 in the same row (indicating a horizontal win for the player) or column (indicating a vertical one). We also check if the player has 3 on either of the two diagonals. We therefore can make a statement about each player after a move
 
-   We alternate the moves between the two players, at each step we can check if of the moves so far are there 3 in the same row (indicating a horizontal win for the player) or column (indicating a vertical one). We also check if there's a 3 on either of the two diagonals. We therefore can make a statement about each player after a move
-
-   - either they have won, in which case that's our answer since its not possible to draw by *both* players winning simultaneously
-   - or they have not won, in which case we keep looking at the next value but with the next player
+   - Either they have won, in which case that's our answer since its not possible to draw by *both* players winning simultaneously
+   - Or they have not won, in which case we keep looking at the next value but with the next player
    - As a straightforward optimization, it is impossible to have won if you haven't made three moves
 
      When we are done going through all the moves, if no one has won and we've considered 9 moves then its a =draw=, otherwise =pending=
@@ -138,7 +137,6 @@
     | MoveA | Win? | Why                               | MoveB | Win? | Why      |
     |-------+------+-----------------------------------+-------+------+----------|
     | 0,0   |      | <3 moves                          | 2,0   |      | <3 moves |
-    | 2,0   |      | <3 moves                          | 1,1   |      | <3 moves |
     | 1,1   |      | <3 moves                          | 2,1   |      | <3 moves |
     | 2,2   | A    | Matches on the top->down diagonal |       |      |          |
 
@@ -149,7 +147,7 @@
     |-------+------+-----------------------+-------+------+-----------------------|
     | 0,0   |      | <3 moves              | 1,1   |      | <3 moves              |
     | 2,0   |      | <3 moves              | 1,0   |      | <3 moves              |
-    | 1,2   |      | <3 moves              | 2,1   |      | <3 moves              |
+    | 1,2   |      | no row, col, diagonal | 2,1   |      | no row, col, diagonal |
     | 0,1   |      | no row, col, diagonal | 0,2   |      | no row, col, diagonal |
     | 2,2   |      | no row, col, diagonal |       |      |                       |
 
