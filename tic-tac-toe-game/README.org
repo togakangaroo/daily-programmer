@@ -276,9 +276,9 @@
 
   It's got this implicit state where we can optimize the first 2 calls by recording the coordinates and replying that there is no victory without even checking. After that we've got to start checking.
 
-  That sort of pattern is a form of generator isn't it?  Interestingly, since you are receiving a coordinate each time, then maybe we should style it as the more "advanced" form of a generator which is sent values (in this case the coordinate). This is supported in python with the generator's ~send~ function but its a totally weird, anti-intuitive syntax where you basically have to call ~next~ once and *afterwards* call ~send~ to advance the iterator properly. Still, a good idea here, even if the python approach to it is bizarre.
+  That sort of pattern is a form of generator isn't it?  Interestingly, since you are receiving a coordinate each time, then maybe we should style it as the more "advanced" form of a generator which is sent values (in this case the coordinate). This is supported in python with the generator's ~send~ function but its a totally weird, anti-intuitive syntax. Still, a good idea here, even if the python approach to it is bizarre.
 
-  Because of the awkward syntax we actually need an extra ~yield~ out front. This is what the first ~next~ runs to
+  Because of the awkward syntax we actually need an extra ~yield~ out front. This is what the first ~next/send~ runs to
 
   #+name: python-evaluate
   #+begin_src python
@@ -304,7 +304,7 @@
         <<python-evaluate>>
 
         evaluation = evaluate()
-        next(evaluation) # advance to the first yield
+        evaluation.send(None) # advance to the first yield
         return evaluation.send
   #+end_src
 
