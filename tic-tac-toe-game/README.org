@@ -401,3 +401,357 @@
     : not A [None, None, None, 'A']
 
     Ah, fixed it
+
+   
+* Racket Implementation
+  :PROPERTIES:
+  :header-args:racket: :noweb strip-export :exports both :eval no :results output
+  :END:
+
+  Ok so I am doing this after the [[Python Implementation]] and its been some time since I used Racket, so let's just take it slow, we're not going to do anything fancy, just the same patterns as the Python version, but with the niceties of Racket syntax
+
+  Oh heck, since I bothered with algebraic data types for python, I'll do one new thing: I've never actually used [[https://docs.racket-lang.org/ts-guide/quick.html][Typed Racket]] before. Let's check it out.
+
+  Oh interesting, apparently Typed Racket is similar in syntax to [[https://docs.racket-lang.org/reference/contracts.html#%28tech._contract%29][contracts]]. Now that is an interesting bit of overlap.
+
+  Oh farts and a colostomy, Typed Racket [[https://github.com/capfredf/typed-racket/blob/rfc-typing-generic/rfcs/text/0003-typing-generic-interfaces.md#prior-art][does not support generics]] and as a result you can't really use ~data/collection~ with it.
+
+  #+name: typed/racket/tic-tac-toe-game-state
+  #+begin_src racket
+    #lang typed/racket
+    (require threading)
+    (require/typed data/collection)
+    
+    (define-type Coordinate (Pairof Real Real))
+    (define-type Player (U 'A 'B))
+    (define-type TicTacToeState (U Player 'Draw 'Pending))
+    
+    (define max-moves-to-consider 9)
+    
+    (: tic-tac-toe-game-state (-> (Listof Coordinate) TicTacToeState))
+    (define (tic-tac-toe-game-state move-coordinates)
+      (define player-moves (~>> '(A B) cycle (take 9)))
+      'Pending)
+  #+end_src
+  
+  #+begin_src racket :eval yes
+    <<typed/racket/tic-tac-toe-game-state>>
+    (tic-tac-toe-game-state (list "a" (cons 1 2)))
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  /tmp/ob-racket-PvvOdD/ob-racketZO549urkt:4:0: require/typed: at least one specification is required
+    in: (require/typed data/collection)
+    location...:
+     /tmp/ob-racket-PvvOdD/ob-racketZO549urkt:4:0
+    context...:
+     do-raise-syntax-error
+     dots-loop
+     apply-transformer-in-context
+     apply-transformer52
+     dispatch-transformer41
+     loop
+     finish
+     pass-1-and-2-loop
+     module-begin-k
+     do-local-expand50
+     /usr/share/racket/pkgs/typed-racket-lib/typed-racket/tc-setup.rkt:94:0: tc-module/full
+     /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typed-racket.rkt:23:4: module-begin
+     apply-transformer-in-context
+     apply-transformer52
+     dispatch-transformer41
+     ensure-module-begin34
+     ...
+  #+end_example
+  
+  For the life of me I can't seem to figure out how to Typed Racket with common methods in ~sequence~ such as ~in-slice~ or in ~racket/stream~.
+
+  So...uh, abandon plan, we're just going to do regular ol' non-statically checked racket
+  
+  #+name: racket/tic-tac-toe-game-state
+  #+begin_src racket
+    (require threading)
+    (require data/collection)
+    
+    (define max-moves-to-consider 9)
+    
+    (define (tic-tac-toe-game-state move-coordinates)
+      (define player-moves (~>> '(A B) cycle (take 9)))
+      'Pending)
+  #+end_src
+  
+  #+begin_src racket :eval yes
+    <<racket/tic-tac-toe-game-state>>
+    (tic-tac-toe-game-state (list "a" (cons 1 2)))
+  #+end_src
+
+  #+RESULTS:
+  : '(A B A B A B A B A)
+  
+** Racket Playground
+  :PROPERTIES:
+  :header-args:racket: :noweb strip-export :exports both :eval yes :results output
+  :END:
+  
+*** Basic Typed Racket
+
+    From their [[https://docs.racket-lang.org/ts-guide/quick.html][Quick Start]]
+
+    #+begin_src racket
+      #lang typed/racket
+      (struct pt ([x : Real] [y : Real]))
+      
+      (: distance (-> pt pt Real))
+      (define (distance p1 p2)
+        (sqrt (+ (sqr (- (pt-x p2) (pt-x p1)))
+                 (sqr (- (pt-y p2) (pt-y p1))))))
+      
+      (distance (pt 4 9) "a")
+    #+end_src
+
+    #+RESULTS:
+    #+begin_example
+    /tmp/ob-racket-pWE8Zh/ob-racketQqaMdJrkt:10:19: Type Checker: type mismatch
+      expected: pt
+      given: String
+      in: "a"
+      location...:
+       /tmp/ob-racket-pWE8Zh/ob-racketQqaMdJrkt:10:19
+      context...:
+       do-raise-syntax-error
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:348:0: type-check
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:591:0: tc-module
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/tc-setup.rkt:94:0: tc-module/full
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typed-racket.rkt:23:4: module-begin
+       apply-transformer-in-context
+       apply-transformer52
+       dispatch-transformer41
+       ensure-module-begin34
+       expand-module16
+       expand-capturing-lifts
+       temp118_0
+       temp91_0
+       compile15
+       temp85_0
+       standard-module-name-resolver
+       ...
+    #+end_example
+
+    And there we are. Pretty straightforward type error
+
+*** Type Unions
+
+    Lets start with literals. Looks pretty simple!
+    #+begin_src racket
+      #lang typed/racket
+      
+      (define-type Player (U 'A 'B))
+      
+      (: x Player)
+      (define x 'C)
+      x
+    #+end_src
+
+    #+RESULTS:
+    #+begin_example
+    /tmp/ob-racket-JdxsQz/ob-racketlYVDI4rkt:7:10: Type Checker: type mismatch
+      expected: Player
+      given: 'C
+      in: (quote C)
+      location...:
+       /tmp/ob-racket-JdxsQz/ob-racketlYVDI4rkt:7:10
+      context...:
+       do-raise-syntax-error
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:348:0: type-check
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:591:0: tc-module
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/tc-setup.rkt:94:0: tc-module/full
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typed-racket.rkt:23:4: module-begin
+       apply-transformer-in-context
+       apply-transformer52
+       dispatch-transformer41
+       ensure-module-begin34
+       expand-module16
+       expand-capturing-lifts
+       temp118_0
+       temp91_0
+       compile15
+       temp85_0
+       standard-module-name-resolver
+       ...
+    #+end_example
+
+*** Cycle
+    I need to create a loop of ~'A 'B 'A 'B 'A~ etc of size without ~data/collection~
+    #+begin_src racket 
+      #lang typed/racket
+      
+      (require threading)
+      
+      (~> (in-cycle '(A B))
+          (in-slice 9 _)
+          (sequence-ref _ 0))
+    #+end_src
+
+    #+RESULTS:
+    #+begin_example
+    Type Checker: missing type for identifier;
+     consider using `require/typed' to import it
+      identifier: provide/contract-id-in-slice
+      from module: racket/sequence
+      in: provide/contract-id-in-slice
+      context...:
+       do-raise-syntax-error
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:348:0: type-check
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:591:0: tc-module
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/tc-setup.rkt:94:0: tc-module/full
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typed-racket.rkt:23:4: module-begin
+       apply-transformer-in-context
+       apply-transformer52
+       dispatch-transformer41
+       ensure-module-begin34
+       expand-module16
+       expand-capturing-lifts
+       temp118_0
+       temp91_0
+       compile15
+       temp85_0
+       standard-module-name-resolver
+       ...
+    #+end_example
+    
+    The issue seems to be ~in-slice~ does that just not exist in typed racket?
+
+    Ok...fine, so without ~in-slice~ then?
+    
+    #+begin_src racket
+      #lang typed/racket
+      
+      (require threading)
+      
+      (~> '(A B)
+          in-cycle
+          sequence->stream
+          (stream-take 9)
+          stream->list)
+    #+end_src
+
+    #+RESULTS:
+    #+begin_example
+    /tmp/ob-racket-pdDxtF/ob-racket1voi0hrkt:10:4: Type Checker: missing type for identifier;
+     consider using `require/typed' to import it
+      identifier: stream->list
+      from module: typed/racket
+      in: stream->list
+      location...:
+       /tmp/ob-racket-pdDxtF/ob-racket1voi0hrkt:10:4
+      context...:
+       do-raise-syntax-error
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/utils/tc-utils.rkt:133:21: for-loop
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/utils/tc-utils.rkt:123:0: report-all-errors
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:348:0: type-check
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:591:0: tc-module
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/tc-setup.rkt:94:0: tc-module/full
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typed-racket.rkt:23:4: module-begin
+       apply-transformer-in-context
+       apply-transformer52
+       dispatch-transformer41
+       ensure-module-begin34
+       expand-module16
+       expand-capturing-lifts
+       temp118_0
+       temp91_0
+       compile15
+       ...
+    /tmp/ob-racket-pdDxtF/ob-racket1voi0hrkt:9:5: Type Checker: missing type for identifier;
+     consider using `require/typed' to import it
+      identifier: stream-take
+      from module: typed/racket
+      in: stream-take
+      location...:
+       /tmp/ob-racket-pdDxtF/ob-racket1voi0hrkt:9:5
+      context...:
+       do-raise-syntax-error
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/utils/tc-utils.rkt:133:21: for-loop
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/utils/tc-utils.rkt:123:0: report-all-errors
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:348:0: type-check
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:591:0: tc-module
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/tc-setup.rkt:94:0: tc-module/full
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typed-racket.rkt:23:4: module-begin
+       apply-transformer-in-context
+       apply-transformer52
+       dispatch-transformer41
+       ensure-module-begin34
+       expand-module16
+       expand-capturing-lifts
+       temp118_0
+       temp91_0
+       compile15
+       ...
+    /tmp/ob-racket-pdDxtF/ob-racket1voi0hrkt:8:4: Type Checker: missing type for identifier;
+     consider using `require/typed' to import it
+      identifier: sequence->stream
+      from module: typed/racket
+      in: sequence->stream
+      location...:
+       /tmp/ob-racket-pdDxtF/ob-racket1voi0hrkt:8:4
+      context...:
+       do-raise-syntax-error
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/utils/tc-utils.rkt:133:21: for-loop
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/utils/tc-utils.rkt:123:0: report-all-errors
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:348:0: type-check
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:591:0: tc-module
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/tc-setup.rkt:94:0: tc-module/full
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typed-racket.rkt:23:4: module-begin
+       apply-transformer-in-context
+       apply-transformer52
+       dispatch-transformer41
+       ensure-module-begin34
+       expand-module16
+       expand-capturing-lifts
+       temp118_0
+       temp91_0
+       compile15
+       ...
+    Type Checker: Summary: 3 errors encountered
+      location...:
+       /tmp/ob-racket-pdDxtF/ob-racket1voi0hrkt:10:4
+       /tmp/ob-racket-pdDxtF/ob-racket1voi0hrkt:9:5
+       /tmp/ob-racket-pdDxtF/ob-racket1voi0hrkt:8:4
+      context...:
+       do-raise-syntax-error
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:348:0: type-check
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typecheck/tc-toplevel.rkt:591:0: tc-module
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/tc-setup.rkt:94:0: tc-module/full
+       /usr/share/racket/pkgs/typed-racket-lib/typed-racket/typed-racket.rkt:23:4: module-begin
+       apply-transformer-in-context
+       apply-transformer52
+       dispatch-transformer41
+       ensure-module-begin34
+       expand-module16
+       expand-capturing-lifts
+       temp118_0
+       temp91_0
+       compile15
+       temp85_0
+       standard-module-name-resolver
+       ...
+    #+end_example
+
+*** Cycle and zip
+    Easy enough to cycle using ~data/collection~ and zipping is done via ~map~ (I have yet to learn how to do it with collections of varying lengths however)
+    
+    #+begin_src racket
+      (require data/collection)
+      (require threading)
+      
+      (define (zip-shortest map-with . sequences)
+        (for-sequence))
+      
+      (define player-moves (~>> '(A B) cycle (take 9)))
+      
+      (sequence->list (map cons player-moves (in-range)))
+    #+end_src
+
+    #+RESULTS:
+    : '((A . 0) (B . 1) (A . 2) (B . 3) (A . 4) (B . 5) (A . 6) (B . 7) (A . 8))
