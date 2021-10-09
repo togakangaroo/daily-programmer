@@ -119,25 +119,92 @@
 
 ** Parser
 
-    #+name: racket.island-perimeter-parser.rkt
+    #+name: ip.parser.rkt
     #+begin_src racket :eval no
       #lang brag
-      island-perimeter : "\n"* row ("\n"+ row)*
-      row : white-space* cell* vertical-wall white-space*
-      cell : vertical-wall white-space+ mark white-space+
-      white-space : " "
-      vertical-wall : "|"
-      land : "X"
-      water : " "
-      mark : land | water
+      ip-program : "\n"* ip-row ("\n"+ ip-row)*
+      ip-row : ip-white-ip-space* ip-cell* ip-vertical-ip-wall ip-white-ip-space*
+      ip-cell : ip-vertical-ip-wall ip-white-ip-space+ ip-mark ip-white-ip-space+
+      ip-white-ip-space : " "
+      ip-vertical-ip-wall : "|"
+      ip-land : "X"
+      ip-water : " "
+      ip-mark : ip-land | ip-water
     #+end_src
 
-    #+begin_src racket :eval yes :adjacent-file racket.island-perimeter-parser.rkt
+    #+begin_src racket :eval yes :adjacent-file ip.parser.rkt
       #lang br
-      (require "racket.island-perimeter-parser.rkt")
+      (require "ip.parser.rkt")
       (parse-to-datum "
         <<example=1/diagram>>")
     #+end_src
 
     #+RESULTS:
-    : '(island-perimeter "\n" (row (white-space " ") (white-space " ") (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (vertical-wall "|")) "\n" (row (white-space " ") (white-space " ") (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (vertical-wall "|")) "\n" (row (white-space " ") (white-space " ") (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (vertical-wall "|")) "\n" (row (white-space " ") (white-space " ") (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (vertical-wall "|")))
+    : '(ip-program "\n" (ip-row (ip-white-ip-space " ") (ip-white-ip-space " ") (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-vertical-ip-wall "|")) "\n" (ip-row (ip-white-ip-space " ") (ip-white-ip-space " ") (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-vertical-ip-wall "|")) "\n" (ip-row (ip-white-ip-space " ") (ip-white-ip-space " ") (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-vertical-ip-wall "|")) "\n" (ip-row (ip-white-ip-space " ") (ip-white-ip-space " ") (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-vertical-ip-wall "|")))
+    
+    #+name: ip.reader.rkt
+    #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
+      #lang br/quicklang
+      
+      (require threading)
+      (require brag/support)
+      (require "ip.parser.rkt")
+      
+      (provide read-syntax)
+      
+      (define (read-syntax path port)
+        (define parse-tree (parse path (make-tokenizer port)))
+        (define module-datum `(module island-perimeter "ip.expander.rkt"
+                                ,parse-tree))
+        (datum->syntax #f module-datum))
+      
+      (define (make-tokenizer port)
+        (define (next-token)
+          (define ip-lexer
+            (lexer
+             [any-char lexeme]))
+          (ip-lexer port))
+        next-token)
+    #+end_src
+
+    #+name: ip.expander.rkt
+    #+begin_src racket :eval no
+      #lang br/quicklang
+      (require racket/pretty)
+      
+      (provide (rename-out [ip-module-begin #%module-begin]))
+      
+      (define-macro (ip-module-begin PARSE-TREE)
+        #'(#%module-begin
+           (pretty-print 'PARSE-TREE)))
+    #+end_src
+    
+    
+    #+begin_src racket :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt
+      #lang reader "ip.reader.rkt"
+      | X |   | X |
+    #+end_src
+
+    #+RESULTS:
+    #+begin_example
+    '(ip-program
+      "\n"
+      "\n"
+      (ip-row
+       (ip-cell
+        (ip-vertical-ip-wall "|")
+        (ip-white-ip-space " ")
+        (ip-mark (ip-land "X"))
+        (ip-white-ip-space " "))
+       (ip-cell
+        (ip-vertical-ip-wall "|")
+        (ip-white-ip-space " ")
+        (ip-mark (ip-water " "))
+        (ip-white-ip-space " "))
+       (ip-cell
+        (ip-vertical-ip-wall "|")
+        (ip-white-ip-space " ")
+        (ip-mark (ip-land "X"))
+        (ip-white-ip-space " "))
+       (ip-vertical-ip-wall "|")))
+    #+end_example
