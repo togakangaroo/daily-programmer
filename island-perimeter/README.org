@@ -1,37 +1,143 @@
 #+TITLE: Island Perimeter
 * Problem Statement
   [[https://operation-code.slack.com/archives/C7JMZ5LAV/p1633353389035400][From OpCode Slack]]
-  
-You are given =row x col= grid representing a map where ~grid[i][j] = 1~ represents land and ~grid[i][j] = 0~ represents water.
 
-Grid cells are connected horizontally/vertically (not diagonally). The grid is completely surrounded by water, and there is exactly one island (i.e., one or more connected land cells).
+  You are given =row x col= grid representing a map where ~grid[i][j] = 1~ represents land and ~grid[i][j] = 0~ represents water.
 
-The island doesn't have "lakes", meaning the water inside isn't connected to the water around the island. One cell is a square with side length 1. The grid is rectangular, width and height don't exceed 100. Determine the perimeter of the island.
+  Grid cells are connected horizontally/vertically (not diagonally). The grid is completely surrounded by water, and there is exactly one island (i.e., one or more connected land cells).
 
- *Constraints:*
- - ~row == grid.length~
- - ~col == grid[i].length~
- - ~1 <= row, col <= 100~
- - ~grid[i][j] is 0 or 1~
- - There is exactly one island in grid.
-  
+  The island doesn't have "lakes", meaning the water inside isn't connected to the water around the island. One cell is a square with side length 1. The grid is rectangular, width and height don't exceed 100. Determine the perimeter of the island.
+
+  *Constraints:*
+  - ~row == grid.length~
+  - ~col == grid[i].length~
+  - ~1 <= row, col <= 100~
+  - ~grid[i][j] is 0 or 1~
+  - There is exactly one island in grid.
+
 ** Example 1:
- 
- - Input :: ~grid = [[0,1,0,0],[1,1,1,0],[0,1,0,0],[1,1,0,0]]~
- - Output :: ~16~
- - Explanation :: The perimeter is the 16 yellow stripes
-  
-   |   | X |   |   |
-   | X | X | X |   |
-   |   | X |   |   |
-   | X | X |   |   |
-   
+   - Input :: ~grid = [[0,1,0,0],[1,1,1,0],[0,1,0,0],[1,1,0,0]]~
+   - Output :: ~16~
+   - Explanation :: The perimeter is the 16 yellow stripes
+
+     #+name: example=1/diagram
+     #+begin_src racket :eval no
+     |   | X |   |   |
+     | X | X | X |   |
+     |   | X |   |   |
+     | X | X |   |   |
+     #+end_src
+
 ** Example 2:
- - Input :: ~grid = [[1]]~
- - Output :: ~4~
-   
-  
+   - Input :: ~grid = [[1]]~
+   - Output :: ~4~
+
+
 ** Example 3:
- - Input :: grid = ~[[1,0]]~
- - Output :: ~4~
+   - Input :: grid = ~[[1,0]]~
+   - Output :: ~4~
+
+* Brainstorming
+  :PROPERTIES:
+  :header-args:racket: :noweb yes
+  :END:
+
+  So normally I would start jotting down ideas here but in this case I used the time-honored strategy of taking a shower and of course it came to me.
+
+** Node Map
+   For our purposes, lets count coordinates at the vertices, not at the cells! So in [[Example 1]] above we take =0 0= at the upper left vertex, going accross to =4 0= and down to =4 4= we then express the chart as a list of connections from each vertex
+
+   #+name: racket/example-1/node-map
+   #+begin_src racket :export code :eval no
+     (apply hash '((1 0) ((2 0) (1 1))
+                         (2 0) ((2 1) (1 0))
+                         (0 1) ((1 1) (0 2))
+                         (1 1) ((2 1) (1 2) (0 1) (1 0))
+                         (2 1) ((3 1) (2 2) (1 1) (2 0))
+                         (3 1) ((3 2) (2 1))
+                         (0 2) ((2 1) (0 1))
+                         (1 2) ((2 2) (1 3) (0 2) (1 1))
+                         (2 2) ((3 2) (2 3) (1 2) (2 1))
+                         (3 2) ((2 2) (3 1))
+                         (0 3) ((1 3) (0 4))
+                         (1 3) ((2 3) (1 4) (0 3) (1 2))
+                         (2 3) ((2 4) (1 3) (2 2))
+                         (0 4) ((1 4) (0 3))
+                         (1 4) ((2 4) (0 4) (1 3))
+                         (2 4) ((1 4) (2 3))))
+   #+end_src
+
+   But that;s not quite right, After all, I need an indicator *which* connection to ove to, not all steps are along the outside of the shape.
+
+   So uhh...can we filter out the ones that are internal? Probably best to not place them in the list to begin with, but the logic should apply either way. What makes a connection internal? For [[Example 1]] we would want to omit the connection between =1 1= and =2 1=. Why? Because the square to either side of that connection is full.
+
+   To do this...it actually *does* seem like it would be easier if we also had a full mapping of the board itself so we could refer to full cells. 
+   - A connection between =x1 y1
+
+   Given a proper node map structure like above, it should be trivial to determine perimeter. You literally start anywhere and try to move into the first connection that you have not yet visited until you can do it no more. Each time you step you increase a counter
+  
+   This only works come to think of it,  if there are no *internal* nodes tracked.
+
+   None of the examples above describe one, we Need to
+
+   Let's not worry about that now, lets assume it already has been properly arranged where all data in it is relevant. If that is the case, then you can pick any point on the ,,
  
+   #+begin_src racket
+     (require threading)
+     (require (except-in data/collection sequence->list))
+     (require racket/generator)
+     (require racket/match)
+     
+     (define node-map
+       <<racket/example-1/node-map>>)
+     
+     (define (has-key source key)
+       (hash-ref-key key #f))
+     
+     (define steps (sequence->stream
+                    (in-generator 
+                     (let rec ([next-node (hash-iterate-key node-map 0)]
+                               [visited (make-hash)])
+                       (println (list next-node visited (hash-ref-key node-map next-node 'f) (hash-ref-key visited next-node 'f)))
+                       (when (and (hash-key node-map next-node)
+                                  (hash-key visited next-node 'f))
+                         (hash-set! visited next-node 't)
+                         (yield next-node)
+                         (match-let ([(list x y) next-node])
+                           (print 'next)))))))
+     ;; (rec (list (add1 x) y) visited)
+     ;; (rec (list x add1 y) visited)
+     ;; (rec (list (sub1 x) y) visited)
+     ;; (rec (list x (sub1 y)) visited)))))))
+     
+     (first (take 3 steps))
+   #+end_src
+
+   #+RESULTS:
+   : '((2 4) #hash() (2 4) f)
+   : '(2 4)
+
+** Parser
+
+    #+name: racket.island-perimeter-parser.rkt
+    #+begin_src racket :eval no
+      #lang brag
+      island-perimeter : "\n"* row ("\n"+ row)*
+      row : white-space* cell* vertical-wall white-space*
+      cell : vertical-wall white-space+ mark white-space+
+      white-space : " "
+      vertical-wall : "|"
+      land : "X"
+      water : " "
+      mark : land | water
+    #+end_src
+
+    #+begin_src racket :eval yes :adjacent-file racket.island-perimeter-parser.rkt
+      #lang br
+      (require "racket.island-perimeter-parser.rkt")
+      (parse-to-datum "
+        <<example=1/diagram>>")
+    #+end_src
+
+    #+RESULTS:
+    : '(island-perimeter "\n" (row (white-space " ") (white-space " ") (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (vertical-wall "|")) "\n" (row (white-space " ") (white-space " ") (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (vertical-wall "|")) "\n" (row (white-space " ") (white-space " ") (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (vertical-wall "|")) "\n" (row (white-space " ") (white-space " ") (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (land "X")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (cell (vertical-wall "|") (white-space " ") (mark (water " ")) (white-space " ")) (vertical-wall "|")))
