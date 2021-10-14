@@ -20,7 +20,7 @@
    - Output :: ~16~
    - Explanation :: The perimeter is the 16 yellow stripes
 
-     #+name: example=1/diagram
+     #+name: example-1/diagram
      #+begin_src racket :eval no
      |   | X |   |   |
      | X | X | X |   |
@@ -119,18 +119,24 @@
 
 ** Parser
 
+   Ok you know what, I think all the stuff I'm doing above is good, but it certainly is making assumptions about what sort of data structure is easy to parse that I am not certain would hold. Let's figure that side of it out right now
+
+   First, can I write a brag grammar for what the board looks like? It kinda seems straightforward, lets try it
+   
     #+name: ip.parser.rkt
     #+begin_src racket :eval no
       #lang brag
       ip-program : "\n"* ip-row ("\n"+ ip-row)*
-      ip-row : ip-white-ip-space* ip-cell* ip-vertical-ip-wall ip-white-ip-space*
-      ip-cell : ip-vertical-ip-wall ip-white-ip-space+ ip-mark ip-white-ip-space+
-      ip-white-ip-space : " "
-      ip-vertical-ip-wall : "|"
+      ip-row : ip-whitespace* ip-cell* ip-vertical-wall ip-whitespace*
+      ip-cell : ip-vertical-wall ip-whitespace+ ip-mark ip-whitespace+
+      ip-whitespace : " "
+      ip-vertical-wall : "|"
       ip-land : "X"
       ip-water : " "
       ip-mark : ip-land | ip-water
     #+end_src
+
+    Uhh...I'm actually pretty confident about that one, let's try it out on [[Example 1]]
 
     #+begin_src racket :eval yes :adjacent-file ip.parser.rkt
       #lang br
@@ -140,10 +146,23 @@
     #+end_src
 
     #+RESULTS:
-    : '(ip-program "\n" (ip-row (ip-white-ip-space " ") (ip-white-ip-space " ") (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-vertical-ip-wall "|")) "\n" (ip-row (ip-white-ip-space " ") (ip-white-ip-space " ") (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-vertical-ip-wall "|")) "\n" (ip-row (ip-white-ip-space " ") (ip-white-ip-space " ") (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-vertical-ip-wall "|")) "\n" (ip-row (ip-white-ip-space " ") (ip-white-ip-space " ") (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-land "X")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-cell (ip-vertical-ip-wall "|") (ip-white-ip-space " ") (ip-mark (ip-water " ")) (ip-white-ip-space " ")) (ip-vertical-ip-wall "|")))
+    : '(ip-program "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")))
     
-    #+name: ip.reader.rkt
-    #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
+    Oh nice! With a minimal amount of twiddling, that actually worked.
+
+    So the next bit is going to be simply modifying the bf example from the Beautiful Racket book. In that example they use a tokenizer to ignore the comments. In this case I don't think we need that. I suspect we could get rid of the tokenizer entirely and just use the default but because I don't know how off the top of my head, lets just make a tokenizer that simply makes every character into a token
+    
+    #+name: racket/every-character:tokenizer
+    #+begin_src racket :eval no
+      (define (make-tokenizer port)
+        (λ ()
+          (define ip-lexer (lexer
+                            [any-char lexeme]))
+          (ip-lexer port)))
+    #+end_src
+    
+    #+name: ip.reader.rkt/prefix
+    #+begin_src racket :eval no
       #lang br/quicklang
       
       (require threading)
@@ -151,23 +170,20 @@
       (require "ip.parser.rkt")
       
       (provide read-syntax)
-      
+    #+end_src
+    
+    #+name: ip.reader.printing-expander.rkt
+    #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
+      <<ip.reader.rkt/prefix>>
       (define (read-syntax path port)
         (define parse-tree (parse path (make-tokenizer port)))
-        (define module-datum `(module island-perimeter "ip.expander.rkt"
+        (define module-datum `(module island-perimeter "ip.printing-expander.rkt"
                                 ,parse-tree))
         (datum->syntax #f module-datum))
-      
-      (define (make-tokenizer port)
-        (define (next-token)
-          (define ip-lexer
-            (lexer
-             [any-char lexeme]))
-          (ip-lexer port))
-        next-token)
+      <<racket/every-character:tokenizer>>
     #+end_src
 
-    #+name: ip.expander.rkt
+    #+name: ip.printing-expander.rkt
     #+begin_src racket :eval no
       #lang br/quicklang
       (require racket/pretty)
@@ -180,8 +196,8 @@
     #+end_src
     
     
-    #+begin_src racket :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt
-      #lang reader "ip.reader.rkt"
+    #+begin_src racket :adjacent-file  ip.reader.printing-expander.rkt ip.parser.rkt ip.printing-expander.rkt
+      #lang reader "ip.reader.printing-expander.rkt"
       | X |   | X |
     #+end_src
 
@@ -192,19 +208,86 @@
       "\n"
       (ip-row
        (ip-cell
-        (ip-vertical-ip-wall "|")
-        (ip-white-ip-space " ")
+        (ip-vertical-wall "|")
+        (ip-whitespace " ")
         (ip-mark (ip-land "X"))
-        (ip-white-ip-space " "))
+        (ip-whitespace " "))
        (ip-cell
-        (ip-vertical-ip-wall "|")
-        (ip-white-ip-space " ")
+        (ip-vertical-wall "|")
+        (ip-whitespace " ")
         (ip-mark (ip-water " "))
-        (ip-white-ip-space " "))
+        (ip-whitespace " "))
        (ip-cell
-        (ip-vertical-ip-wall "|")
-        (ip-white-ip-space " ")
+        (ip-vertical-wall "|")
+        (ip-whitespace " ")
         (ip-mark (ip-land "X"))
-        (ip-white-ip-space " "))
-       (ip-vertical-ip-wall "|")))
+        (ip-whitespace " "))
+       (ip-vertical-wall "|")))
     #+end_example
+
+    Ok, so now we want to write a function that can convert this into something more workable
+
+    #+name: ip.reader.rkt
+    #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
+      <<ip.reader.rkt/prefix>>
+      (define (read-syntax path port)
+        (define parse-tree (parse path (make-tokenizer port)))
+        (define module-datum `(module island-perimeter "ip.expander.rkt"
+                                ,parse-tree))
+        (datum->syntax #f module-datum))
+      <<racket/every-character:tokenizer>>
+    #+end_src
+
+    #+name: ip.expander.rkt
+    #+begin_src racket :eval no
+      #lang br/quicklang
+      (require racket/pretty)
+      (require racket/match)
+      (require threading)
+      
+      (provide (rename-out [ip-module-begin #%module-begin]))
+      
+      (define-macro (ip-module-begin PARSE-TREE)
+        #'(#%module-begin
+           (display-results (parse-island 'PARSE-TREE))))
+      
+      (define (display-results board)
+        (pretty-print board))
+      
+      (define/match (parse-island program)
+        [((list 'ip-program contents ...)) (~>> contents
+                                                (remove* (list "\n"))
+                                                (map parse-island))]
+        [((list 'ip-row rows ...)) (~>> rows
+                                        (map parse-island)
+                                        (remove* (list (void))))]
+        [((list 'ip-cell contents ...)) (~>> contents
+                                             (map parse-island)
+                                             (remove* (list (void)))
+                                             first)]
+        [((list 'ip-vertical-wall _)) (void)]
+        [((list 'ip-whitespace _)) (void)]
+        [((list 'ip-mark (list 'ip-water _))) 'water]
+        [((list 'ip-mark (list 'ip-land _))) 'land])
+    #+end_src
+    
+    
+    #+begin_src racket :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt
+      #lang reader "ip.reader.rkt"
+      | X |   | X |
+    #+end_src
+
+    #+RESULTS:
+    : '((land water land))
+    
+
+    #+begin_src racket :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt
+      #lang reader "ip.reader.rkt"
+      <<example-1/diagram>>
+    #+end_src
+
+    #+RESULTS:
+    : '((water land water water)
+    :   (land land land water)
+    :   (water land water water)
+    :   (land land water water))
