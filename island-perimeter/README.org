@@ -22,10 +22,10 @@
 
      #+name: example-1/diagram
      #+begin_src racket :eval no
-     |   | X |   |   |
-     | X | X | X |   |
-     |   | X |   |   |
-     | X | X |   |   |
+       |   | X |   |   |
+       | X | X | X |   |
+       |   | X |   |   |
+       | X | X |   |   |
      #+end_src
 
 ** Example 2:
@@ -123,171 +123,471 @@
 
    First, can I write a brag grammar for what the board looks like? It kinda seems straightforward, lets try it
    
-    #+name: ip.parser.rkt
-    #+begin_src racket :eval no
-      #lang brag
-      ip-program : "\n"* ip-row ("\n"+ ip-row)*
-      ip-row : ip-whitespace* ip-cell* ip-vertical-wall ip-whitespace*
-      ip-cell : ip-vertical-wall ip-whitespace+ ip-mark ip-whitespace+
-      ip-whitespace : " "
-      ip-vertical-wall : "|"
-      ip-land : "X"
-      ip-water : " "
-      ip-mark : ip-land | ip-water
-    #+end_src
+   #+name: ip.parser.rkt
+   #+begin_src racket :eval no
+     #lang brag
+     ip-program : "\n"* ip-row ("\n"+ ip-row)*
+     ip-row : ip-whitespace* ip-cell* ip-vertical-wall ip-whitespace*
+     ip-cell : ip-vertical-wall ip-whitespace+ ip-mark ip-whitespace+
+     ip-whitespace : " "
+     ip-vertical-wall : "|"
+     ip-land : "X"
+     ip-water : " "
+     ip-mark : ip-land | ip-water
+   #+end_src
 
-    Uhh...I'm actually pretty confident about that one, let's try it out on [[Example 1]]
+   Uhh...I'm actually pretty confident about that one, let's try it out on [[Example 1]]
 
-    #+begin_src racket :eval yes :adjacent-file ip.parser.rkt
-      #lang br
-      (require "ip.parser.rkt")
-      (parse-to-datum "
-        <<example=1/diagram>>")
-    #+end_src
+   #+begin_src racket :eval yes :adjacent-file ip.parser.rkt
+     #lang br
+     (require "ip.parser.rkt")
+     (parse-to-datum "
+       <<example=1/diagram>>")
+   #+end_src
 
-    #+RESULTS:
-    : '(ip-program "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")))
+   #+RESULTS:
+   : '(ip-program "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")))
     
-    Oh nice! With a minimal amount of twiddling, that actually worked.
+   Oh nice! With a minimal amount of twiddling, that actually worked.
 
-    So the next bit is going to be simply modifying the bf example from the Beautiful Racket book. In that example they use a tokenizer to ignore the comments. In this case I don't think we need that. I suspect we could get rid of the tokenizer entirely and just use the default but because I don't know how off the top of my head, lets just make a tokenizer that simply makes every character into a token
+   So the next bit is going to be simply modifying the bf example from the Beautiful Racket book. In that example they use a tokenizer to ignore the comments. In this case I don't think we need that. I suspect we could get rid of the tokenizer entirely and just use the default but because I don't know how off the top of my head, lets just make a tokenizer that simply makes every character into a token
     
-    #+name: racket/every-character:tokenizer
-    #+begin_src racket :eval no
-      (define (make-tokenizer port)
-        (λ ()
-          (define ip-lexer (lexer
-                            [any-char lexeme]))
-          (ip-lexer port)))
-    #+end_src
+   #+name: racket/every-character:tokenizer
+   #+begin_src racket :eval no
+     (define (make-tokenizer port)
+       (λ ()
+         (define ip-lexer (lexer
+                           [any-char lexeme]))
+         (ip-lexer port)))
+   #+end_src
     
-    #+name: ip.reader.rkt/prefix
-    #+begin_src racket :eval no
-      #lang br/quicklang
-      
+   #+name: ip.reader.rkt/prefix
+   #+begin_src racket :eval no
+     #lang br/quicklang
+     
+     (require threading)
+     (require brag/support)
+     (require "ip.parser.rkt")
+     
+     (provide read-syntax)
+   #+end_src
+    
+   #+name: ip.reader.printing-expander.rkt
+   #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
+     <<ip.reader.rkt/prefix>>
+     (define (read-syntax path port)
+       (define parse-tree (parse path (make-tokenizer port)))
+       (define module-datum `(module island-perimeter "ip.printing-expander.rkt"
+                               ,parse-tree))
+       (datum->syntax #f module-datum))
+     <<racket/every-character:tokenizer>>
+   #+end_src
+
+   #+name: ip.printing-expander.rkt
+   #+begin_src racket :eval no
+     #lang br/quicklang
+     (require racket/pretty)
+     
+     (provide (rename-out [ip-module-begin #%module-begin]))
+     
+     (define-macro (ip-module-begin PARSE-TREE)
+       #'(#%module-begin
+          (pretty-print 'PARSE-TREE)))
+   #+end_src
+    
+    
+   #+begin_src racket :adjacent-file  ip.reader.printing-expander.rkt ip.parser.rkt ip.printing-expander.rkt
+     #lang reader "ip.reader.printing-expander.rkt"
+     | X |   | X |
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   '(ip-program
+     "\n"
+     "\n"
+     (ip-row
+      (ip-cell
+       (ip-vertical-wall "|")
+       (ip-whitespace " ")
+       (ip-mark (ip-land "X"))
+       (ip-whitespace " "))
+      (ip-cell
+       (ip-vertical-wall "|")
+       (ip-whitespace " ")
+       (ip-mark (ip-water " "))
+       (ip-whitespace " "))
+      (ip-cell
+       (ip-vertical-wall "|")
+       (ip-whitespace " ")
+       (ip-mark (ip-land "X"))
+       (ip-whitespace " "))
+      (ip-vertical-wall "|")))
+   #+end_example
+
+   Ok, so now we want to write a function that can convert this into something more workable
+
+   #+name: ip.reader.rkt
+   #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
+     <<ip.reader.rkt/prefix>>
+     (define (read-syntax path port)
+       (define parse-tree (parse path (make-tokenizer port)))
+       (define module-datum `(module island-perimeter "ip.expander.rkt"
+                               ,parse-tree))
+       (datum->syntax #f module-datum))
+     <<racket/every-character:tokenizer>>
+   #+end_src
+
+   #+name: ip.expander.rkt
+   #+begin_src racket :eval no
+     #lang br/quicklang
+     (require racket/pretty)
+     (require racket/match)
+     (require math/matrix)
+     (require threading)
+     
+     (provide (rename-out [ip-module-begin #%module-begin]))
+     
+     (define-macro (ip-module-begin PARSE-TREE)
+       #'(#%module-begin
+          (display-results (parse-island 'PARSE-TREE))))
+     
+     (define (display-results board)
+       (pretty-print (matrix->list* board)))
+     
+     (define/match (parse-island program)
+       [((list 'ip-program contents ...)) (~>> contents
+                                               (remove* (list "\n"))
+                                               (map parse-island)
+                                               list*->matrix)]
+       [((list 'ip-row rows ...)) (~>> rows
+                                       (map parse-island)
+                                       (remove* (list (void))))]
+       [((list 'ip-cell contents ...)) (~>> contents
+                                            (map parse-island)
+                                            (remove* (list (void)))
+                                            first)]
+       [((list 'ip-vertical-wall _)) (void)]
+       [((list 'ip-whitespace _)) (void)]
+       [((list 'ip-mark (list 'ip-water _))) 'water]
+       [((list 'ip-mark (list 'ip-land _))) 'land])
+   #+end_src
+    
+    
+   #+begin_src racket :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt
+     #lang reader "ip.reader.rkt"
+     | X |   | X |
+     | X | X |   |
+   #+end_src
+
+   #+RESULTS:
+   : '((land water land) (land land water))
+    
+
+   #+begin_src racket :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt
+     #lang reader "ip.reader.rkt"
+     <<example-1/diagram>>
+   #+end_src
+
+   #+RESULTS:
+   : '((water land water water)
+   :   (land land land water)
+   :   (water land water water)
+   :   (land land water water))
+
+   First thought is to get only the edges which I can do by a laplace filter using a convolution matrix of
+
+   |    0 | -.25 |    0 |
+   | -.25 |    1 | -.25 |
+   |    0 | -.25 |    0 |
+    
+   but....what does that actually do for me? Lets create an example with some internals
+
+   #+name: example-4/diagram
+   #+begin_src racket :eval no
+     |   |   | X |   |   |
+     | X | X | X | X |   |
+     | X | X | X | X |   |
+     | X | X | X | X |   |
+     |   |   | X |   |   |
+     | X | X | X |   |   |
+   #+end_src
+
+   In this case, cells =(2 1) (1 2) (2 2) (2 3)= are completely internal and do not need to be considered.
+
+   Lets say I'm tracking around the edges - that is I'm looking at vertex =[0 1]= and I need to decide which direction to step to next. There are 4 directions and the way we can pick is
+    1. Always try the same sequence (eg Right, Down, Left, Up). Take the first step you can
+    2. Do not step back to where you have been
+    3. Never step down a path where surrounded by two squares with the same mark
+
+       If we were to follow that rule we would step
+
+       - [0 1] -> [1 1]
+       - [1 1] -> [2 1]
+       - [2 1] -> [2 0]
+       - [2 0] -> [3 0]
+       - [3 0] -> [3 1]
+       - [3 1] -> [4 1]
+       - [4 1] -> [4 2]
+       - [4 2] -> [4 3]
+       - [4 3] -> [4 4]
+       - [4 4] -> [3 4]
+       - [3 4] -> [3 5]
+
+       Etcetera. I think I've convinced myself that this would both work, and not require any sort of edge detection.
+
+
+    Well lets implement this then
+
+    First, how about figurg out the vertex we will start at
+     
+    #+begin_src racket
       (require threading)
-      (require brag/support)
-      (require "ip.parser.rkt")
-      
-      (provide read-syntax)
-    #+end_src
-    
-    #+name: ip.reader.printing-expander.rkt
-    #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
-      <<ip.reader.rkt/prefix>>
-      (define (read-syntax path port)
-        (define parse-tree (parse path (make-tokenizer port)))
-        (define module-datum `(module island-perimeter "ip.printing-expander.rkt"
-                                ,parse-tree))
-        (datum->syntax #f module-datum))
-      <<racket/every-character:tokenizer>>
-    #+end_src
-
-    #+name: ip.printing-expander.rkt
-    #+begin_src racket :eval no
-      #lang br/quicklang
       (require racket/pretty)
+      (require math/matrix)
+      (require math/array)
+      (require (except-in data/collection sequence->list))
       
-      (provide (rename-out [ip-module-begin #%module-begin]))
+      (define board '((water water water water)
+                      (land land land water)
+                      (water land water water)
+                      (land land water water)))
       
-      (define-macro (ip-module-begin PARSE-TREE)
-        #'(#%module-begin
-           (pretty-print 'PARSE-TREE)))
-    #+end_src
-    
-    
-    #+begin_src racket :adjacent-file  ip.reader.printing-expander.rkt ip.parser.rkt ip.printing-expander.rkt
-      #lang reader "ip.reader.printing-expander.rkt"
-      | X |   | X |
+      (ormap identity (for/sequence ([row board]
+                                     [r (in-naturals)])
+                        (for/first ([cell row]
+                                    [c (in-naturals)]
+                                    #:when (equal? 'land cell))
+                          (cons r c))))
     #+end_src
 
     #+RESULTS:
-    #+begin_example
-    '(ip-program
-      "\n"
-      "\n"
-      (ip-row
-       (ip-cell
-        (ip-vertical-wall "|")
-        (ip-whitespace " ")
-        (ip-mark (ip-land "X"))
-        (ip-whitespace " "))
-       (ip-cell
-        (ip-vertical-wall "|")
-        (ip-whitespace " ")
-        (ip-mark (ip-water " "))
-        (ip-whitespace " "))
-       (ip-cell
-        (ip-vertical-wall "|")
-        (ip-whitespace " ")
-        (ip-mark (ip-land "X"))
-        (ip-whitespace " "))
-       (ip-vertical-wall "|")))
-    #+end_example
+    : '(1 . 0)
 
-    Ok, so now we want to write a function that can convert this into something more workable
+    But hold on, didn't we say we want to work with matricies? How would you do that there?
 
-    #+name: ip.reader.rkt
-    #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
-      <<ip.reader.rkt/prefix>>
-      (define (read-syntax path port)
-        (define parse-tree (parse path (make-tokenizer port)))
-        (define module-datum `(module island-perimeter "ip.expander.rkt"
-                                ,parse-tree))
-        (datum->syntax #f module-datum))
-      <<racket/every-character:tokenizer>>
-    #+end_src
-
-    #+name: ip.expander.rkt
+    #+name: first-land-vertex
     #+begin_src racket :eval no
-      #lang br/quicklang
-      (require racket/pretty)
+      (require threading)
       (require racket/match)
+      (require math/matrix)
+      (require math/array)
+      (require (except-in data/collection sequence->list))
+      
+      (define (first-land-vertex board)
+        (match-define (vector board-height board-width) (array-shape board))
+        (define first-land-position-per-row (for/sequence ([r (in-range board-height)])
+                                              (for/first ([c (in-range board-width)]
+                                                          #:when (~>> (vector r c)
+                                                                      (array-ref board)
+                                                                      (equal? 'land)))
+                                                (vector r c))))
+      
+        (define first-land-cell (for/first ([v first-land-position-per-row]
+                                            #:when (not (false? v)))
+                                  v))
+        ;; Upper left vertex would be the same as the cell coordinates, since we're sweeping through left to right and top to bottom, it is impossible that the upper left would be an internal vertex
+        first-land-cell)
+    #+end_src
+     
+    #+begin_src racket 
+      (define board (list*->matrix '((water water water water)
+                                     (water water land water)
+                                     (land land land water)
+                                     (water land water water)
+                                     (land land water water))))
+      
+      
+      <<first-land-vertex>>
+      
+      (first-land-vertex board)
+    #+end_src
+
+    #+RESULTS:
+    : '#(1 2)
+
+    Ok, so now lets see what it looks like to walk it from there
+     
+    #+begin_src racket 
       (require threading)
+      (require racket/match)
+      (require racket/format)
+      (require racket/set)
+      (require racket/vector)
+      (require math/matrix)
+      (require math/array)
+      (require (except-in data/collection sequence->list))
       
-      (provide (rename-out [ip-module-begin #%module-begin]))
+      (define (vertex-in-bounds? board vertex)
+        (match-define (vector board-height board-width) (array-shape board))
+        (match-define (vector row column) vertex)
+        (and (<= 0 column (sub1 board-width))
+             (<= 0 row (sub1 board-height))))
       
-      (define-macro (ip-module-begin PARSE-TREE)
-        #'(#%module-begin
-           (display-results (parse-island 'PARSE-TREE))))
+      (define (segment-on-perimeter? board vertex-1 vertex-2)
+        (and  (vertex-in-bounds? board vertex-2)
+              (vertex-in-bounds? board vertex-1)
+              (not (equal? (array-ref board vertex-1)
+                           (array-ref board vertex-2)))))
       
-      (define (display-results board)
-        (pretty-print board))
+      (define (find-perimeter board initial-vertex)
+        (let rec ([current-vertex initial-vertex]
+                  [previously-visited (set)])
+          (println (~a "currently" current-vertex))
+          (let ([visited (set-add previously-visited current-vertex)])
+               (unless (for*/or ([direction #[#[0 1] #[1 0] #[0 -1] #[-1 0]]])
+                         (define next-vertex (vector-map + current-vertex direction))
+                         (println (~a "considering" next-vertex))
+                         (if (and (not (set-member? visited next-vertex))
+                                  (segment-on-perimeter? board current-vertex next-vertex))
+                             (rec next-vertex visited)
+                             #f))
+                 (println (~a "all done, visited:" visited))
+                 (set-count visited)))))
       
-      (define/match (parse-island program)
-        [((list 'ip-program contents ...)) (~>> contents
-                                                (remove* (list "\n"))
-                                                (map parse-island))]
-        [((list 'ip-row rows ...)) (~>> rows
-                                        (map parse-island)
-                                        (remove* (list (void))))]
-        [((list 'ip-cell contents ...)) (~>> contents
-                                             (map parse-island)
-                                             (remove* (list (void)))
-                                             first)]
-        [((list 'ip-vertical-wall _)) (void)]
-        [((list 'ip-whitespace _)) (void)]
-        [((list 'ip-mark (list 'ip-water _))) 'water]
-        [((list 'ip-mark (list 'ip-land _))) 'land])
-    #+end_src
-    
-    
-    #+begin_src racket :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt
-      #lang reader "ip.reader.rkt"
-      | X |   | X |
+      
+      (define board (list*->matrix '((water water water water)
+                                     (water water land water)
+                                     (land land land water)
+                                     (water land water water)
+                                     (land land water water))))
+      
+      (find-perimeter board (vector 1 2))
     #+end_src
 
     #+RESULTS:
-    : '((land water land))
-    
+    : "currently#(1 2)"
+    : "considering#(1 3)"
+    : "currently#(1 3)"
+    : "considering#(1 4)"
+    : "considering#(2 3)"
+    : "considering#(1 2)"
+    : "considering#(0 3)"
+    : "all done, visited:#<set: #(1 2) #(1 3)>"
 
-    #+begin_src racket :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt
-      #lang reader "ip.reader.rkt"
-      <<example-1/diagram>>
+    How to implement ~segment-on-perimeter?~ given two vericies. Well firstly, if either of the verticies is out of bounds the answer is "no". Otherwise we have that rule where the cells on both sides of the line should be different. So how do we know which cells those are?
+
+    |---+---+
+    |   |   |
+    |---+→→→✕
+    |   | X |
+    |---+---+
+    
+    ~#[1 1]~ to ~#[1 2]~ should give us cells ~#[0 1]~ and ~#[1 1]~. If the move is to the right therefore the cells to worry about it are ~(+ vertex-from #[-1 0])~ and ~(+ vertex-to #[0 -1])~
+
+    What about the other direction?
+    
+    |---+---+
+    |   |   |
+    |---✕←←←+
+    |   | X |
+    |---+---+
+    
+    ~#[1 2]~ to ~#[1 1]~ should again give us cells ~#[0 1]~ and ~#[1 1]~. So if the move is to the left then the cells to worry about are ~(+ vertex-from #[0 -1])~ and ~(+ vertex-to #[-1 0])~
+    
+    | direction | vertex-from | vertex-to | diff | adjacent cells |
+    |-----------+-------------+-----------+------+----------------|
+    | Right     | 1 1         | 1 2       | 0 1  | [0 1] [1 1]    |
+    | Left      | 1 2         | 1 1       | 0 -1 | [0 1] [1 1]    |
+    | Down      | 1 1         | 2 1       | 1 0  | [1 0] [1 1]    |
+    | Up        | 2 1         | 1 1       | -1 0 | [1 0] [1 1]    |
+    
+    - if left/right (diff 1) then it would be ~(min vertex-from vertex-to)~ and the one above it
+    - if down/up (diff 0) then it would be ~(min ...)~ and the one to the left of it
+      
+      
+    #+begin_src racket
+      (require threading)
+      (require racket/match)
+      (require racket/format)
+      (require racket/set)
+      (require racket/vector)
+      (require math/matrix)
+      (require math/array)
+      (require (except-in data/collection sequence->list))
+      
+      (define (vector+ . vectors) (apply vector-map + vectors))
+      (define (vector- . vectors) (apply vector-map - vectors))
+      (define up1 #[-1 0])
+      (define left1 #[0 -1])
+      
+      (define (indicies-of-cells-adjacent-to-move from to)
+        (match (vector- to from)
+          [(vector 0 1)  (list from (vector+ from up1))]
+          [(vector 0 -1) (list to   (vector+ to up1))]
+          [(vector 1 0)  (list from (vector+ from left1))]
+          [(vector -1 0) (list to   (vector+ to left1))]))
+      
+      (indicies-of-cells-adjacent-to-move #[1 1] #[1 2])
+      (indicies-of-cells-adjacent-to-move #[1 2] #[1 1])
+      (indicies-of-cells-adjacent-to-move #[1 1] #[2 1])
+      (indicies-of-cells-adjacent-to-move #[2 1] #[1 1])
     #+end_src
 
     #+RESULTS:
-    : '((water land water water)
-    :   (land land land water)
-    :   (water land water water)
-    :   (land land water water))
+    : '(#(1 1) #(0 1))
+    : '(#(1 1) #(0 1))
+    : '(#(1 1) #(1 0))
+    : '(#(1 1) #(1 0))
+
+
+** Playground
+    #+begin_src racket
+      (require racket/vector)
+      
+      (define v1 #[1 2])
+      (define v2 #[1 1])
+      
+      (apply + (vector->list (vector-map - v1 v2)))
+      (apply + (vector->list (vector-map - v2 v1)))
+    #+end_src
+
+    #+RESULTS:
+    : 1
+    : -1
+
+    #+begin_src racket
+      (for*/list ([x '(0 1)]
+                  [y '(0 1)])
+        (vector-map + (vector 0 0) (vector x y)))
+    #+end_src
+
+    #+RESULTS:
+    : '(#(0 0) #(0 1) #(1 0) #(1 1))
+
+    #+begin_src racket
+      (for*/or ([x '(0 1)]
+                [y '(0 1)])
+        (when (equal? x 1) (list x y)))
+    #+end_src
+
+    #+RESULTS:
+
+    #+begin_src racket 
+      (require math/array)
+      (require math/matrix)
+      (define board (list*->matrix '((water water water water)
+                                     (water water land water)
+                                     (land land land water)
+                                     (water land water water)
+                                     (land land water water))))
+      
+      
+      (array-ref board #[-1 2])
+    #+end_src
+
+    #+RESULTS:
+    : array-ref: expected indexes for shape '(5 4); given '#(-1 2)
+    :   context...:
+    :    /usr/share/racket/pkgs/math-lib/math/private/array/typed-array-indexing.rkt:31:2: array-ref
+    :    body of "/tmp/ob-racket-cwhiXq/ob-racketXCk3nw.rkt"
+
+    #+begin_src racket
+      (vector< #[1 1] #[2 2])
+    #+end_src
+
+    #+RESULTS:
+    : ob-racketwdjRct.rkt:3:1: vector<: unbound identifier
+    :   in: vector<
+    :   location...:
+    :    ob-racketwdjRct.rkt:3:1
