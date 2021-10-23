@@ -408,7 +408,8 @@
 
    Ok, so now lets see what it looks like to walk it from there
      
-   #+begin_src racket 
+   #+name: find-perimeter
+   #+begin_src racket :eval no
      <<racket/my-imports>>
      
      <<indicies-of-cells-adjacent-to-move>>
@@ -426,21 +427,37 @@
        (and (apply not-equal? adjacent-cells)
             (member 'land adjacent-cells)))
      
-     (define (find-perimeter board initial-vertex)
-       (let rec ([current-vertex initial-vertex]
-                 [previously-visited (set)])
-         ;;(println (~a "currently" current-vertex))
-         (let ([visited (set-add previously-visited current-vertex)])
-           (unless (for*/or ([direction #[#[0 1] #[1 0] #[0 -1] #[-1 0]]])
-                     (define next-vertex (vector-map + current-vertex direction))
-                     ;;(println (~a "considering" next-vertex))
-                     (if (and (not (set-member? visited next-vertex))
-                              (segment-on-perimeter? board current-vertex next-vertex))
-                         (rec next-vertex visited)
-                         #f))
-             (println (~a "all done, visited:" visited))
-             (displayln (set-count visited))))))
+     (define (walk-perimeter board initial-vertex)
+       (in-generator
+        (define visited (mutable-set))
+        (let rec ([current-vertex initial-vertex])
+          (unless (set-member? visited current-vertex)
+            ;;(println (~a 'current-vertex current-vertex 'visited visited #:separator " "))
+            (yield current-vertex)
+            (set-add! visited current-vertex)
+            (for ([direction #[#[0 1] #[1 0] #[0 -1] #[-1 0]]])
+              (define next-vertex (vector+ current-vertex direction))
+              (when (segment-on-perimeter? board current-vertex next-vertex)
+                (rec next-vertex)))))))
      
+     (define (find-perimeter board initial-vertex)
+       (sequence-length (walk-perimeter board initial-vertex)))
+   #+end_src
+
+      
+   #+begin_src racket
+     <<find-perimeter>>
+     
+     (define board (list*->matrix '((water land  water))))
+     
+     (sequence->list (walk-perimeter board (vector 0 1)))
+   #+end_src
+
+   #+RESULTS:
+   : '(#(0 1) #(0 2) #(1 2) #(1 1))
+
+   #+begin_src racket
+     <<find-perimeter>>
      
      (define board (list*->matrix '((water water water water)
                                     (water water land  water)
@@ -449,13 +466,10 @@
                                     (land  land  water water))))
      
      (find-perimeter board (vector 1 2))
-     
    #+end_src
 
    #+RESULTS:
-   : "all done, visited:#<set: #(2 0) #(5 2) #(1 2) #(3 0) #(2 1) #(1 3) #(3 1) #(2 2) #(4 0) #(3 2) #(2 3) #(5 0) #(4 1) #(3 3) #(5 1) #(4 2)>"
    : 16
-      
       
    How to implement ~segment-on-perimeter?~ given two vericies. Well firstly, if either of the verticies is out of bounds the answer is "no". Otherwise we have that rule where the cells on both sides of the line should be different. So how do we know which cells those are?
       
@@ -527,6 +541,7 @@
      (require racket/format)
      (require racket/set)
      (require racket/vector)
+     (require racket/generator)
      (require math/matrix)
      (require math/array)
      (require (except-in data/collection sequence->list))
