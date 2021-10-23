@@ -411,22 +411,9 @@
    #+begin_src racket 
      <<racket/my-imports>>
      
-     (define (cell-in-bounds? board cell-position)
-       (match-define (vector max-row max-column) (vector-map sub1 (array-shape board)))
-       (match-define (vector row column) cell-position)
-       (and (<= 0 row max-row)
-            (<= 0 column max-column)))
-     
-     
-     (define (vertex-in-bounds? board vertex)
-       (match-define (vector max-vertex-row max-vertex-column) (array-shape board))
-       (match-define (vector row column) vertex)
-       (and (<= 0 row max-vertex-column)
-            (<= 0 column max-vertex-column)))
+     <<indicies-of-cells-adjacent-to-move>>
      
      (define not-equal? (compose not equal?))
-     
-     <<indicies-of-cells-adjacent-to-move>>
      
      (define (value-at-cell board idx)
        (with-handlers ([exn:fail? (thunk* 'water)])
@@ -442,32 +429,32 @@
      (define (find-perimeter board initial-vertex)
        (let rec ([current-vertex initial-vertex]
                  [previously-visited (set)])
-         (println (~a "currently" current-vertex))
+         ;;(println (~a "currently" current-vertex))
          (let ([visited (set-add previously-visited current-vertex)])
            (unless (for*/or ([direction #[#[0 1] #[1 0] #[0 -1] #[-1 0]]])
                      (define next-vertex (vector-map + current-vertex direction))
-                     (println (~a "considering" next-vertex))
+                     ;;(println (~a "considering" next-vertex))
                      (if (and (not (set-member? visited next-vertex))
                               (segment-on-perimeter? board current-vertex next-vertex))
                          (rec next-vertex visited)
                          #f))
              (println (~a "all done, visited:" visited))
-             (set-count visited)))))
+             (displayln (set-count visited))))))
      
      
      (define board (list*->matrix '((water water water water)
-                                    (water water land water)
-                                    (land land land water)
-                                    (water land water water)
-                                    (land land water water))))
+                                    (water water land  water)
+                                    (land  land  land  water)
+                                    (water land  water water)
+                                    (land  land  water water))))
      
-     ;;(find-perimeter board (vector 1 2))
+     (find-perimeter board (vector 1 2))
      
-     (segment-on-perimeter? board #[2 1] #[2 2])
    #+end_src
 
    #+RESULTS:
-   : '(land water)
+   : "all done, visited:#<set: #(2 0) #(5 2) #(1 2) #(3 0) #(2 1) #(1 3) #(3 1) #(2 2) #(4 0) #(3 2) #(2 3) #(5 0) #(4 1) #(3 3) #(5 1) #(4 2)>"
+   : 16
       
       
    How to implement ~segment-on-perimeter?~ given two vericies. Well firstly, if either of the verticies is out of bounds the answer is "no". Otherwise we have that rule where the cells on both sides of the line should be different. So how do we know which cells those are?
