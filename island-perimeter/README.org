@@ -241,10 +241,7 @@
    #+name: ip.expander.rkt
    #+begin_src racket :eval no
      #lang br/quicklang
-     (require racket/pretty)
-     (require racket/match)
-     (require math/matrix)
-     (require threading)
+     <<racket/my-imports>>
      
      (provide (rename-out [ip-module-begin #%module-begin]))
      
@@ -255,20 +252,23 @@
      (define (display-results board)
        (pretty-print (matrix->list* board)))
      
+     (define compact (curry filter identity))
+     
      (define/match (parse-island program)
        [((list 'ip-program contents ...)) (~>> contents
                                                (remove* (list "\n"))
                                                (map parse-island)
+                                               sequence->list*
                                                list*->matrix)]
        [((list 'ip-row rows ...)) (~>> rows
                                        (map parse-island)
-                                       (remove* (list (void))))]
+                                       compact)]
        [((list 'ip-cell contents ...)) (~>> contents
                                             (map parse-island)
-                                            (remove* (list (void)))
+                                            compact
                                             first)]
-       [((list 'ip-vertical-wall _)) (void)]
-       [((list 'ip-whitespace _)) (void)]
+       [((list 'ip-vertical-wall _)) #f]
+       [((list 'ip-whitespace _)) #f]
        [((list 'ip-mark (list 'ip-water _))) 'water]
        [((list 'ip-mark (list 'ip-land _))) 'land])
    #+end_src
