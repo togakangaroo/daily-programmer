@@ -14,14 +14,14 @@
   - ~1 <= row, col <= 100~
   - ~grid[i][j] is 0 or 1~
   - There is exactly one island in grid.
-
+    
 ** Example 1:
    - Input :: ~grid = [[0,1,0,0],[1,1,1,0],[0,1,0,0],[1,1,0,0]]~
    - Output :: ~16~
    - Explanation :: The perimeter is the 16 yellow stripes
 
      #+name: example-1/diagram
-     #+begin_src racket :eval no
+     #+begin_src racket :eval no :export code
        |   | X |   |   |
        | X | X | X |   |
        |   | X |   |   |
@@ -32,96 +32,35 @@
    - Input :: ~grid = [[1]]~
    - Output :: ~4~
 
-
 ** Example 3:
    - Input :: grid = ~[[1,0]]~
    - Output :: ~4~
 
-* Brainstorming
+  
+** Putting My Own Twist on It
+
+   Lets really lean into Racket. I want to experiment not only with Racket syntax but also with its language-creation capabilities. After all, I created a whole [[https://github.com/togakangaroo/ob-racket][Emacs extension to enable that]] yet have the barest of experience with it.
+
+   I therefore want the input to be an actual table, exactly like the [[Example 1]] diagram above. That should be the program. The result of running that progra should be the island's perimeter.
+
+* Implementation
   :PROPERTIES:
   :header-args:racket: :noweb yes
   :END:
 
-  So normally I would start jotting down ideas here but in this case I used the time-honored strategy of taking a shower and of course it came to me.
-
-** Node Map
-   For our purposes, lets count coordinates at the vertices, not at the cells! So in [[Example 1]] above we take =0 0= at the upper left vertex, going accross to =4 0= and down to =4 4= we then express the chart as a list of connections from each vertex
-
-   #+name: racket/example-1/node-map
-   #+begin_src racket :export code :eval no
-     (apply hash '((1 0) ((2 0) (1 1))
-                         (2 0) ((2 1) (1 0))
-                         (0 1) ((1 1) (0 2))
-                         (1 1) ((2 1) (1 2) (0 1) (1 0))
-                         (2 1) ((3 1) (2 2) (1 1) (2 0))
-                         (3 1) ((3 2) (2 1))
-                         (0 2) ((2 1) (0 1))
-                         (1 2) ((2 2) (1 3) (0 2) (1 1))
-                         (2 2) ((3 2) (2 3) (1 2) (2 1))
-                         (3 2) ((2 2) (3 1))
-                         (0 3) ((1 3) (0 4))
-                         (1 3) ((2 3) (1 4) (0 3) (1 2))
-                         (2 3) ((2 4) (1 3) (2 2))
-                         (0 4) ((1 4) (0 3))
-                         (1 4) ((2 4) (0 4) (1 3))
-                         (2 4) ((1 4) (2 3))))
-   #+end_src
-
-   But that;s not quite right, After all, I need an indicator *which* connection to ove to, not all steps are along the outside of the shape.
-
-   So uhh...can we filter out the ones that are internal? Probably best to not place them in the list to begin with, but the logic should apply either way. What makes a connection internal? For [[Example 1]] we would want to omit the connection between =1 1= and =2 1=. Why? Because the square to either side of that connection is full.
-
-   To do this...it actually *does* seem like it would be easier if we also had a full mapping of the board itself so we could refer to full cells. 
-   - A connection between =x1 y1
-
-   Given a proper node map structure like above, it should be trivial to determine perimeter. You literally start anywhere and try to move into the first connection that you have not yet visited until you can do it no more. Each time you step you increase a counter
+  The implementation will containe several parts.
+   
+  - All programs have a reading/parsing phase which takes the given program and converts it into s-expressions
+  - Given an s-expression, all programs next have a pre-processing phase with an expander which takes those s-expresions and expands them into new s-expressions that can be evaluated
+  - Finally, as part of the expansion you create the library itself that your code should be using
   
-   This only works come to think of it,  if there are no *internal* nodes tracked.
+** Reader
 
-   None of the examples above describe one, we Need to
+   Initially I started with brainstorming and writing out path-finding code (included in the [[Brainstorming]] section below). After a while, I felt like I might be on the wrong track. The idea was solid but it was operating on a data structure that I wasn't convinced was realisticly one that would be straightforward to generate. I therefore pivoted to figuring out the reader portion.
+   
+   To start with, the program that we want (composed of the diagram itself) is one that is not itself regular s-expressions. We must therefore parse it, and the nicest way to parse a program is with a context free grammar. Racket has a library for this in [[https://docs.racket-lang.org/brag/index.html][brag]] which I'll use here.
 
-   Let's not worry about that now, lets assume it already has been properly arranged where all data in it is relevant. If that is the case, then you can pick any point on the ,,
- 
-   #+begin_src racket
-     (require threading)
-     (require (except-in data/collection sequence->list))
-     (require racket/generator)
-     (require racket/match)
-     
-     (define node-map
-       <<racket/example-1/node-map>>)
-     
-     (define (has-key source key)
-       (hash-ref-key key #f))
-     
-     (define steps (sequence->stream
-                    (in-generator 
-                     (let rec ([next-node (hash-iterate-key node-map 0)]
-                               [visited (make-hash)])
-                       (println (list next-node visited (hash-ref-key node-map next-node 'f) (hash-ref-key visited next-node 'f)))
-                       (when (and (hash-key node-map next-node)
-                                  (hash-key visited next-node 'f))
-                         (hash-set! visited next-node 't)
-                         (yield next-node)
-                         (match-let ([(list x y) next-node])
-                           (print 'next)))))))
-     ;; (rec (list (add1 x) y) visited)
-     ;; (rec (list x add1 y) visited)
-     ;; (rec (list (sub1 x) y) visited)
-     ;; (rec (list x (sub1 y)) visited)))))))
-     
-     (first (take 3 steps))
-   #+end_src
-
-   #+RESULTS:
-   : '((2 4) #hash() (2 4) f)
-   : '(2 4)
-
-** Parser
-
-   Ok you know what, I think all the stuff I'm doing above is good, but it certainly is making assumptions about what sort of data structure is easy to parse that I am not certain would hold. Let's figure that side of it out right now
-
-   First, can I write a brag grammar for what the board looks like? It kinda seems straightforward, lets try it
+   My last experience with context free grammars (short of a chapter early in the Beautiful Racket book) was in sophmore or junior year of college some 18 years ago but I do remember that once you got your head around the concept, they were relatively straightforward to write. Let's try to write one for our needs.
    
    #+name: ip.parser.rkt
    #+begin_src racket :eval no
@@ -142,13 +81,13 @@
      #lang br
      (require "ip.parser.rkt")
      (parse-to-datum "
-       <<example=1/diagram>>")
+       <<example-1/diagram>>")
    #+end_src
 
    #+RESULTS:
    : '(ip-program "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")))
     
-   Oh nice! With a minimal amount of twiddling, that actually worked.
+   Oh nice. With a minimal amount of twiddling, that actually worked!
 
    So the next bit is going to be simply modifying the bf example from the Beautiful Racket book. In that example they use a tokenizer to ignore the comments. In this case I don't think we need that. I suspect we could get rid of the tokenizer entirely and just use the default but because I don't know how off the top of my head, lets just make a tokenizer that simply makes every character into a token
     
@@ -608,6 +547,7 @@
    - Write standard imports into their own lang
    - Don't use a mutable set
    - Have to tokenizer ignore pipes surrounded by spaces so you can write out just the island without the tabular structure
+   - I wonder how to do it with tail recursion?
    
 ** Imports 
    This is the standard set of imports I'm relying on. I should probably write them into my own lang.
@@ -625,63 +565,147 @@
      (require threading)
      (require (except-in data/collection sequence->list))
    #+end_src
-** Playground
+* Brainstorming
+  :PROPERTIES:
+  :header-args:racket: :noweb yes
+  :END:
+
+  So normally I would start jotting down ideas here but in this case I used the time-honored strategy of taking a shower and of course it came to me.
+
+** Node Map
+   For our purposes, lets count coordinates at the vertices, not at the cells! So in [[Example 1]] above we take =0 0= at the upper left vertex, going accross to =4 0= and down to =4 4= we then express the chart as a list of connections from each vertex
+
+   #+name: racket/example-1/node-map
+   #+begin_src racket :export code :eval no
+     (apply hash '((1 0) ((2 0) (1 1))
+                         (2 0) ((2 1) (1 0))
+                         (0 1) ((1 1) (0 2))
+                         (1 1) ((2 1) (1 2) (0 1) (1 0))
+                         (2 1) ((3 1) (2 2) (1 1) (2 0))
+                         (3 1) ((3 2) (2 1))
+                         (0 2) ((2 1) (0 1))
+                         (1 2) ((2 2) (1 3) (0 2) (1 1))
+                         (2 2) ((3 2) (2 3) (1 2) (2 1))
+                         (3 2) ((2 2) (3 1))
+                         (0 3) ((1 3) (0 4))
+                         (1 3) ((2 3) (1 4) (0 3) (1 2))
+                         (2 3) ((2 4) (1 3) (2 2))
+                         (0 4) ((1 4) (0 3))
+                         (1 4) ((2 4) (0 4) (1 3))
+                         (2 4) ((1 4) (2 3))))
+   #+end_src
+
+   But that;s not quite right, After all, I need an indicator *which* connection to ove to, not all steps are along the outside of the shape.
+
+   So uhh...can we filter out the ones that are internal? Probably best to not place them in the list to begin with, but the logic should apply either way. What makes a connection internal? For [[Example 1]] we would want to omit the connection between =1 1= and =2 1=. Why? Because the square to either side of that connection is full.
+
+   To do this...it actually *does* seem like it would be easier if we also had a full mapping of the board itself so we could refer to full cells. 
+   - A connection between =x1 y1
+
+   Given a proper node map structure like above, it should be trivial to determine perimeter. You literally start anywhere and try to move into the first connection that you have not yet visited until you can do it no more. Each time you step you increase a counter
+  
+   This only works come to think of it,  if there are no *internal* nodes tracked.
+
+   None of the examples above describe one, we Need to
+
+   Let's not worry about that now, lets assume it already has been properly arranged where all data in it is relevant. If that is the case, then you can pick any point on the ,,
+ 
    #+begin_src racket
-     (require racket/vector)
+     (require threading)
+     (require (except-in data/collection sequence->list))
+     (require racket/generator)
+     (require racket/match)
      
-     (define v1 #[1 2])
-     (define v2 #[1 1])
+     (define node-map
+       <<racket/example-1/node-map>>)
      
-     (apply + (vector->list (vector-map - v1 v2)))
-     (apply + (vector->list (vector-map - v2 v1)))
+     (define (has-key source key)
+       (hash-ref-key key #f))
+     
+     (define steps (sequence->stream
+                    (in-generator 
+                     (let rec ([next-node (hash-iterate-key node-map 0)]
+                               [visited (make-hash)])
+                       (println (list next-node visited (hash-ref-key node-map next-node 'f) (hash-ref-key visited next-node 'f)))
+                       (when (and (hash-key node-map next-node)
+                                  (hash-key visited next-node 'f))
+                         (hash-set! visited next-node 't)
+                         (yield next-node)
+                         (match-let ([(list x y) next-node])
+                           (print 'next)))))))
+     ;; (rec (list (add1 x) y) visited)
+     ;; (rec (list x add1 y) visited)
+     ;; (rec (list (sub1 x) y) visited)
+     ;; (rec (list x (sub1 y)) visited)))))))
+     
+     (first (take 3 steps))
    #+end_src
 
    #+RESULTS:
-   : 1
-   : -1
+   : '((2 4) #hash() (2 4) f)
+   : '(2 4)
 
-   #+begin_src racket
-     (for*/list ([x '(0 1)]
-                 [y '(0 1)])
-       (vector-map + (vector 0 0) (vector x y)))
-   #+end_src
+  
+* Playground
+  :PROPERTIES:
+  :header-args:racket: :noweb yes
+  :END:
+  #+begin_src racket
+    (require racket/vector)
+     
+    (define v1 #[1 2])
+    (define v2 #[1 1])
+     
+    (apply + (vector->list (vector-map - v1 v2)))
+    (apply + (vector->list (vector-map - v2 v1)))
+  #+end_src
 
-   #+RESULTS:
-   : '(#(0 0) #(0 1) #(1 0) #(1 1))
+  #+RESULTS:
+  : 1
+  : -1
 
-   #+begin_src racket
-     (for*/or ([x '(0 1)]
-               [y '(0 1)])
-       (when (equal? x 1) (list x y)))
-   #+end_src
+  #+begin_src racket
+    (for*/list ([x '(0 1)]
+                [y '(0 1)])
+      (vector-map + (vector 0 0) (vector x y)))
+  #+end_src
 
-   #+RESULTS:
+  #+RESULTS:
+  : '(#(0 0) #(0 1) #(1 0) #(1 1))
 
-   #+begin_src racket 
-     (require math/array)
-     (require math/matrix)
-     (define board (list*->matrix '((water water water water)
-                                    (water water land water)
-                                    (land land land water)
-                                    (water land water water)
-                                    (land land water water))))
+  #+begin_src racket
+    (for*/or ([x '(0 1)]
+              [y '(0 1)])
+      (when (equal? x 1) (list x y)))
+  #+end_src
+
+  #+RESULTS:
+
+  #+begin_src racket 
+    (require math/array)
+    (require math/matrix)
+    (define board (list*->matrix '((water water water water)
+                                   (water water land water)
+                                   (land land land water)
+                                   (water land water water)
+                                   (land land water water))))
      
      
-     (array-ref board #[-1 2])
-   #+end_src
+    (array-ref board #[-1 2])
+  #+end_src
 
-   #+RESULTS:
-   : array-ref: expected indexes for shape '(5 4); given '#(-1 2)
-   :   context...:
-   :    /usr/share/racket/pkgs/math-lib/math/private/array/typed-array-indexing.rkt:31:2: array-ref
-   :    body of "/tmp/ob-racket-cwhiXq/ob-racketXCk3nw.rkt"
+  #+RESULTS:
+  : array-ref: expected indexes for shape '(5 4); given '#(-1 2)
+  :   context...:
+  :    /usr/share/racket/pkgs/math-lib/math/private/array/typed-array-indexing.rkt:31:2: array-ref
+  :    body of "/tmp/ob-racket-cwhiXq/ob-racketXCk3nw.rkt"
 
-   #+begin_src racket
-     (require math/array)
+  #+begin_src racket
+    (require math/array)
      
-     (with-handlers ([exn:fail? display])
-       (array-ref (array #[1 2]) #[2]))
-   #+end_src
+    (with-handlers ([exn:fail? display])
+      (array-ref (array #[1 2]) #[2]))
+  #+end_src
 
-   #+RESULTS:
-   : #(struct:exn:fail array-ref: expected indexes for shape '(2); given '#(2) #<continuation-mark-set>)
+  #+RESULTS:
+  : #(struct:exn:fail array-ref: expected indexes for shape '(2); given '#(2) #<continuation-mark-set>)
