@@ -181,7 +181,7 @@
 
 *** The Expander
     
-   Ok, so now we want to write a function that can convert this into something more workable
+   Ok, so now we want to write a function that can convert this into something more workable.
 
    #+name: ip.dev.reader.rkt
    #+begin_src racket :adjacent-file ip.parser.rkt :eval no :exports no
@@ -194,33 +194,8 @@
      <<racket/every-character:tokenizer>>
    #+end_src
 
-
-   #+name: racket/parse-island
-   #+begin_src racket :eval no
-     (define compact (curry filter identity))
-     
-     (define/match (parse-island program)
-       [("\n") #f]
-       [((list 'ip-program contents ...)) (~>> contents
-                                               (map parse-island)
-                                               compact
-                                               sequence->list*
-                                               list*->matrix)]
-       [((list 'ip-row rows ...)) (~>> rows
-                                       (map parse-island)
-                                       compact)]
-       [((list 'ip-cell contents ...)) (~>> contents
-                                            (map parse-island)
-                                            compact
-                                            first)]
-       [((list 'ip-vertical-wall _)) #f]
-       [((list 'ip-whitespace _)) #f]
-       [((list 'ip-mark (list 'ip-water _))) 'water]
-       [((list 'ip-mark (list 'ip-land _))) 'land])
-   #+end_src
-   
    #+name: ip.dev.expander.rkt
-   #+begin_src racket :eval no
+   #+begin_src racket :eval no :exports no
      #lang br/quicklang
      <<racket/my-imports>>
      
@@ -236,8 +211,30 @@
           (display-results (parse-island 'PARSE-TREE))))
    #+end_src
     
+   What I really want is not the s-expression soup above but a 2d matrix that contains the symbols ~'land~ or ~'water~ in each cell. This might not be the best structure for our needs (as opposed for example an aggregation of connections or of vertices), but its the most straightforward one. We can also express the conversion with a nice pattern matching function
+
+   #+name: racket/parse-island
+   #+begin_src racket :eval no :exports code
+     (define compact (curry filter identity))
+     (define mapcompact (compose compact map))
+     
+     (define/match (parse-island program)
+       [((list 'ip-program contents ...)) (~>> contents
+                                               (mapcompact parse-island)
+                                               sequence->list*
+                                               list*->matrix)]
+       [((list 'ip-row rows ...)) (mapcompact parse-island rows)]
+       [((list 'ip-cell contents ...)) (first (mapcompact parse-island contents))]
+       [((list 'ip-vertical-wall _)) #f]
+       [((list 'ip-whitespace _)) #f]
+       [("\n") #f]
+       [((list 'ip-mark (list 'ip-water _))) 'water]
+       [((list 'ip-mark (list 'ip-land _))) 'land])
+   #+end_src
+   
+   Two quick tests:
     
-   #+begin_src racket :adjacent-file  ip.dev.reader.rkt ip.parser.rkt ip.dev.expander.rkt
+   #+begin_src racket :exports both :adjacent-file  ip.dev.reader.rkt ip.parser.rkt ip.dev.expander.rkt
      #lang reader "ip.dev.reader.rkt"
      | X |   | X |
      | X | X |   |
@@ -247,7 +244,7 @@
    : '((land water land) (land land water))
     
 
-   #+begin_src racket :adjacent-file  ip.dev.reader.rkt ip.parser.rkt ip.dev.expander.rkt
+   #+begin_src racket :exports both :noweb yes :adjacent-file  ip.dev.reader.rkt ip.parser.rkt ip.dev.expander.rkt
      #lang reader "ip.dev.reader.rkt"
      <<example-1/diagram>>
    #+end_src
@@ -258,6 +255,9 @@
    :   (water land water water)
    :   (land land water water))
 
+   And that works!
+
+   I do feel like maybe this function should be in the reader rather than the expander, but lets go with this for now.
   
 ** Measure Perimeter 
    First thought is to get only the edges which I can do by a laplace filter using a convolution matrix of
