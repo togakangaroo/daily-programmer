@@ -583,10 +583,37 @@
    #+RESULTS:
    : 16
 
+   Now lets try a more complex one
+
+   #+begin_src racket :noweb yes :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
+     #lang reader "ip.reader.rkt"
+     |   |   |   |   |   |   |   |   |   |   |
+     |   |   |   |   |   |   | X | X | X | X |
+     |   |   |   |   |   |   | X |   | X |   |
+     |   |   |   |   | X | X | X | X |   |   |
+     |   |   | X | X | X | X |   | X | X |   |
+     |   |   | X |   |   |   |   |   | X |   |
+     |   |   |   | X | X |   | X | X | X | X |
+     |   |   |   | X | X |   | X | X | X | X |
+     |   | X | X | X | X | X | X |   |   |   |
+     |   |   | X | X | X | X | X |   |   |   |
+   #+end_src
+
+   #+RESULTS:
+   : 62
+   
+   Well I'm not going to double check that, but it seems right
+
+   Ideas for future improvement:
+   - Write standard imports into their own lang
+   - Don't use a mutable set
+   - Have to tokenizer ignore pipes surrounded by spaces so you can write out just the island without the tabular structure
+   
 ** Imports 
+   This is the standard set of imports I'm relying on. I should probably write them into my own lang.
    
    #+name: racket/my-imports
-   #+begin_src racket :eval no
+   #+begin_src racket :eval no :export code
      (require racket/match)
      (require racket/format)
      (require racket/set)
