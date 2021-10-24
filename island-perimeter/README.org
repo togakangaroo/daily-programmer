@@ -227,31 +227,19 @@
 
    Ok, so now we want to write a function that can convert this into something more workable
 
-   #+name: ip.reader.rkt
+   #+name: ip.dev.reader.rkt
    #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
      <<ip.reader.rkt/prefix>>
      (define (read-syntax path port)
        (define parse-tree (parse path (make-tokenizer port)))
-       (define module-datum `(module island-perimeter "ip.expander.rkt"
+       (define module-datum `(module island-perimeter "ip.dev.expander.rkt"
                                ,parse-tree))
        (datum->syntax #f module-datum))
      <<racket/every-character:tokenizer>>
    #+end_src
 
-   #+name: ip.expander.rkt
+   #+name: racket/parse-island
    #+begin_src racket :eval no
-     #lang br/quicklang
-     <<racket/my-imports>>
-     
-     (provide (rename-out [ip-module-begin #%module-begin]))
-     
-     (define-macro (ip-module-begin PARSE-TREE)
-       #'(#%module-begin
-          (display-results (parse-island 'PARSE-TREE))))
-     
-     (define (display-results board)
-       (pretty-print (matrix->list* board)))
-     
      (define compact (curry filter identity))
      
      (define/match (parse-island program)
@@ -272,10 +260,27 @@
        [((list 'ip-mark (list 'ip-water _))) 'water]
        [((list 'ip-mark (list 'ip-land _))) 'land])
    #+end_src
+   
+   #+name: ip.dev.expander.rkt
+   #+begin_src racket :eval no
+     #lang br/quicklang
+     <<racket/my-imports>>
+     
+     (provide (rename-out [ip-module-begin #%module-begin]))
+     
+     <<racket/parse-island>>
+     
+     (define (display-results board)
+       (pretty-print (matrix->list* board)))
+     
+     (define-macro (ip-module-begin PARSE-TREE)
+       #'(#%module-begin
+          (display-results (parse-island 'PARSE-TREE))))
+   #+end_src
     
     
-   #+begin_src racket :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt
-     #lang reader "ip.reader.rkt"
+   #+begin_src racket :adjacent-file  ip.dev.reader.rkt ip.parser.rkt ip.dev.expander.rkt
+     #lang reader "ip.dev.reader.rkt"
      | X |   | X |
      | X | X |   |
    #+end_src
@@ -284,8 +289,8 @@
    : '((land water land) (land land water))
     
 
-   #+begin_src racket :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt
-     #lang reader "ip.reader.rkt"
+   #+begin_src racket :adjacent-file  ip.dev.reader.rkt ip.parser.rkt ip.dev.expander.rkt
+     #lang reader "ip.dev.reader.rkt"
      <<example-1/diagram>>
    #+end_src
 
@@ -524,16 +529,60 @@
  
 ** Putting it together 
    
-   #+begin_src racket
-     <<racket/my-imports>>
-     <<find-perimeter>>
-     (define board (list*->matrix '((water water water water)
-                                    (water water land  water)
-                                    (land  land  land  water)
-                                    (water land  water water)
-                                    (land  land  water water))))
-     (find-perimeter board (vector 1 2))
+   First the reader is very similar to what came before, we're simply referrencing the true expander rather than the dev one. This is more about a limitation of noweb syntax than anything that needs to be understood in isolation
+   
+   #+name: ip.reader.rkt
+   #+begin_src racket :eval no
+     <<ip.reader.rkt/prefix>>
+     (define (read-syntax path port)
+       (define parse-tree (parse path (make-tokenizer port)))
+       (define module-datum `(module island-perimeter "ip.expander.rkt"
+                               ,parse-tree))
+       (datum->syntax #f module-datum))
+     <<racket/every-character:tokenizer>>
    #+end_src
+
+   So now we want our actual expander. While I could embed the actual perimeter measuring code in this file, I think I'd rather it be implemented in a separate module
+   
+   #+name: ip.expander.rkt
+   #+begin_src racket :eval no
+     #lang br/quicklang
+     
+     <<racket/my-imports>>
+     (require "find-perimeter.rkt")
+     
+     (provide (rename-out [ip-module-begin #%module-begin]))
+     
+     <<racket/parse-island>>
+     
+     (define-macro (ip-module-begin PARSE-TREE)
+       #'(#%module-begin
+          (define board (parse-island 'PARSE-TREE))
+          (find-perimeter board (first-land-vertex board))))
+   #+end_src
+
+   #+name: find-perimeter.rkt
+   #+begin_src racket :eval no
+     <<racket/my-imports>>
+     
+     (provide find-perimeter walk-perimeter first-land-vertex)
+     
+     <<first-land-vertex>>
+     
+     <<find-perimeter>>
+     
+   #+end_src
+   
+   So now taking the above, we should be able to get a perimeter output
+   
+   #+begin_src racket :noweb yes :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
+     #lang reader "ip.reader.rkt"
+     <<example-1/diagram>>
+   #+end_src
+
+   #+RESULTS:
+   : 16
+
 ** Imports 
    
    #+name: racket/my-imports
