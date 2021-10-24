@@ -21,7 +21,7 @@
    - Explanation :: The perimeter is the 16 yellow stripes
 
      #+name: example-1/diagram
-     #+begin_src racket :eval no :export code
+     #+begin_src racket :eval no :exports code
        |   | X |   |   |
        | X | X | X |   |
        |   | X |   |   |
@@ -58,6 +58,9 @@
 
    Initially I started with brainstorming and writing out path-finding code (included in the [[Brainstorming]] section below). After a while, I felt like I might be on the wrong track. The idea was solid but it was operating on a data structure that I wasn't convinced was realisticly one that would be straightforward to generate. I therefore pivoted to figuring out the reader portion.
    
+  
+*** The Parser
+   
    To start with, the program that we want (composed of the diagram itself) is one that is not itself regular s-expressions. We must therefore parse it, and the nicest way to parse a program is with a context free grammar. Racket has a library for this in [[https://docs.racket-lang.org/brag/index.html][brag]] which I'll use here.
 
    My last experience with context free grammars (short of a chapter early in the Beautiful Racket book) was in sophmore or junior year of college some 18 years ago but I do remember that once you got your head around the concept, they were relatively straightforward to write. Let's try to write one for our needs.
@@ -75,9 +78,9 @@
      ip-mark : ip-land | ip-water
    #+end_src
 
-   Uhh...I'm actually pretty confident about that one, let's try it out on [[Example 1]]
+   Uhh...I'm actually pretty confident about that one, let's try it out on [[Example 1]]. If this works then calling ~parse-to-datum~ should give us a valid s-expression
 
-   #+begin_src racket :eval yes :adjacent-file ip.parser.rkt
+   #+begin_src racket :eval yes :adjacent-file ip.parser.rkt :exports both :noweb yes
      #lang br
      (require "ip.parser.rkt")
      (parse-to-datum "
@@ -89,30 +92,37 @@
     
    Oh nice. With a minimal amount of twiddling, that actually worked!
 
-   So the next bit is going to be simply modifying the bf example from the Beautiful Racket book. In that example they use a tokenizer to ignore the comments. In this case I don't think we need that. I suspect we could get rid of the tokenizer entirely and just use the default but because I don't know how off the top of my head, lets just make a tokenizer that simply makes every character into a token
+*** The Tokenizer   
+    
+   So the next bit is going to be simply modifying the [[https://beautifulracket.com/bf/intro.html][bf example from the Beautiful Racket book]]. In that example they use a tokenizer to ignore the comments. In this case I don't think we need that. I suspect we could get rid of the tokenizer entirely and just use a built-in one because I don't know how off the top of my head, lets just make a tokenizer that simply makes every character into a token. After all, there is no such concept as "words" in what I'm doing here, it literally is just character by character.
     
    #+name: racket/every-character:tokenizer
-   #+begin_src racket :eval no
+   #+begin_src racket :eval no :exports code
      (define (make-tokenizer port)
        (λ ()
          (define ip-lexer (lexer
                            [any-char lexeme]))
          (ip-lexer port)))
    #+end_src
+
+*** An experimental reader
     
+   So any reader we want is going to want to start with Quicklang, pull in brag, and pull in the functions provided by our parser; specifically [[https://docs.racket-lang.org/brag/index.html#%28def._%28%28lib._brag%2Fmain..rkt%29._parse%29%29][parse]].
+
    #+name: ip.reader.rkt/prefix
    #+begin_src racket :eval no
      #lang br/quicklang
      
-     (require threading)
      (require brag/support)
      (require "ip.parser.rkt")
      
      (provide read-syntax)
    #+end_src
+
+   We combine this and our tokenizer to create a reader function that when called will simply create a new racket module that uses a custom expander that does nothing but pretty print.
     
    #+name: ip.reader.printing-expander.rkt
-   #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
+   #+begin_src racket :adjacent-file ip.parser.rkt :eval no :noweb strip-export :exports code
      <<ip.reader.rkt/prefix>>
      (define (read-syntax path port)
        (define parse-tree (parse path (make-tokenizer port)))
@@ -122,8 +132,10 @@
      <<racket/every-character:tokenizer>>
    #+end_src
 
+   And here would be the expander. Again, the only thing its doing here is pretty-printing the result
+   
    #+name: ip.printing-expander.rkt
-   #+begin_src racket :eval no
+   #+begin_src racket :eval no :exports code
      #lang br/quicklang
      (require racket/pretty)
      
@@ -133,8 +145,9 @@
        #'(#%module-begin
           (pretty-print 'PARSE-TREE)))
    #+end_src
-    
-    
+
+   Putting these together, we should be able to now run a simple program written in our grammar. It won't *do* anything other than parse the input and display it, but that's a reader for you!
+
    #+begin_src racket :adjacent-file  ip.reader.printing-expander.rkt ip.parser.rkt ip.printing-expander.rkt
      #lang reader "ip.reader.printing-expander.rkt"
      | X |   | X |
@@ -164,10 +177,14 @@
       (ip-vertical-wall "|")))
    #+end_example
 
+   I'll note that I'm not qutie happy with this output. I don't think there is any point in the expander receiving s expressions like ~"\n"~ or ~{ip-whitespace " ")~ (though ~(ip-whitespace)~ would make some sense). It feels like the sort of thing that should be handled in the reader, but I hit against the limit of my knowledge here and will just push this work out to the expander where I know how to take care of it.
+
+*** The Expander
+    
    Ok, so now we want to write a function that can convert this into something more workable
 
    #+name: ip.dev.reader.rkt
-   #+begin_src racket :adjacent-file ip.parser.rkt :eval no 
+   #+begin_src racket :adjacent-file ip.parser.rkt :eval no :exports no
      <<ip.reader.rkt/prefix>>
      (define (read-syntax path port)
        (define parse-tree (parse path (make-tokenizer port)))
@@ -177,14 +194,16 @@
      <<racket/every-character:tokenizer>>
    #+end_src
 
+
    #+name: racket/parse-island
    #+begin_src racket :eval no
      (define compact (curry filter identity))
      
      (define/match (parse-island program)
+       [("\n") #f]
        [((list 'ip-program contents ...)) (~>> contents
-                                               (remove* (list "\n"))
                                                (map parse-island)
+                                               compact
                                                sequence->list*
                                                list*->matrix)]
        [((list 'ip-row rows ...)) (~>> rows
@@ -553,7 +572,7 @@
    This is the standard set of imports I'm relying on. I should probably write them into my own lang.
    
    #+name: racket/my-imports
-   #+begin_src racket :eval no :export code
+   #+begin_src racket :eval no :exports code
      (require racket/match)
      (require racket/format)
      (require racket/set)
@@ -576,7 +595,7 @@
    For our purposes, lets count coordinates at the vertices, not at the cells! So in [[Example 1]] above we take =0 0= at the upper left vertex, going accross to =4 0= and down to =4 4= we then express the chart as a list of connections from each vertex
 
    #+name: racket/example-1/node-map
-   #+begin_src racket :export code :eval no
+   #+begin_src racket :exports code :eval no
      (apply hash '((1 0) ((2 0) (1 1))
                          (2 0) ((2 1) (1 0))
                          (0 1) ((1 1) (0 2))
