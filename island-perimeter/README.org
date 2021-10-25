@@ -71,7 +71,7 @@ Note that the following works through the problem step by step. To jump to the f
     #+name: ip.parser.rkt
     #+begin_src racket :eval no :tangle ip.parser.rkt
       #lang brag
-      ip-program : "\n"* ip-row ("\n"+ ip-row)*
+      ip-program : "\n"* ip-row ("\n"+ ip-row)* "\n"*
       ip-row : ip-whitespace* ip-cell* ip-vertical-wall ip-whitespace*
       ip-cell : ip-vertical-wall ip-whitespace+ ip-mark ip-whitespace+
       ip-whitespace : " "
@@ -569,6 +569,13 @@ Note that the following works through the problem step by step. To jump to the f
   #+RESULTS:
   : 62
   
+  #+begin_src shell :exports both
+    racket example-5.rkt
+  #+end_src
+
+  #+RESULTS:
+  : 62
+
   Well I'm not going to double check that, but it seems right.
 
   Ideas for future improvement:

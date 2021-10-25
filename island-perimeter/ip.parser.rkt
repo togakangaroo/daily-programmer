@@ -1,5 +1,5 @@
 #lang brag
-ip-program : "\n"* ip-row ("\n"+ ip-row)*
+ip-program : "\n"* ip-row ("\n"+ ip-row)* "\n"*
 ip-row : ip-whitespace* ip-cell* ip-vertical-wall ip-whitespace*
 ip-cell : ip-vertical-wall ip-whitespace+ ip-mark ip-whitespace+
 ip-whitespace : " "
