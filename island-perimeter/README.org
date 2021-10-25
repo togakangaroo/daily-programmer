@@ -1,6 +1,6 @@
 #+TITLE: Island Perimeter
 
-Note that the following works through the problem step by step. To jump to the final listing and solution go to [[Putting it together]]
+Note that the following works through the problem step by step. To jump to the final listing and solution go to [[id:e8a4c22b-8f73-4fd1-9d5f-3fd16806d926][Putting it together]]
 
 * Problem Statement
   [[https://operation-code.slack.com/archives/C7JMZ5LAV/p1633353389035400][From OpCode Slack]]
@@ -490,6 +490,7 @@ Note that the following works through the problem step by step. To jump to the f
 * Putting it together
   :PROPERTIES:
   :header-args:racket: :eval no :noweb yes :exports code
+  :ID:       e8a4c22b-8f73-4fd1-9d5f-3fd16806d926
   :END:
 
   We figured out all the pieces above, now lets put it all together into a single listing.
