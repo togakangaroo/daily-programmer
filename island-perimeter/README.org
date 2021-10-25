@@ -1,6 +1,6 @@
 #+TITLE: Island Perimeter
 
-Note that the following works through the problem step by step. To jump to the final listing and solution go to [[id:e8a4c22b-8f73-4fd1-9d5f-3fd16806d926][Putting it together]]
+Note that the following works through the problem step by step. To jump to the final listing and solution go to [[id:e8a4c22b-8f73-4fd1-9d5f-3fd16806d926][Putting it together]] or simply look at the other files tangled to this directory
 
 * Problem Statement
   [[https://operation-code.slack.com/archives/C7JMZ5LAV/p1633353389035400][From OpCode Slack]]
@@ -69,7 +69,7 @@ Note that the following works through the problem step by step. To jump to the f
     My last experience with context free grammars (short of a chapter early in the Beautiful Racket book) was in sophmore or junior year of college some 18 years ago but I do remember that once you got your head around the concept, they were relatively straightforward to write. Let's try to write one for our needs.
 
     #+name: ip.parser.rkt
-    #+begin_src racket :eval no
+    #+begin_src racket :eval no :tangle ip.parser.rkt
       #lang brag
       ip-program : "\n"* ip-row ("\n"+ ip-row)*
       ip-row : ip-whitespace* ip-cell* ip-vertical-wall ip-whitespace*
@@ -498,7 +498,7 @@ Note that the following works through the problem step by step. To jump to the f
   First the reader is very similar to what was described earlier for debugging purposes, we're need to simply be referencing the true expander rather than the one that merely displays output. The fact that we have to repeat this at all is more about a limitation of emacs' noweb templating syntax than anything that needs to be understood in isolation
 
   #+name: ip.reader.rkt
-  #+begin_src racket
+  #+begin_src racket :tangle ip.reader.rkt
     <<ip.reader.rkt/prefix>>
     (define (read-syntax path port)
       (define parse-tree (parse path (make-tokenizer port)))
@@ -511,7 +511,7 @@ Note that the following works through the problem step by step. To jump to the f
   Now we want our actual expander. While I could embed the actual perimeter measuring code in this file, I think I'd rather it be implemented in a separate module
 
   #+name: ip.expander.rkt
-  #+begin_src racket
+  #+begin_src racket :tangle ip.expander.rkt
     #lang br/quicklang
     
     <<racket/my-imports>>
@@ -530,7 +530,7 @@ Note that the following works through the problem step by step. To jump to the f
   And finding the perimeter is pretty straightforward
 
   #+name: find-perimeter.rkt
-  #+begin_src racket
+  #+begin_src racket :tangle find-perimeter.rkt
     <<racket/my-imports>>
     
     (provide find-perimeter walk-perimeter first-land-vertex)
@@ -542,7 +542,7 @@ Note that the following works through the problem step by step. To jump to the f
 
   So now taking the above, we should be able to get a perimeter output
 
-  #+begin_src racket :eval yes :exports both :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
+  #+begin_src racket :eval yes :exports both :tangle example-1.rkt :adjacent-file ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
     #lang reader "ip.reader.rkt"
     <<example-1/diagram>>
   #+end_src
@@ -552,7 +552,7 @@ Note that the following works through the problem step by step. To jump to the f
 
   Now lets try a more complex one
 
-  #+begin_src racket :eval yes :exports both :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
+  #+begin_src racket :eval yes :exports both :tangle example-5.rkt :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
     #lang reader "ip.reader.rkt"
     |   |   |   |   |   |   |   |   |   |   |
     |   |   |   |   |   |   | X | X | X | X |
@@ -568,7 +568,7 @@ Note that the following works through the problem step by step. To jump to the f
 
   #+RESULTS:
   : 62
-
+  
   Well I'm not going to double check that, but it seems right.
 
   Ideas for future improvement:
