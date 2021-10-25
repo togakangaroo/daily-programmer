@@ -398,7 +398,7 @@ Note that the following works through the problem step by step. To jump to the f
           [(vector -1 0) (list vertex-1 (vector+ vertex-1 left1))]))
     #+end_src
 
-    #+begin_src racket
+    #+begin_src racket :exports both
       <<racket/my-imports>>
       <<indicies-of-cells-adjacent-to-move>>
       (indicies-of-cells-adjacent-to-move #[1 1] #[1 2])
@@ -454,7 +454,7 @@ Note that the following works through the problem step by step. To jump to the f
 
     And simply finding the perimeter?
    
-    #+begin_src racket
+    #+begin_src racket :exports both
       <<racket/my-imports>>
       <<find-perimeter>>
       (define board (list*->matrix '((water water water water)
