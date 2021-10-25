@@ -1,0 +1,671 @@
+#+TITLE: Island Perimeter
+
+Note that the following works through the problem step by step. To jump to the final listing and solution go to [[Putting it together]]
+
+* Problem Statement
+  [[https://operation-code.slack.com/archives/C7JMZ5LAV/p1633353389035400][From OpCode Slack]]
+
+  You are given =row x col= grid representing a map where ~grid[i][j] = 1~ represents land and ~grid[i][j] = 0~ represents water.
+
+  Grid cells are connected horizontally/vertically (not diagonally). The grid is completely surrounded by water, and there is exactly one island (i.e., one or more connected land cells).
+
+  The island doesn't have "lakes", meaning the water inside isn't connected to the water around the island. One cell is a square with side length 1. The grid is rectangular, width and height don't exceed 100. Determine the perimeter of the island.
+
+  *Constraints:*
+  - ~row == grid.length~
+  - ~col == grid[i].length~
+  - ~1 <= row, col <= 100~
+  - ~grid[i][j] is 0 or 1~
+  - There is exactly one island in grid.
+
+** Example 1:
+   - Input :: ~grid = [[0,1,0,0],[1,1,1,0],[0,1,0,0],[1,1,0,0]]~
+   - Output :: ~16~
+   - Explanation :: The perimeter is the 16 yellow stripes
+
+     #+name: example-1/diagram
+     #+begin_src racket :eval no :exports code
+       |   | X |   |   |
+       | X | X | X |   |
+       |   | X |   |   |
+       | X | X |   |   |
+     #+end_src
+
+** Example 2:
+   - Input :: ~grid = [[1]]~
+   - Output :: ~4~
+
+** Example 3:
+   - Input :: grid = ~[[1,0]]~
+   - Output :: ~4~
+
+
+** Putting My Own Twist on It
+
+   Lets really lean into Racket. I want to experiment not only with Racket syntax but also with its language-creation capabilities. After all, I created a whole [[https://github.com/togakangaroo/ob-racket][Emacs extension to enable that]] yet have the barest of experience with it.
+
+   I therefore want the input to be an actual table, exactly like the [[Example 1]] diagram above. That should be the program. The result of running that progra should be the island's perimeter.
+
+* Implementation
+  :PROPERTIES:
+  :header-args:racket: :noweb strip-export
+  :END:
+
+  The implementation will containe several parts.
+
+  - All programs have a reading/parsing phase which takes the given program and converts it into s-expressions
+  - Given an s-expression, all programs next have a pre-processing phase with an expander which takes those s-expresions and expands them into new s-expressions that can be evaluated
+  - Finally, as part of the expansion you create the library itself that your code should be using
+
+** Reader
+
+   Initially I started with brainstorming and writing out path-finding code (included in the [[Brainstorming]] section below). After a while, I felt like I might be on the wrong track. The idea was solid but it was operating on a data structure that I wasn't convinced was realisticly one that would be straightforward to generate. I therefore pivoted to figuring out the reader portion.
+
+
+*** The Parser
+
+    To start with, the program that we want (composed of the diagram itself) is one that is not itself regular s-expressions. We must therefore parse it, and the nicest way to parse a program is with a context free grammar. Racket has a library for this in [[https://docs.racket-lang.org/brag/index.html][brag]] which I'll use here.
+
+    My last experience with context free grammars (short of a chapter early in the Beautiful Racket book) was in sophmore or junior year of college some 18 years ago but I do remember that once you got your head around the concept, they were relatively straightforward to write. Let's try to write one for our needs.
+
+    #+name: ip.parser.rkt
+    #+begin_src racket :eval no
+      #lang brag
+      ip-program : "\n"* ip-row ("\n"+ ip-row)*
+      ip-row : ip-whitespace* ip-cell* ip-vertical-wall ip-whitespace*
+      ip-cell : ip-vertical-wall ip-whitespace+ ip-mark ip-whitespace+
+      ip-whitespace : " "
+      ip-vertical-wall : "|"
+      ip-land : "X"
+      ip-water : " "
+      ip-mark : ip-land | ip-water
+    #+end_src
+
+    Uhh...I'm actually pretty confident about that one, let's try it out on [[Example 1]]. If this works then calling ~parse-to-datum~ should give us a valid s-expression
+
+    #+begin_src racket :eval yes :adjacent-file ip.parser.rkt :exports both :noweb yes
+      #lang br
+      (require "ip.parser.rkt")
+      (parse-to-datum "
+        <<example-1/diagram>>")
+    #+end_src
+
+    #+RESULTS:
+    : '(ip-program "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")) "\n" (ip-row (ip-whitespace " ") (ip-whitespace " ") (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-land "X")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-cell (ip-vertical-wall "|") (ip-whitespace " ") (ip-mark (ip-water " ")) (ip-whitespace " ")) (ip-vertical-wall "|")))
+
+    Oh nice. With a minimal amount of twiddling, that actually worked!
+
+*** The Tokenizer
+
+    So the next bit is going to be simply modifying the [[https://beautifulracket.com/bf/intro.html][bf example from the Beautiful Racket book]]. In that example they use a tokenizer to ignore the comments. In this case I don't think we need that. I suspect we could get rid of the tokenizer entirely and just use a built-in one because I don't know how off the top of my head, lets just make a tokenizer that simply makes every character into a token. After all, there is no such concept as "words" in what I'm doing here, it literally is just character by character.
+
+    #+name: racket/every-character:tokenizer
+    #+begin_src racket :eval no :exports code
+      (define (make-tokenizer port)
+        (λ ()
+          (define ip-lexer (lexer
+                            [any-char lexeme]))
+          (ip-lexer port)))
+    #+end_src
+
+*** An experimental reader
+
+    So any reader we want is going to want to start with Quicklang, pull in brag, and pull in the functions provided by our parser; specifically [[https://docs.racket-lang.org/brag/index.html#%28def._%28%28lib._brag%2Fmain..rkt%29._parse%29%29][parse]].
+
+    #+name: ip.reader.rkt/prefix
+    #+begin_src racket :eval no
+      #lang br/quicklang
+      
+      (require brag/support)
+      (require "ip.parser.rkt")
+      
+      (provide read-syntax)
+    #+end_src
+
+    We combine this and our tokenizer to create a reader function that when called will simply create a new racket module that uses a custom expander that does nothing but pretty print.
+
+    #+name: ip.reader.printing-expander.rkt
+    #+begin_src racket :adjacent-file ip.parser.rkt :eval no :noweb strip-export :exports code
+      <<ip.reader.rkt/prefix>>
+      (define (read-syntax path port)
+        (define parse-tree (parse path (make-tokenizer port)))
+        (define module-datum `(module island-perimeter "ip.printing-expander.rkt"
+                                ,parse-tree))
+        (datum->syntax #f module-datum))
+      <<racket/every-character:tokenizer>>
+    #+end_src
+
+    And here would be the expander. Again, the only thing its doing here is pretty-printing the result
+
+    #+name: ip.printing-expander.rkt
+    #+begin_src racket :eval no :exports code
+      #lang br/quicklang
+      (require racket/pretty)
+      
+      (provide (rename-out [ip-module-begin #%module-begin]))
+      
+      (define-macro (ip-module-begin PARSE-TREE)
+        #'(#%module-begin
+           (pretty-print 'PARSE-TREE)))
+    #+end_src
+
+    Putting these together, we should be able to now run a simple program written in our grammar. It won't *do* anything other than parse the input and display it, but that's a reader for you!
+
+    #+begin_src racket :adjacent-file  ip.reader.printing-expander.rkt ip.parser.rkt ip.printing-expander.rkt
+      #lang reader "ip.reader.printing-expander.rkt"
+      | X |   | X |
+    #+end_src
+
+    #+RESULTS:
+    #+begin_example
+    '(ip-program
+      "\n"
+      "\n"
+      (ip-row
+       (ip-cell
+        (ip-vertical-wall "|")
+        (ip-whitespace " ")
+        (ip-mark (ip-land "X"))
+        (ip-whitespace " "))
+       (ip-cell
+        (ip-vertical-wall "|")
+        (ip-whitespace " ")
+        (ip-mark (ip-water " "))
+        (ip-whitespace " "))
+       (ip-cell
+        (ip-vertical-wall "|")
+        (ip-whitespace " ")
+        (ip-mark (ip-land "X"))
+        (ip-whitespace " "))
+       (ip-vertical-wall "|")))
+    #+end_example
+
+    I'll note that I'm not qutie happy with this output. I don't think there is any point in the expander receiving s expressions like ~"\n"~ or ~{ip-whitespace " ")~ (though ~(ip-whitespace)~ would make some sense). It feels like the sort of thing that should be handled in the reader, but I hit against the limit of my knowledge here and will just push this work out to the expander where I know how to take care of it.
+
+*** The Expander
+
+    Ok, so now we want to write a function that can convert this into something more workable.
+
+    #+name: ip.dev.reader.rkt
+    #+begin_src racket :adjacent-file ip.parser.rkt :eval no :exports no
+      <<ip.reader.rkt/prefix>>
+      (define (read-syntax path port)
+        (define parse-tree (parse path (make-tokenizer port)))
+        (define module-datum `(module island-perimeter "ip.dev.expander.rkt"
+                                ,parse-tree))
+        (datum->syntax #f module-datum))
+      <<racket/every-character:tokenizer>>
+    #+end_src
+
+    #+name: ip.dev.expander.rkt
+    #+begin_src racket :eval no :exports no
+      #lang br/quicklang
+      <<racket/my-imports>>
+      
+      (provide (rename-out [ip-module-begin #%module-begin]))
+      
+      <<racket/parse-island>>
+      
+      (define (display-results board)
+        (pretty-print (matrix->list* board)))
+      
+      (define-macro (ip-module-begin PARSE-TREE)
+        #'(#%module-begin
+           (display-results (parse-island 'PARSE-TREE))))
+    #+end_src
+
+    What I really want is not the s-expression soup above but a 2d matrix that contains the symbols ~'land~ or ~'water~ in each cell. This might not be the best structure for our needs (as opposed for example an aggregation of connections or of vertices), but its the most straightforward one. We can also express the conversion with a nice pattern matching function
+
+    #+name: racket/parse-island
+    #+begin_src racket :eval no :exports code
+      (define compact (curry filter identity))
+      (define mapcompact (compose compact map))
+      
+      (define/match (parse-island program)
+        [((list 'ip-program contents ...)) (~>> contents
+                                                (mapcompact parse-island)
+                                                sequence->list*
+                                                list*->matrix)]
+        [((list 'ip-row rows ...)) (mapcompact parse-island rows)]
+        [((list 'ip-cell contents ...)) (first (mapcompact parse-island contents))]
+        [((list 'ip-vertical-wall _)) #f]
+        [((list 'ip-whitespace _)) #f]
+        [("\n") #f]
+        [((list 'ip-mark (list 'ip-water _))) 'water]
+        [((list 'ip-mark (list 'ip-land _))) 'land])
+    #+end_src
+
+    Two quick tests:
+
+    #+begin_src racket :exports both :adjacent-file  ip.dev.reader.rkt ip.parser.rkt ip.dev.expander.rkt
+      #lang reader "ip.dev.reader.rkt"
+      | X |   | X |
+      | X | X |   |
+    #+end_src
+
+    #+RESULTS:
+    : '((land water land) (land land water))
+
+
+    #+begin_src racket :exports both :noweb yes :adjacent-file  ip.dev.reader.rkt ip.parser.rkt ip.dev.expander.rkt
+      #lang reader "ip.dev.reader.rkt"
+      <<example-1/diagram>>
+    #+end_src
+
+    #+RESULTS:
+    : '((water land water water)
+    :   (land land land water)
+    :   (water land water water)
+    :   (land land water water))
+
+    And that works!
+
+    I do feel like maybe this function should be in the reader rather than the expander, but lets go with this for now.
+
+** Measure Perimeter
+
+   Ok, so given the above structure we now need to actually make it measure a perimeter.
+
+   The idea I was developing while [[Brainstorming]] was to consider vertices along the perimeter rather than cells, the idea being that this is what matters.
+
+   If you only care about vertices on the perimeter, there is a good physical analogy we can use. Consider police tape wound around a crime scene in an enclosed polygon shape. The tape is wound around items that act as supports, these can be considered the vertices of our island shape. To get the perimeter, you just pick a support, pick a direction, and just follow the tape around, counting the number of supports you pass before you cycle back to the first one.
+
+   So consider the following shape
+
+   #+name: example-4/diagram
+   #+begin_src racket :eval no
+     |   |   | X |   |   |
+     | X | X | X | X |   |
+     | X | X | X | X |   |
+     | X | X | X | X |   |
+     |   |   | X |   |   |
+     | X | X | X |   |   |
+   #+end_src
+
+
+   Lets say I'm tracking around the edges - that is I'm looking at vertex =[1 0]= and I need to decide which direction to step to next. There are 4 directions and the way we can pick
+   1. Always try the same sequence (eg Right, Down, Left, Up). Take the first step you can
+   2. Do not step back to where you have been
+   3. *One but not both* of the cells adjacent to your step must be a ~'land~ cell
+
+      If we were to follow that rule we would step
+
+      - [1 0] -> [1 1]
+      - [1 1] -> [1 2]
+      - [1 2] -> [0 2]
+      - [0 2] -> [0 3]
+      - [0 3] -> [1 3]
+      - [1 3] -> [1 4]
+      - [1 4] -> [2 4]
+      - [2 4] -> [3 4]
+      - [3 4] -> [4 4]
+      - [4 4] -> [4 3]
+      - [4 3] -> [5 3]
+
+   And so on. I think I've convinced myself that this would both work. I think I've also outlined an implementation that does this in a single sweep through the matrix rather than first needing to calculate edge vertices, you identify and walk them all in one go.
+
+   Well lets implement this then.
+
+*** Find the initial vertex
+
+    First, we need to identify *a* point on the perimeter of our shape to start our walk algorithm on. If we had the list of perimeter vertices already, this would be dirt simple - just pick one - but if we had such a list we could also just count its size and be done with the whole question. We need the list, and finding a first step for our walk is how we bootstrap our walk.
+
+    An interesting note, in considering data structures I chose to work with a matrix which is just an arrangement of ~math/array~ elements. The big advantage here is the indices can be iterated as a single flat list. We therefore just walk through indices to find any ~'land~ and take that index. So long as we're moving through the matrix in a predictable direction, we can figure out which of the cell's 4 vertices must lie on the perimeter of the shape (as opposed to the inside) by virtue of not having run into a land cell previously in the direction we are coming from.
+
+    #+name: first-land-vertex
+    #+begin_src racket :eval no :exports code
+      (define (first-land-vertex board)
+        ;; in-array-indexes guarantees to return indices starting with the innermost iteration first. For a 2d matrix that means sweeping from left to right and downward.
+        ;; The upper left vertex would be the same as the cell coordinates. As we're sweeping upper left to lower right, the first land cell we encounter, its upper left vertex must be on the outside
+        (for/or ([idx (~> board array-shape in-array-indexes)])
+          (if (equal? 'land (array-ref board idx))
+              idx
+              #f)))
+    #+end_src
+
+    #+begin_src racket :noweb strip-export :exports both
+      <<racket/my-imports>>
+      (define board (list*->matrix '((water water water water)
+                                     (water water land water)
+                                     (land land land water)
+                                     (water land water water)
+                                     (land land water water))))
+      <<first-land-vertex>>
+      (first-land-vertex board)
+    #+end_src
+
+    #+RESULTS:
+    : '#(1 2)
+
+    Ok, so now lets see what it looks like to walk it from there. This next part took a ton of trial and error and I had to learn a ton about the Racket standard library and follow a whole mess of dead ends, what remains in here is the more refined version where I actually figured out what I should be doing.
+
+*** Check if a move is along a perimeter
+
+    From the algorithm details we can say that we will need to be able to decide whether the cells adjacent to a move are on the shape perimeter with a move described as a step between adjacent vertices.
+
+    Remember that the rule is to consider the cell values to either side of the move
+    - At least one of them must be a land
+    - Both cannot be land (as then you'd be on the inside of the shape)
+
+    This actually means that we don't have to worry much about being out-of-bounds so long as any cell that falls off the map is considered to contain water. Since we are using ~math/array~, we can just reference any index and if we get an out-of-bounds error, return ~'water~
+
+    #+name: move-along-perimeter?
+    #+begin_src racket :eval no
+      (define not-equal? (compose not equal?))
+      
+      (define (try-array-ref board default-value idx)
+        "Like array-ref but with a default value returned if the index is out of bounds"
+        (with-handlers ([exn:fail? (thunk* default-value)])
+          (array-ref board idx)))
+      
+      (define (move-along-perimeter? board vertex-1 vertex-2)
+        (define adjacent-cells (~>> (indicies-of-cells-adjacent-to-move vertex-1 vertex-2)
+                                    (map (curry try-array-ref board 'water))
+                                    sequence->list))
+        (and (member 'land adjacent-cells)
+             (apply not-equal? adjacent-cells)))
+    #+end_src
+    
+*** Get indices of cells adjacent to a move
+
+    Next step is that ~indicies-of-cells-adjacent-to-move~ function. How do we implement that?
+    
+    There is plenty of room here to get fancy with (basic) math and to be honest, I did, but ultimately I didn't try hard enough, and in looking for the pattern I realized it is easier to just hard code how to calculate the cells you are moving to based on the direction of the move.
+
+    Consider the table of what the adjacent cells would be
+    
+    | direction | vertex-from | vertex-to | diff | adjacent cells |
+    |-----------+-------------+-----------+------+----------------|
+    | Right     | 1 1         | 1 2       | 0 1  | [0 1] [1 1]    |
+    | Left      | 1 2         | 1 1       | 0 -1 | [0 1] [1 1]    |
+    | Down      | 1 1         | 2 1       | 1 0  | [1 0] [1 1]    |
+    | Up        | 2 1         | 1 1       | -1 0 | [1 0] [1 1]    |
+
+    We can just check these conditions and do the math.
+    
+    #+name: indicies-of-cells-adjacent-to-move
+    #+begin_src racket :eval no
+      (define (vector+ . vectors) (apply vector-map + vectors))
+      (define (vector- . vectors) (apply vector-map - vectors))
+      (define up1 #[-1 0])
+      (define left1 #[0 -1])
+      
+      (define (indicies-of-cells-adjacent-to-move vertex-2 vertex-1)
+        (match (vector- vertex-1 vertex-2)
+          [(vector 0 1)  (list vertex-2 (vector+ vertex-2 up1))]
+          [(vector 0 -1) (list vertex-1 (vector+ vertex-1 up1))]
+          [(vector 1 0)  (list vertex-2 (vector+ vertex-2 left1))]
+          [(vector -1 0) (list vertex-1 (vector+ vertex-1 left1))]))
+    #+end_src
+
+    #+begin_src racket
+      <<racket/my-imports>>
+      <<indicies-of-cells-adjacent-to-move>>
+      (indicies-of-cells-adjacent-to-move #[1 1] #[1 2])
+      (indicies-of-cells-adjacent-to-move #[1 2] #[1 1])
+      (indicies-of-cells-adjacent-to-move #[1 1] #[2 1])
+      (indicies-of-cells-adjacent-to-move #[2 1] #[1 1])
+    #+end_src
+
+    #+RESULTS:
+    : '(#(1 1) #(0 1))
+    : '(#(1 1) #(0 1))
+    : '(#(1 1) #(1 0))
+    : '(#(1 1) #(1 0))
+
+
+*** Find perimeter
+
+    Now I believe we are ready to do the walk. This is of course going to be recursive. At each vertex we will check adjacent vertices in a clockwise direction (right, down, left, up) and when that vertex falls along the perimeter, we will visit it. We will also keep track of the visited nodes list and not visit any node twice.
+    
+    As always, I prefer to start with a generator for something like this. Yield back perimeter vertices as you step on them, this generates something with similar memory-usage characteristics of a straightforward count but extremely flexible and useful for debugging.
+    
+    #+name: find-perimeter
+    #+begin_src racket :eval no :noweb strip-export :exports code
+      <<indicies-of-cells-adjacent-to-move>>
+      <<move-along-perimeter?>>
+      (define adjacent-cell-moves (list #[0 1] #[1 0] #[0 -1] #[-1 0]))
+      
+      (define (walk-perimeter board initial-vertex)
+        (in-generator
+         (define visited (mutable-set))
+         (let step-to ([current-vertex initial-vertex])
+           (unless (set-member? visited current-vertex)
+             (yield current-vertex)
+             (set-add! visited current-vertex)
+             (for ([move adjacent-cell-moves])
+               (define next-vertex (vector+ current-vertex move))
+               (when (move-along-perimeter? board current-vertex next-vertex)
+                 (step-to next-vertex)))))))
+      
+      (define (find-perimeter board initial-vertex)
+        (sequence-length (walk-perimeter board initial-vertex)))
+    #+end_src
+
+    #+begin_src racket :exports both
+      <<racket/my-imports>>
+      <<find-perimeter>>
+      (define board (list*->matrix '((water land  water))))
+      (sequence->list (walk-perimeter board (vector 0 1)))
+    #+end_src
+
+    #+RESULTS:
+    : '(#(0 1) #(0 2) #(1 2) #(1 1))
+
+    And simply finding the perimeter?
+   
+    #+begin_src racket
+      <<racket/my-imports>>
+      <<find-perimeter>>
+      (define board (list*->matrix '((water water water water)
+                                     (water water land  water)
+                                     (land  land  land  water)
+                                     (water land  water water)
+                                     (land  land  water water))))
+      (find-perimeter board (vector 1 2))
+    #+end_src
+
+    #+RESULTS:
+    : 16
+
+    Nice.
+
+** Imports
+   This is the standard set of imports I'm relying on. I should probably write them into my own lang.
+
+   #+name: racket/my-imports
+   #+begin_src racket :eval no :exports code
+     (require racket/match)
+     (require racket/format)
+     (require racket/set)
+     (require racket/vector)
+     (require racket/generator)
+     (require racket/pretty)
+     (require math/matrix)
+     (require math/array)
+     (require threading)
+     (require (except-in data/collection sequence->list))
+   #+end_src
+   
+* Putting it together
+  :PROPERTIES:
+  :header-args:racket: :eval no :noweb yes :exports code
+  :END:
+
+  We figured out all the pieces above, now lets put it all together into a single listing.
+
+  First the reader is very similar to what was described earlier for debugging purposes, we're need to simply be referencing the true expander rather than the one that merely displays output. The fact that we have to repeat this at all is more about a limitation of emacs' noweb templating syntax than anything that needs to be understood in isolation
+
+  #+name: ip.reader.rkt
+  #+begin_src racket
+    <<ip.reader.rkt/prefix>>
+    (define (read-syntax path port)
+      (define parse-tree (parse path (make-tokenizer port)))
+      (define module-datum `(module island-perimeter "ip.expander.rkt"
+                              ,parse-tree))
+      (datum->syntax #f module-datum))
+    <<racket/every-character:tokenizer>>
+  #+end_src
+
+  Now we want our actual expander. While I could embed the actual perimeter measuring code in this file, I think I'd rather it be implemented in a separate module
+
+  #+name: ip.expander.rkt
+  #+begin_src racket
+    #lang br/quicklang
+    
+    <<racket/my-imports>>
+    (require "find-perimeter.rkt")
+    
+    (provide (rename-out [ip-module-begin #%module-begin]))
+    
+    <<racket/parse-island>>
+    
+    (define-macro (ip-module-begin PARSE-TREE)
+      #'(#%module-begin
+         (define board (parse-island 'PARSE-TREE))
+         (find-perimeter board (first-land-vertex board))))
+  #+end_src
+   
+  And finding the perimeter is pretty straightforward
+
+  #+name: find-perimeter.rkt
+  #+begin_src racket
+    <<racket/my-imports>>
+    
+    (provide find-perimeter walk-perimeter first-land-vertex)
+    
+    <<first-land-vertex>>
+    
+    <<find-perimeter>>
+  #+end_src
+
+  So now taking the above, we should be able to get a perimeter output
+
+  #+begin_src racket :eval yes :exports both :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
+    #lang reader "ip.reader.rkt"
+    <<example-1/diagram>>
+  #+end_src
+
+  #+RESULTS:
+  : 16
+
+  Now lets try a more complex one
+
+  #+begin_src racket :eval yes :exports both :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
+    #lang reader "ip.reader.rkt"
+    |   |   |   |   |   |   |   |   |   |   |
+    |   |   |   |   |   |   | X | X | X | X |
+    |   |   |   |   |   |   | X |   | X |   |
+    |   |   |   |   | X | X | X | X |   |   |
+    |   |   | X | X | X | X |   | X | X |   |
+    |   |   | X |   |   |   |   |   | X |   |
+    |   |   |   | X | X |   | X | X | X | X |
+    |   |   |   | X | X |   | X | X | X | X |
+    |   | X | X | X | X | X | X |   |   |   |
+    |   |   | X | X | X | X | X |   |   |   |
+  #+end_src
+
+  #+RESULTS:
+  : 62
+
+  Well I'm not going to double check that, but it seems right.
+
+  Ideas for future improvement:
+  - Write standard imports into their own lang
+  - Don't use a mutable set
+  - Have to tokenizer ignore pipes surrounded by spaces so you can write out just the island without the tabular structure
+  - I wonder how to do it with tail recursion?
+  - Really every part of this can likely be revisited for more clever-ing and improvement.
+
+* Brainstorming
+  :PROPERTIES:
+  :header-args:racket: :noweb yes
+  :END:
+
+  These are various ideas I pursued at various times. It is not terribly relevant to the solution above other than simply being part of the journey.
+
+** Node Map
+   For our purposes, lets count coordinates at the vertices, not at the cells! So in [[Example 1]] above we take =0 0= at the upper left vertex, going accross to =4 0= and down to =4 4= we then express the chart as a list of connections from each vertex
+
+   #+name: racket/example-1/node-map
+   #+begin_src racket :exports code :eval no
+     (apply hash '((1 0) ((2 0) (1 1))
+                         (2 0) ((2 1) (1 0))
+                         (0 1) ((1 1) (0 2))
+                         (1 1) ((2 1) (1 2) (0 1) (1 0))
+                         (2 1) ((3 1) (2 2) (1 1) (2 0))
+                         (3 1) ((3 2) (2 1))
+                         (0 2) ((2 1) (0 1))
+                         (1 2) ((2 2) (1 3) (0 2) (1 1))
+                         (2 2) ((3 2) (2 3) (1 2) (2 1))
+                         (3 2) ((2 2) (3 1))
+                         (0 3) ((1 3) (0 4))
+                         (1 3) ((2 3) (1 4) (0 3) (1 2))
+                         (2 3) ((2 4) (1 3) (2 2))
+                         (0 4) ((1 4) (0 3))
+                         (1 4) ((2 4) (0 4) (1 3))
+                         (2 4) ((1 4) (2 3))))
+   #+end_src
+
+   But that's not quite right, After all, I need an indicator *which* connection to ove to, not all steps are along the outside of the shape.
+
+   So uhh...can we filter out the ones that are internal? Probably best to not place them in the list to begin with, but the logic should apply either way. What makes a connection internal? For [[Example 1]] we would want to omit the connection between =1 1= and =2 1=. Why? Because the square to either side of that connection is full.
+
+   To do this...it actually *does* seem like it would be easier if we also had a full mapping of the board itself so we could refer to full cells.
+   - A connection between =x1 y1
+
+   Given a proper node map structure like above, it should be trivial to determine perimeter. You literally start anywhere and try to move into the first connection that you have not yet visited until you can do it no more. Each time you step you increase a counter
+
+   This only works come to think of it,  if there are no *internal* nodes tracked.
+
+   None of the examples above describe one, we Need to
+
+   Let's not worry about that now, lets assume it already has been properly arranged where all data in it is relevant. If that is the case, then you can pick any point on the ,,
+
+   #+begin_src racket
+     (require threading)
+     (require (except-in data/collection sequence->list))
+     (require racket/generator)
+     (require racket/match)
+     
+     (define node-map
+       <<racket/example-1/node-map>>)
+     
+     (define (has-key source key)
+       (hash-ref-key key #f))
+     
+     (define steps (sequence->stream
+                    (in-generator
+                     (let rec ([next-node (hash-iterate-key node-map 0)]
+                               [visited (make-hash)])
+                       (println (list next-node visited (hash-ref-key node-map next-node 'f) (hash-ref-key visited next-node 'f)))
+                       (when (and (hash-key node-map next-node)
+                                  (hash-key visited next-node 'f))
+                         (hash-set! visited next-node 't)
+                         (yield next-node)
+                         (match-let ([(list x y) next-node])
+                           (print 'next)))))))
+     ;; (rec (list (add1 x) y) visited)
+     ;; (rec (list x add1 y) visited)
+     ;; (rec (list (sub1 x) y) visited)
+     ;; (rec (list x (sub1 y)) visited)))))))
+     
+     (first (take 3 steps))
+   #+end_src
+
+   #+RESULTS:
+   : '((2 4) #hash() (2 4) f)
+   : '(2 4)
+
+** Something something laplace filter
+
+   First thought is to get only the edges which I can do by a laplace filter using a convolution matrix of
+
+   |    0 | -.25 |    0 |
+   | -.25 |    1 | -.25 |
+   |    0 | -.25 |    0 |
+
+   but....what does that actually do for me?
+
+   I think this might allow getting the list of perimeter vertices using a matrix operation but I'm not sure. Dropping it for now
+
