@@ -151,7 +151,7 @@ Note that the following works through the problem step by step. To jump to the f
 
     Putting these together, we should be able to now run a simple program written in our grammar. It won't *do* anything other than parse the input and display it, but that's a reader for you!
 
-    #+begin_src racket :adjacent-file  ip.reader.printing-expander.rkt ip.parser.rkt ip.printing-expander.rkt
+    #+begin_src racket :exports both :adjacent-file  ip.reader.printing-expander.rkt ip.parser.rkt ip.printing-expander.rkt
       #lang reader "ip.reader.printing-expander.rkt"
       | X |   | X |
     #+end_src
