@@ -1,4 +1,7 @@
 #+TITLE: Island Perimeter
+
+Note that the following works through the problem step by step. To jump to the final listing and solution go to [[Putting it together]]
+
 * Problem Statement
   [[https://operation-code.slack.com/archives/C7JMZ5LAV/p1633353389035400][From OpCode Slack]]
 
@@ -467,89 +470,6 @@
 
     Nice.
 
-** Putting it together
-
-   First the reader is very similar to what came before, we're simply referrencing the true expander rather than the dev one. This is more about a limitation of noweb syntax than anything that needs to be understood in isolation
-
-   #+name: ip.reader.rkt
-   #+begin_src racket :eval no
-     <<ip.reader.rkt/prefix>>
-     (define (read-syntax path port)
-       (define parse-tree (parse path (make-tokenizer port)))
-       (define module-datum `(module island-perimeter "ip.expander.rkt"
-                               ,parse-tree))
-       (datum->syntax #f module-datum))
-     <<racket/every-character:tokenizer>>
-   #+end_src
-
-   So now we want our actual expander. While I could embed the actual perimeter measuring code in this file, I think I'd rather it be implemented in a separate module
-
-   #+name: ip.expander.rkt
-   #+begin_src racket :eval no
-     #lang br/quicklang
-     
-     <<racket/my-imports>>
-     (require "find-perimeter.rkt")
-     
-     (provide (rename-out [ip-module-begin #%module-begin]))
-     
-     <<racket/parse-island>>
-     
-     (define-macro (ip-module-begin PARSE-TREE)
-       #'(#%module-begin
-          (define board (parse-island 'PARSE-TREE))
-          (find-perimeter board (first-land-vertex board))))
-   #+end_src
-
-   #+name: find-perimeter.rkt
-   #+begin_src racket :eval no
-     <<racket/my-imports>>
-     
-     (provide find-perimeter walk-perimeter first-land-vertex)
-     
-     <<first-land-vertex>>
-     
-     <<find-perimeter>>
-     
-   #+end_src
-
-   So now taking the above, we should be able to get a perimeter output
-
-   #+begin_src racket :noweb yes :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
-     #lang reader "ip.reader.rkt"
-     <<example-1/diagram>>
-   #+end_src
-
-   #+RESULTS:
-   : 16
-
-   Now lets try a more complex one
-
-   #+begin_src racket :noweb yes :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
-     #lang reader "ip.reader.rkt"
-     |   |   |   |   |   |   |   |   |   |   |
-     |   |   |   |   |   |   | X | X | X | X |
-     |   |   |   |   |   |   | X |   | X |   |
-     |   |   |   |   | X | X | X | X |   |   |
-     |   |   | X | X | X | X |   | X | X |   |
-     |   |   | X |   |   |   |   |   | X |   |
-     |   |   |   | X | X |   | X | X | X | X |
-     |   |   |   | X | X |   | X | X | X | X |
-     |   | X | X | X | X | X | X |   |   |   |
-     |   |   | X | X | X | X | X |   |   |   |
-   #+end_src
-
-   #+RESULTS:
-   : 62
-
-   Well I'm not going to double check that, but it seems right
-
-   Ideas for future improvement:
-   - Write standard imports into their own lang
-   - Don't use a mutable set
-   - Have to tokenizer ignore pipes surrounded by spaces so you can write out just the island without the tabular structure
-   - I wonder how to do it with tail recursion?
-
 ** Imports
    This is the standard set of imports I'm relying on. I should probably write them into my own lang.
 
@@ -566,12 +486,103 @@
      (require threading)
      (require (except-in data/collection sequence->list))
    #+end_src
+   
+* Putting it together
+  :PROPERTIES:
+  :header-args:racket: :eval no :noweb yes :exports code
+  :END:
+
+  We figured out all the pieces above, now lets put it all together into a single listing.
+
+  First the reader is very similar to what was described earlier for debugging purposes, we're need to simply be referencing the true expander rather than the one that merely displays output. The fact that we have to repeat this at all is more about a limitation of emacs' noweb templating syntax than anything that needs to be understood in isolation
+
+  #+name: ip.reader.rkt
+  #+begin_src racket
+    <<ip.reader.rkt/prefix>>
+    (define (read-syntax path port)
+      (define parse-tree (parse path (make-tokenizer port)))
+      (define module-datum `(module island-perimeter "ip.expander.rkt"
+                              ,parse-tree))
+      (datum->syntax #f module-datum))
+    <<racket/every-character:tokenizer>>
+  #+end_src
+
+  Now we want our actual expander. While I could embed the actual perimeter measuring code in this file, I think I'd rather it be implemented in a separate module
+
+  #+name: ip.expander.rkt
+  #+begin_src racket
+    #lang br/quicklang
+    
+    <<racket/my-imports>>
+    (require "find-perimeter.rkt")
+    
+    (provide (rename-out [ip-module-begin #%module-begin]))
+    
+    <<racket/parse-island>>
+    
+    (define-macro (ip-module-begin PARSE-TREE)
+      #'(#%module-begin
+         (define board (parse-island 'PARSE-TREE))
+         (find-perimeter board (first-land-vertex board))))
+  #+end_src
+   
+  And finding the perimeter is pretty straightforward
+
+  #+name: find-perimeter.rkt
+  #+begin_src racket
+    <<racket/my-imports>>
+    
+    (provide find-perimeter walk-perimeter first-land-vertex)
+    
+    <<first-land-vertex>>
+    
+    <<find-perimeter>>
+  #+end_src
+
+  So now taking the above, we should be able to get a perimeter output
+
+  #+begin_src racket :eval yes :exports both :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
+    #lang reader "ip.reader.rkt"
+    <<example-1/diagram>>
+  #+end_src
+
+  #+RESULTS:
+  : 16
+
+  Now lets try a more complex one
+
+  #+begin_src racket :eval yes :exports both :adjacent-file  ip.reader.rkt ip.parser.rkt ip.expander.rkt find-perimeter.rkt
+    #lang reader "ip.reader.rkt"
+    |   |   |   |   |   |   |   |   |   |   |
+    |   |   |   |   |   |   | X | X | X | X |
+    |   |   |   |   |   |   | X |   | X |   |
+    |   |   |   |   | X | X | X | X |   |   |
+    |   |   | X | X | X | X |   | X | X |   |
+    |   |   | X |   |   |   |   |   | X |   |
+    |   |   |   | X | X |   | X | X | X | X |
+    |   |   |   | X | X |   | X | X | X | X |
+    |   | X | X | X | X | X | X |   |   |   |
+    |   |   | X | X | X | X | X |   |   |   |
+  #+end_src
+
+  #+RESULTS:
+  : 62
+
+  Well I'm not going to double check that, but it seems right.
+
+  Ideas for future improvement:
+  - Write standard imports into their own lang
+  - Don't use a mutable set
+  - Have to tokenizer ignore pipes surrounded by spaces so you can write out just the island without the tabular structure
+  - I wonder how to do it with tail recursion?
+  - Really every part of this can likely be revisited for more clever-ing and improvement.
+
 * Brainstorming
   :PROPERTIES:
   :header-args:racket: :noweb yes
   :END:
 
-  So normally I would start jotting down ideas here but in this case I used the time-honored strategy of taking a shower and of course it came to me.
+  These are various ideas I pursued at various times. It is not terribly relevant to the solution above other than simply being part of the journey.
 
 ** Node Map
    For our purposes, lets count coordinates at the vertices, not at the cells! So in [[Example 1]] above we take =0 0= at the upper left vertex, going accross to =4 0= and down to =4 4= we then express the chart as a list of connections from each vertex
@@ -596,7 +607,7 @@
                          (2 4) ((1 4) (2 3))))
    #+end_src
 
-   But that;s not quite right, After all, I need an indicator *which* connection to ove to, not all steps are along the outside of the shape.
+   But that's not quite right, After all, I need an indicator *which* connection to ove to, not all steps are along the outside of the shape.
 
    So uhh...can we filter out the ones that are internal? Probably best to not place them in the list to begin with, but the logic should apply either way. What makes a connection internal? For [[Example 1]] we would want to omit the connection between =1 1= and =2 1=. Why? Because the square to either side of that connection is full.
 
@@ -654,69 +665,7 @@
    | -.25 |    1 | -.25 |
    |    0 | -.25 |    0 |
 
-   but....what does that actually do for me? Lets create an example with some internals
+   but....what does that actually do for me?
 
+   I think this might allow getting the list of perimeter vertices using a matrix operation but I'm not sure. Dropping it for now
 
-* Playground
-  :PROPERTIES:
-  :header-args:racket: :noweb yes
-  :END:
-  #+begin_src racket
-    (require racket/vector)
-    
-    (define v1 #[1 2])
-    (define v2 #[1 1])
-    
-    (apply + (vector->list (vector-map - v1 v2)))
-    (apply + (vector->list (vector-map - v2 v1)))
-  #+end_src
-
-  #+RESULTS:
-  : 1
-  : -1
-
-  #+begin_src racket
-    (for*/list ([x '(0 1)]
-                [y '(0 1)])
-      (vector-map + (vector 0 0) (vector x y)))
-  #+end_src
-
-  #+RESULTS:
-  : '(#(0 0) #(0 1) #(1 0) #(1 1))
-
-  #+begin_src racket
-    (for*/or ([x '(0 1)]
-              [y '(0 1)])
-      (when (equal? x 1) (list x y)))
-  #+end_src
-
-  #+RESULTS:
-
-  #+begin_src racket
-    (require math/array)
-    (require math/matrix)
-    (define board (list*->matrix '((water water water water)
-                                   (water water land water)
-                                   (land land land water)
-                                   (water land water water)
-                                   (land land water water))))
-    
-    
-    (array-ref board #[-1 2])
-  #+end_src
-
-  #+RESULTS:
-  : array-ref: expected indexes for shape '(5 4); given '#(-1 2)
-  :   context...:
-  :    /usr/share/racket/pkgs/math-lib/math/private/array/typed-array-indexing.rkt:31:2: array-ref
-  :    body of "/tmp/ob-racket-cwhiXq/ob-racketXCk3nw.rkt"
-
-  #+begin_src racket
-    (require math/array)
-
-    (with-handlers ([exn:fail? display])
-      (array-ref (array #[1 2]) #[2]))
-  #+end_src
-
-  #+RESULTS:
-  : #(struct:exn:fail array-ref: expected indexes for shape '(2); given '#(2) #<continuation-mark-set>)
