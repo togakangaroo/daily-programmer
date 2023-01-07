@@ -22,3 +22,4 @@ What you find here, are not writeups of me solving these problems, they're the a
 - [[./battleship-board][Battleship Board]]
 - [[./tic-tac-toe-game][Check Tic Tac Toe Winner]]
 - [[./island-perimeter][Calculate Island Perimeter]]
+- [[./maximum-ice-cream-bars][Maximum Ice Cream Bars]]
