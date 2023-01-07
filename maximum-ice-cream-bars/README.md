@@ -14,7 +14,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 1
 
-<table id="orgeabf3ff" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgb64d74a" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -47,7 +47,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 2
 
-<table id="org648cec1" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org6eb7347" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -80,7 +80,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 3
 
-<table id="orgaedf5cd" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgb50ba5b" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -188,7 +188,7 @@ So imagine moving down this list from left to right with `coins = 5` until the t
 
 If you were to count the number of steps you took moving left toright you would get 3 as you should.
 
-This seems to just be a simple loop in an iterator
+When considered in that way, this is just be a simple loop in an iterator. I love the loop facility so lets use that, and the nice thing about emacs generators is that because closures aren't "real" (everything is just a list after all) you can yield from pretty much anywhere - even from inside what in other languages would be higher order functions!
 
     (iter-make
      (cl-loop for c in sorted-costs
@@ -199,7 +199,11 @@ This seems to just be a simple loop in an iterator
               do (iter-yield c)
               finally return nil))
 
-And we can test that by passing in the example tables above and evaluating things.
+This will generate an iteration of all costs we have encountered before the runninig total was exceeded. Note that because we are passing back values with `iter-yield`, the `nil` value returned in the above code is immaterial, it is just necessary for the `cl-loop` syntax.
+
+While we do not actually want the costs, we want just the total amount of costs that we passed, because we are using a generator here, there is no extra memory usage, we are simply streaming back values so adding this bit of functionality is effectively "free". To get the total number of ice cream bars the boy can get, we simply count the number (not total) of costs that are in the stream.
+
+We can test that by passing in the example tables above and evaluating things.
 
     (require 'generator)
     (let* ((expected (car (cdaddr data)))
@@ -213,7 +217,7 @@ And we can test that by passing in the example tables above and evaluating thing
                             count 1)))
       (princ (if (equalp actual expected) "PASS" "FAIL")))
 
-So call this against [Example 1](#orgd537517)
+So call this against [Example 1](#org09b5613)
 
     1
     1
@@ -221,13 +225,13 @@ So call this against [Example 1](#orgd537517)
     3
     PASS
 
-Oh wow that seemeds to work. What about some others?
+Cool that seemeds to work. What about some others?
 
-Lets run it on [Example 2](#org534f802)
+Lets run it on [Example 2](#org3551f66)
 
     PASS
 
-And now on [Example 3](#orgb05061f)
+And now on [Example 3](#orga73f0f4)
 
     1
     1

@@ -86,7 +86,7 @@ So imagine moving down this list from left to right with ~coins = 5~ until the t
 
 If you were to count the number of steps you took moving left toright you would get 3 as you should.
 
-This seems to just be a simple loop in an iterator
+When considered in that way, this is just be a simple loop in an iterator. I love the loop facility so lets use that, and the nice thing about emacs generators is that because closures aren't "real" (everything is just a list after all) you can yield from pretty much anywhere - even from inside what in other languages would be higher order functions!
 
 #+name: iterate-sorted-costs-you-could-afford
 #+begin_src emacs-lisp :eval no
@@ -100,7 +100,11 @@ This seems to just be a simple loop in an iterator
             finally return nil))
 #+end_src
 
-And we can test that by passing in the example tables above and evaluating things.
+This will generate an iteration of all costs we have encountered before the runninig total was exceeded. Note that because we are passing back values with ~iter-yield~, the ~nil~ value returned in the above code is immaterial, it is just necessary for the ~cl-loop~ syntax.
+
+While we do not actually want the costs, we want just the total amount of costs that we passed, because we are using a generator here, there is no extra memory usage, we are simply streaming back values so adding this bit of functionality is effectively "free". To get the total number of ice cream bars the boy can get, we simply count the number (not total) of costs that are in the stream.
+
+We can test that by passing in the example tables above and evaluating things.
 
 #+name: test---against-example--iterate-sorted-costs-you-could-afford
 #+begin_src emacs-lisp :results output :var data='() :eval no
@@ -128,7 +132,7 @@ So call this against [[Example 1]]
 : 3
 : PASS
 
-Oh wow that seemeds to work. What about some others?
+Cool that seemeds to work. What about some others?
 
 Lets run it on [[Example 2]]
 
