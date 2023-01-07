@@ -1,7 +1,12 @@
 #+TITLE: Maximum Ice Cream Bars
+#+OPTIONS: toc:nil
+#+OPTIONS: html-postamble:nil
 - [[https://operation-code.slack.com/archives/C7JMZ5LAV/p1673011098106419][From the Operation Code Slack]]
 
 * Problem Statement
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
 
 It is a sweltering summer day, and a boy wants to buy some ice cream bars.
 
@@ -45,6 +50,9 @@ Return the maximum number of ice cream bars the boy can buy with ~coins~ coins.
 - ~1 <= coins <= 108~
 
 * Analysis
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
 
 This seems like it would just be a matter of sorting all costs and adding up from the bottom until we exhaust the list or exceed the sum ~coins~ value.
 
@@ -52,10 +60,12 @@ With ~n~ being so low (max of ~105~) there's no harm of sorting the full ~costs~
 
 I am trying to think if it is possible to not simply pick the lowest valued ice cream in order, but I believe it almost must be. After all, if we currently have an ice cream bar of value =x= selected and another =y < x= is available, we can always substitute =y= for =x= to no detriment, it can only help.
 
+
 * Implementation
 :PROPERTIES:
-:header-args: :exports both
-:header-args:emacs-lisp: :lexical yes :noweb yes
+:UNNUMBERED: notoc
+:header-args: :exports both :eval no-export :noweb no-export
+:header-args:emacs-lisp: :lexical yes
 :END:
 
 I've been largely doing emacs lisp lately, and I'm wrting this within Emacs, so lets do that
@@ -87,7 +97,7 @@ This seems to just be a simple loop in an iterator
 And we can test that by passing in the example tables above and evaluating things.
 
 #+name: test---against-example--iterate-sorted-costs-you-could-afford
-#+begin_src emacs-lisp :results output :var data=nil
+#+begin_src emacs-lisp :results output :var data='() :eval no
   (require 'generator)
   (let* ((expected (car (cdaddr data)))
          (coins (cadadr data))
@@ -131,7 +141,7 @@ Oh wow that seemeds to work. What about some others?
 And with that, I think I've passed all the test cases. This is correct, time to just wrap it up as requested in the problem
 
 #+name: get-max-ice-cream-for-coins
-#+begin_src emacs-lisp :var costs=nil coins=0
+#+begin_src emacs-lisp :var costs='() coins=0
   (require 'generator)
   (let* ((sorted-costs (-sort '< costs))
          (ice-cream-bar-prices-you-can-afford
