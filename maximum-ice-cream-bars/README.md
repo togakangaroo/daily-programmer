@@ -14,7 +14,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 1
 
-<table id="orge2e7100" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgeabf3ff" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -47,7 +47,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 2
 
-<table id="org8ace807" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org648cec1" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -80,7 +80,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 3
 
-<table id="org3514bc7" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgaedf5cd" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -123,7 +123,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 This seems like it would just be a matter of sorting all costs and adding up from the bottom until we exhaust the list or exceed the sum `coins` value.
 
-With `n` being so low (max of `105`) there's no harm of sorting the full `costs` list though it shoudl be observed that we will never need the **whole** list sorted, merely the lowest `n` values which has a different Big-O performance profile. But again, the Big-O does not matter when you have a max of `105` numbers.
+With `n` being so low (max of `105`) there's no harm of sorting the full `costs` list though it should be observed that we will never need the **whole** list sorted, merely the lowest `n` values which has a different Big-O performance profile. But again, the Big-O does not matter when you have a max of `105` numbers.
 
 I am trying to think if it is possible to not simply pick the lowest valued ice cream in order, but I believe it almost must be. After all, if we currently have an ice cream bar of value `x` selected and another `y < x` is available, we can always substitute `y` for `x` to no detriment, it can only help.
 
@@ -213,7 +213,7 @@ And we can test that by passing in the example tables above and evaluating thing
                             count 1)))
       (princ (if (equalp actual expected) "PASS" "FAIL")))
 
-So call this against [Example 1](#org7f3cea0)
+So call this against [Example 1](#orgd537517)
 
     1
     1
@@ -223,11 +223,11 @@ So call this against [Example 1](#org7f3cea0)
 
 Oh wow that seemeds to work. What about some others?
 
-Lets run it on [Example 2](#org99b1890)
+Lets run it on [Example 2](#org534f802)
 
     PASS
 
-And now on [Example 3](#orge819381)
+And now on [Example 3](#orgb05061f)
 
     1
     1
