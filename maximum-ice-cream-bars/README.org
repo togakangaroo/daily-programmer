@@ -12,6 +12,12 @@ Return the maximum number of ice cream bars the boy can buy with ~coins~ coins.
 /Note:/ The boy can buy the ice cream bars in any order.
 
 ** Example 1
+
+#+name: example-1
+| Costs  | (1 3 2 4 1) |
+| Coins  |           7 |
+| Result |           4 |
+
 #+begin_example
 Input: costs = [1,3,2,4,1], coins = 7
 Output: 4
@@ -45,5 +51,60 @@ With ~n~ being so low (max of ~105~) there's no harm of sorting the full ~costs~
 I am trying to think if it is possible to not simply pick the lowest valued ice cream in order, but I believe it almost must be. After all, if we currently have an ice cream bar of value =x= selected and another =y < x= is available, we can always substitute =y= for =x= to no detriment, it can only help.
 
 * Implementation
+:PROPERTIES:
+:header-args:emacs-lisp: :lexical yes :noweb yes
+:END:
 
 I've been largely doing emacs lisp lately, and I'm wrting this within Emacs, so lets do that
+
+What I'm thinking is that once we have a ~sorted-costs~ (again, no need to optimize given the constraints), we just walk through that list one step after the other, totalling up the amount spent until we exceed the allotted amount of ~coins~
+
+So imagine moving down this list from left to right with ~coins = 5~ until the total of values in the second row exceeded this.
+
+| Sorted cost  | 1 | 1 | 2 | 3 |  4 |
+| Running cost | 1 | 2 | 4 | 7 | 11 |
+| Continue?    | y | y | y | n |    |
+
+If you were to count the number of steps you took moving left toright you would get 3 as you should.
+
+This seems to just be a simple loop in an iterator
+
+#+name: iterate-sorted-costs-you-could-afford
+#+begin_src emacs-lisp
+  (iter-make
+   (cl-loop for c in sorted-costs
+            with running-total-cost = 0
+            do (setq running-total-cost (+ running-total-cost c))
+            if (< coins running-total-cost)
+            return nil
+            do (iter-yield c)
+            finally return nil))
+#+end_src
+
+And we can test that by passing in the example tables above and evaluating things.
+
+#+name: test---against-example--iterate-sorted-costs-you-could-afford
+#+begin_src emacs-lisp :results output :var data=nil
+  (require 'generator)
+  (let* ((expected (car (cdaddr data)))
+         (coins (cadadr data))
+         (costs (read (cadar data)))
+         (sorted-costs (-sort '< costs))
+         (ice-cream-bar-prices-you-can-afford
+          <<iterate-sorted-costs-you-could-afford>>)
+         (actual (cl-loop for x iter-by ice-cream-bar-prices-you-can-afford
+                          do (princ (format "%s\n" x))
+                          count 1)))
+    (princ (if (equalp actual expected) "PASS" "FAIL")))
+#+end_src
+
+#+call: test---against-example--iterate-sorted-costs-you-could-afford(data=example-1)_
+
+#+RESULTS:
+: 1
+: 1
+: 2
+: 3
+: PASS
+
+Oh wow that seemeds to work. What about some others?
