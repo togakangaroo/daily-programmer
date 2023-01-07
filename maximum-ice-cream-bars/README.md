@@ -14,7 +14,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 1
 
-<table id="org7c7d319" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org1f03474" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -47,7 +47,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 2
 
-<table id="org3ff3a39" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgcff4220" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -80,7 +80,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 3
 
-<table id="orga38d3ff" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgb5da5c1" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -213,6 +213,8 @@ And we can test that by passing in the example tables above and evaluating thing
                             count 1)))
       (princ (if (equalp actual expected) "PASS" "FAIL")))
 
+So call this against [Example 1](#orgdc08d75)
+
     1
     1
     2
@@ -221,7 +223,11 @@ And we can test that by passing in the example tables above and evaluating thing
 
 Oh wow that seemeds to work. What about some others?
 
+Lets run it on [Example 2](#org003d053)
+
     PASS
+
+And now on [Example 3](#org07c234d)
 
     1
     1

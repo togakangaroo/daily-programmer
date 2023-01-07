@@ -112,6 +112,8 @@ And we can test that by passing in the example tables above and evaluating thing
     (princ (if (equalp actual expected) "PASS" "FAIL")))
 #+end_src
 
+So call this against [[Example 1]]
+
 #+call: test---against-example--iterate-sorted-costs-you-could-afford(data=example-1)
 
 #+RESULTS:
@@ -123,10 +125,14 @@ And we can test that by passing in the example tables above and evaluating thing
 
 Oh wow that seemeds to work. What about some others?
 
+Lets run it on [[Example 2]]
+
 #+call: test---against-example--iterate-sorted-costs-you-could-afford(data=example-2)
 
 #+RESULTS:
 : PASS
+
+And now on [[Example 3]]
 
 #+call: test---against-example--iterate-sorted-costs-you-could-afford(data=example-3)
 
