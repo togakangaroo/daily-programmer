@@ -14,7 +14,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 1
 
-<table id="org1f03474" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orge2e7100" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -47,7 +47,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 2
 
-<table id="orgcff4220" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org8ace807" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -80,7 +80,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 3
 
-<table id="orgb5da5c1" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org3514bc7" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -213,7 +213,7 @@ And we can test that by passing in the example tables above and evaluating thing
                             count 1)))
       (princ (if (equalp actual expected) "PASS" "FAIL")))
 
-So call this against [Example 1](#orgdc08d75)
+So call this against [Example 1](#org7f3cea0)
 
     1
     1
@@ -223,11 +223,11 @@ So call this against [Example 1](#orgdc08d75)
 
 Oh wow that seemeds to work. What about some others?
 
-Lets run it on [Example 2](#org003d053)
+Lets run it on [Example 2](#org99b1890)
 
     PASS
 
-And now on [Example 3](#org07c234d)
+And now on [Example 3](#orge819381)
 
     1
     1
@@ -237,7 +237,7 @@ And now on [Example 3](#org07c234d)
     6
     PASS
 
-And with that, I think I've passed all the test cases. This is correct, time to just wrap it up as requested in the problem
+And with that, I think I've passed all the test cases. This is correct, time to just wrap it up to conform to the interface requested in the problem
 
     (require 'generator)
     (let* ((sorted-costs (-sort '< costs))
@@ -245,6 +245,8 @@ And with that, I think I've passed all the test cases. This is correct, time to 
             <<iterate-sorted-costs-you-could-afford>>))
       (cl-loop for x iter-by ice-cream-bar-prices-you-can-afford
                count 1))
+
+And call it with `costs='(1 3 2 4 1), coins=7` to get results&#x2026;
 
     4
 

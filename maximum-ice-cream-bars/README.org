@@ -145,7 +145,7 @@ And now on [[Example 3]]
 : 6
 : PASS
 
-And with that, I think I've passed all the test cases. This is correct, time to just wrap it up as requested in the problem
+And with that, I think I've passed all the test cases. This is correct, time to just wrap it up to conform to the interface requested in the problem
 
 #+name: get-max-ice-cream-for-coins
 #+begin_src emacs-lisp :var costs='() coins=0
@@ -156,6 +156,8 @@ And with that, I think I've passed all the test cases. This is correct, time to 
     (cl-loop for x iter-by ice-cream-bar-prices-you-can-afford
              count 1))
 #+end_src
+
+And call it with ~costs='(1 3 2 4 1), coins=7~ to get results...
 
 #+call: get-max-ice-cream-for-coins(costs='(1 3 2 4 1), coins=7)
 
