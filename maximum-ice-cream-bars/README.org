@@ -37,3 +37,13 @@ Output: 6
 - ~1 <= coins <= 108~
 
 * Analysis
+
+This seems like it would just be a matter of sorting all costs and adding up from the bottom until we exhaust the list or exceed the sum ~coins~ value.
+
+With ~n~ being so low (max of ~105~) there's no harm of sorting the full ~costs~ list though it shoudl be observed that we will never need the *whole* list sorted, merely the lowest ~n~ values which has a different Big-O performance profile. But again, the Big-O does not matter when you have a max of ~105~ numbers.
+
+I am trying to think if it is possible to not simply pick the lowest valued ice cream in order, but I believe it almost must be. After all, if we currently have an ice cream bar of value =x= selected and another =y < x= is available, we can always substitute =y= for =x= to no detriment, it can only help.
+
+* Implementation
+
+I've been largely doing emacs lisp lately, and I'm wrting this within Emacs, so lets do that
