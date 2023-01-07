@@ -74,6 +74,7 @@ What I'm thinking is that once we have a ~sorted-costs~ (again, no need to optim
 
 So imagine moving down this list from left to right with ~coins = 5~ until the total of values in the second row exceeded this.
 
+                ➡️ ➡️ ➡️ ➡️ ➡️
 | Sorted cost  | 1 | 1 | 2 | 3 |  4 |
 | Running cost | 1 | 2 | 4 | 7 | 11 |
 | Continue?    | y | y | y | n |    |

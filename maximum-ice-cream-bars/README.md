@@ -14,7 +14,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 1
 
-<table id="org7d9066e" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org7c7d319" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -47,7 +47,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 2
 
-<table id="orge70ccaf" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org3ff3a39" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -80,7 +80,7 @@ Return the maximum number of ice cream bars the boy can buy with `coins` coins.
 
 ## Example 3
 
-<table id="orgd79ede7" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orga38d3ff" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -135,6 +135,8 @@ I've been largely doing emacs lisp lately, and I'm wrting this within Emacs, so 
 What I'm thinking is that once we have a `sorted-costs` (again, no need to optimize given the constraints), we just walk through that list one step after the other, totalling up the amount spent until we exceed the allotted amount of `coins`
 
 So imagine moving down this list from left to right with `coins = 5` until the total of values in the second row exceeded this.
+
+➡️ ➡️ ➡️ ➡️ ➡️
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
