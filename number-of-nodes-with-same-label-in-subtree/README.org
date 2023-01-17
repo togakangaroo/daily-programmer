@@ -85,3 +85,143 @@ In fact, as the above example shows, this will *also* tell you the factor for =a
 One more thought is that while the last contraint about labels being only english letters might feel meaningless, it actually sets an upper bound for how many different labels we might have; 26. This means that grouping by node label and then jumping around from there might not be such a bad tactical move, we just aren't going to have that much stuff to go through.
 
 Finally, there's the interesting setup of our connections. The first item is where we're jumping from, the next where we're jumping to. You can navigate an entire subtree pretty easily this way and if we're going to be doing that a lot, sticking them into a hashtree by the first element might be a great idea up front.
+
+So interestingly, I feel like this problem is actually a good fit for mutability and object orientation. For example in the above, if ~a1~ is a mutable node it can be done in a way where you can implment visitor pattern such that when you call ~a1.visit(fn)~ it will apply ~fn(a1)~ before delegating to children until its factor is known, and will immediately delegate to children once it is. I like this idea.
+
+* Implementations
+:PROPERTIES:
+:header-args: :noweb yes
+:header-args:typescript: :eval no
+:END:
+
+I feel like I haven't done these in Typescript, let's do that. While I'm sure brute-force is perfectly good enough, I think some of the optimizations would be fun here.
+
+First we're going to need to count up the numbers of individual labels in the ~labels~ string so we can use these for the upper-bound optimization
+
+#+name: getLabelCounts
+#+begin_src typescript
+  const getLabelCounts = (labels: string) => {
+      const counts = new Map<string, number>()
+      for(const c of labels)
+          counts.set(c, 1 + (counts.get(c) ?? 0))
+      return counts
+  }
+#+end_src
+
+#+begin_src typescript :eval yes
+  <<getLabelCounts>>
+  console.log(getLabelCounts("bacbab"))
+#+end_src
+
+#+RESULTS:
+: Map(3) { 'b' => 3, 'a' => 2, 'c' => 1 }
+
+That works well.
+
+Next, lets create a structure for our ~Node~. As described above this would have a mutable ~subtreeLabelFactor~ and a mutable ~visit~ function. Note that I really dislike using ~this~ in javascript so I'm just going to use the python convention for now. Maybe I'll reform this as a class at some point
+
+#+name: Node
+#+begin_src typescript :eval yes :results silent
+  type Node = {
+      readonly children: Node[]
+      readonly label: NonNullable<string>
+      readonly index: NonNullable<number>
+      visit: (self: Node, fn: (item: Node) => void) => void
+      subtreeLabelFactor: number | null
+  }
+#+end_src
+
+Now lets write a node constructor funciton. Yes, I could do classes, but I don't love them as a primitive. Given the choice, I'd prefer to use basic types and factory functions, and while that's not the most idiomatic thing in Typescript, its also not so uncommon a pattern that a mob will be showing up at might front door for doing this.
+
+Note that we don't actually know *which* node will be the "root node" of our tree and we'll likely need ease-of-access so we'll hash every single node by index so that it can be easily jumped to.
+
+#+name: createTree
+#+begin_src typescript
+  const visitChildren: Node["visit"] = (self, fn) => {
+      for(const c of self.children)
+          c.visit(c, fn)
+  }
+
+  const visitSelf: Node["visit"] = (self, fn) => {
+      fn(self)
+      visitChildren(self, fn)
+  }
+
+
+  const createTree = (labels: string, edges: Array<[number, number]>) => {
+      const nodes = new Map<number, Node>()
+
+      const getNode = (index: number) : Node => {
+          let node = nodes.get(index)
+          if(!node) {
+              node = {
+                  index,
+                  label: labels[index],
+                  children: [],
+                  visit: visitSelf,
+                  subtreeLabelFactor: null,
+              }
+              nodes.set(index, node)
+          }
+          return node
+      }
+
+      for(const [fromIndex, toIndex] of edges)
+          getNode(fromIndex).children.push(getNode(toIndex))
+
+      return nodes
+  }
+#+end_src
+
+#+begin_src typescript :eval yes
+  const labels = "aabbbc"
+  const edges : Array<[number, number]> = [[0, 1], [1, 3], [3, 4], [0, 2], [2, 5]]
+
+  <<Node>>
+  <<createTree>>
+  const tree = createTree("abcd", [[0,1], [0, 2], [1, 3]])
+  console.log(tree)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Map(4) {
+  0 => {
+    index: 0,
+    label: 'a',
+    children: [ [Object], [Object] ],
+    visit: [Function: visitSelf],
+    subtreeLabelFactor: null
+  },
+  1 => {
+    index: 1,
+    label: 'b',
+    children: [ [Object] ],
+    visit: [Function: visitSelf],
+    subtreeLabelFactor: null
+  },
+  2 => {
+    index: 2,
+    label: 'c',
+    children: [],
+    visit: [Function: visitSelf],
+    subtreeLabelFactor: null
+  },
+  3 => {
+    index: 3,
+    label: 'd',
+    children: [],
+    visit: [Function: visitSelf],
+    subtreeLabelFactor: null
+  }
+}
+#+end_example
+
+That seems good!
+
+That's cool and that feels badass but it also feels like we're overcomplicating stuff. There's multiple passes through the lists and in fact when it comes to how to implement ~visit~...I'm sure I'm going to have to change some stuff since we'd be passing through the current label.
+
+#+begin_src typescript :eval yes
+  const labels = "aabbbc"
+  const edges : Array<[number, number]> = [[0, 1], [1, 3], [3, 4], [0, 2], [2, 5]]
+#+end_src
