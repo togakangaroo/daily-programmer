@@ -16,6 +16,7 @@ A subtree of a tree ~T~ is the tree consisting of a node in ~T~ and all of its d
 [[file:Problem_Statement/2023-01-13_21-15-43_screenshot.png]]
 
 
+#+name: example-1
 | n | edges                                 | labels  | output          |
 |---+---------------------------------------+---------+-----------------|
 | 7 | ((0 1) (0 2) (1 4) (1 5) (2 3) (2 6)) | abaedcd | (2 1 1 1 1 1 1) |
@@ -26,6 +27,7 @@ A subtree of a tree ~T~ is the tree consisting of a node in ~T~ and all of its d
 #+DOWNLOADED: screenshot @ 2023-01-13 21:20:49
 [[file:Problem_Statement/2023-01-13_21-20-49_screenshot.png]]
 
+#+name: example-2
 | n | edges               | labels | output     |
 |---+---------------------+--------+------------|
 | 4 | ((0 1) (1 2) (0 3)) | bbbb   | (4 2 1 1 ) |
@@ -35,6 +37,7 @@ A subtree of a tree ~T~ is the tree consisting of a node in ~T~ and all of its d
 #+DOWNLOADED: screenshot @ 2023-01-13 21:24:50
 [[file:Problem_Statement/2023-01-13_21-24-50_screenshot.png]]
 
+#+name: example-3
 | n | edges                     | labels | output      |
 |---+---------------------------+--------+-------------|
 | 5 | ((0 1) (0 2) (1 3) (0 4)) | aabab  | (3 2 1 1 1) |
@@ -152,10 +155,10 @@ Now lets create the navigability map we will be building up
 #+begin_src typescript
   type Index = number
 
-  const nodesNavigableFrom : Map<Index, {readonly node: Node, readonly navigableFrom: Set<Node>}> = new Map()
+  const nodesNavigableFrom : Map<Index, {readonly label: Node, readonly navigableFrom: Set<Node>}> = new Map()
 #+end_src
 
-And then let's create a factory function for ~Node~. Yes, I could do classes, but I don't love them as a primitive. Given the choice, I'd prefer to use basic types and factory functions, and while that's not the most idiomatic thing in Typescript, its also not so uncommon a pattern that a mob will be showing up at might front door for doing this. Furthermore, because javascript doesn't have the best support for comparison of non-primitives by value, we never actually want to instantiate the same ~Node~ twice. While that is possible with a constructor, it is more intuitive with a factory.
+And then let's create a factory function for ~Node~. Yes, I could do classes, but I don't love them as a primitive. Given the choice, I'd prefer to use basic types and factory functions, and while that's not the most idiomatic thing in Typescript, its also not so uncommon a pattern that a mob will be showing up at migGht front door for doing this. Furthermore, because javascript doesn't have the best support for comparison of non-primitives by value, we never actually want to instantiate the same ~Node~ twice. While that is possible with a constructor, it is more intuitive with a factory.
 
 #+name: getNodesThatCanNavigateTo
 #+begin_src typescript
@@ -223,3 +226,64 @@ Also, since we're dealing with sets we need a utility function to count the amou
 : Node[0](label = a) has 3 with label a in its subtree
 : Node[6](label = a) has 1 with label a in its subtree
 : Node[4](label = b) has 1 with label b in its subtree
+
+The order is a bit off, lets write tests against the examples
+
+#+name: evaluate-lisp-string
+#+begin_src emacs-lisp :var lisp-as-string="'((1 2) (3 4))" :results code
+  (car (read-from-string lisp-as-string))
+#+end_src
+
+#+RESULTS: evaluate-lisp-string
+#+begin_src emacs-lisp
+'((1 2)
+  (3 4))
+#+end_src
+
+#+begin_src emacs-lisp :var data=example-1 :results code
+  (-let* ((((_ . (edges-lisp-string))) data)
+          ((edges-list) (read-from-string edges-lisp-string))
+          (edges (apply 'vector edges-list))
+
+          (((_ . (_ . output-lisp-string))) data)
+          ((output-list) (read-from-string output-lisp-string))
+          (output (apply 'vector otuput-list)))
+    (json-encode `((edges ,edges)
+                   (output ,output))))
+#+end_src
+
+#+RESULTS:
+#+begin_src emacs-lisp
+"{\"edges\":[[[0,1],[0,2],[1,4],[1,5],[2,3],[2,6]]]}"
+#+end_src
+
+
+
+#+begin_src typescript :eval yes :var testData=example-1
+  console.log(testData)
+#+end_src
+
+#+RESULTS:
+: [
+:   [
+:     7,
+:     '((0 1) (0 2) (1 4) (1 5) (2 3) (2 6))',
+:     'abaedcd',
+:     '(2 1 1 1 1 1 1)'
+:   ]
+: ]
+
+#+begin_src emacs-lisp :eval yes :var value=example-1
+  (json-encode '[[7 5])
+
+#+end_src
+
+#+RESULTS:
+: [[7,5]]
+
+#+begin_src emacs-lisp 
+  (json-read-from-string "[[4, 6]]")
+#+end_src
+
+#+RESULTS:
+: [[4 6]]
