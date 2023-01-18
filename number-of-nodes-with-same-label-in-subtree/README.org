@@ -134,10 +134,92 @@ So if that's the case, should we just flat out calculate the navigability chart?
 :header-args:typescript: :eval no
 :END:
 
-I feel like I haven't done these in Typescript, plus I just launched a [[https://github.com/togakangaroo/create-ob-npx][new way to integrate TypeScript with org mode]], so let's do that. While I'm sure brute-force is perfectly good enough, I think some of the optimizations would be fun here.
+I feel like I haven't done these in Typescript, plus I just launched a [[https://github.com/togakangaroo/create-ob-npx][new way to integrate TypeScript with org mode]], so let's do that.
 
+Lets start by creating a structure for our ~Node~. This is simply a tuple of our label and index.
+
+#+name: Node
+#+begin_src typescript :eval yes :results silent
+  type Node = {
+      readonly label: NonNullable<string>
+      readonly index: NonNullable<number>
+  }
+#+end_src
+
+Now lets create the navigability map we will be building up
+
+#+name: nodesNavigableFrom
+#+begin_src typescript
+  type Index = number
+
+  const nodesNavigableFrom : Map<Index, {readonly node: Node, readonly navigableFrom: Set<Node>}> = new Map()
+#+end_src
+
+And then let's create a factory function for ~Node~. Yes, I could do classes, but I don't love them as a primitive. Given the choice, I'd prefer to use basic types and factory functions, and while that's not the most idiomatic thing in Typescript, its also not so uncommon a pattern that a mob will be showing up at might front door for doing this. Furthermore, because javascript doesn't have the best support for comparison of non-primitives by value, we never actually want to instantiate the same ~Node~ twice. While that is possible with a constructor, it is more intuitive with a factory.
+
+#+name: getNodesThatCanNavigateTo
+#+begin_src typescript
+  const getNodesThatCanNavigateTo = (index: Index) => {
+      let nodeNavigation = nodesNavigableFrom.get(index)
+      if(!nodeNavigation) {
+          const node: Node = {index, label: labels[index],}
+          nodeNavigation = { node, navigableFrom: new Set([node]) }
+          nodesNavigableFrom.set(index, nodeNavigation)
+      }
+      return nodeNavigation.navigableFrom
+  }
+#+end_src
+
+Now, what do we do when we consider an edge?
+
+#+name: considerNavigabilityFromEddge
+#+begin_src typescript
+  type Edge = {readonly fromIndex: Index, readonly toIndex: Index}
+
+  const considerNavigabilityFromEddge = ({fromIndex, toIndex}: Edge) : void => {
+      const setOfNodesThatCanNavigateToFrom = getNodesThatCanNavigateTo(fromIndex)
+      for(const node of getNodesThatCanNavigateTo(toIndex))
+          setOfNodesThatCanNavigateToFrom.add(node)
+  }
+#+end_src
+
+Also, since we're dealing with sets we need a utility function to count the amount of values that match a certain predicate within it.
+
+#+name: setCount
+#+begin_src typescript
+  const setCount = <T> (set: Set<T>, predicate: (_: T) => Boolean) => {
+      let cnt = 0;
+      for(const x of set.values())
+          if(predicate(x))
+              cnt+=1
+      return cnt
+  }
+#+end_src
 
 #+begin_src typescript :eval yes
-  const labels = "aabbbc"
-  const edges : Array<[number, number]> = [[0, 1], [1, 3], [3, 4], [0, 2], [2, 5]]
+  const labels = "aabbbca"
+  const edges = [[1, 3], [2, 5], [0, 1], [2, 6], [0, 2], [3, 4]].map(([fromIndex, toIndex]) => ({fromIndex, toIndex}))
+
+  <<Node>>
+  <<nodesNavigableFrom>>
+  <<getNodesThatCanNavigateTo>>
+  <<considerNavigabilityFromEddge>>
+  <<setCount>>
+
+  for(const edge of edges)
+      considerNavigabilityFromEddge(edge)
+  for(const [index, {node: {label}, navigableFrom}] of nodesNavigableFrom.entries()) {
+      const sameLabelFactor = setCount(navigableFrom, (node) => node.label === label)
+      console.log(`Node[${index}](label = ${label}) has ${sameLabelFactor} with label ${label} in its subtree`)
+  }
+
 #+end_src
+
+#+RESULTS:
+: Node[1](label = a) has 1 with label a in its subtree
+: Node[3](label = b) has 2 with label b in its subtree
+: Node[2](label = b) has 1 with label b in its subtree
+: Node[5](label = c) has 1 with label c in its subtree
+: Node[0](label = a) has 3 with label a in its subtree
+: Node[6](label = a) has 1 with label a in its subtree
+: Node[4](label = b) has 1 with label b in its subtree
