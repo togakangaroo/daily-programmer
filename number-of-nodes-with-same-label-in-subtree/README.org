@@ -240,21 +240,35 @@ The order is a bit off, lets write tests against the examples
   (3 4))
 #+end_src
 
-#+begin_src emacs-lisp :var data=example-1 :results code
-  (-let* ((((_ . (edges-lisp-string))) data)
+#+begin_src emacs-lisp :var data=example-1 :wrap "src json"
+  (-let* ((((_ _ labels)) data))
+    (json-encode  `(labels ,labels)))
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+["labels","abaedcd"]
+#+end_src
+
+
+#+begin_src emacs-lisp :var data=example-1 :wrap "src json"
+  (-let* ((((_ edges-lisp-string)) data)
           ((edges-list) (read-from-string edges-lisp-string))
           (edges (apply 'vector edges-list))
 
-          (((_ . (_ . output-lisp-string))) data)
+          (((_ _ labels)) data)
+
+          (((_ _ _ output-lisp-string)) data)
           ((output-list) (read-from-string output-lisp-string))
-          (output (apply 'vector otuput-list)))
+          (output (apply 'vector output-list)))
     (json-encode `((edges ,edges)
+                   (labels ,labels)
                    (output ,output))))
 #+end_src
 
 #+RESULTS:
-#+begin_src emacs-lisp
-"{\"edges\":[[[0,1],[0,2],[1,4],[1,5],[2,3],[2,6]]]}"
+#+begin_src json
+{"edges":[[[0,1],[0,2],[1,4],[1,5],[2,3],[2,6]]],"labels":["abaedcd"],"output":[[2,1,1,1,1,1,1]]}
 #+end_src
 
 
