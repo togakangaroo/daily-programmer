@@ -131,6 +131,10 @@ Initially I was thinking the running tallies in the middle columns would be impo
 
 So if that's the case, should we just flat out calculate the navigability chart? The worst case scenario is where the entire tree is one flat list of max =n=105= in which case the memory usage would be =105+104+103+...+1= or =106*105/2= which is about space for storing 5K nodes. Not really bad at all. So heck, why even bother with all that other stuff? Lets do it.
 
+I am now realizing that the connectivity thing might not make sense
+
+Oh forget about it, lets just build a tree
+
 * Implementations
 :PROPERTIES:
 :header-args: :noweb yes
@@ -139,116 +143,141 @@ So if that's the case, should we just flat out calculate the navigability chart?
 
 I feel like I haven't done these in Typescript, plus I just launched a [[https://github.com/togakangaroo/create-ob-npx][new way to integrate TypeScript with org mode]], so let's do that.
 
-Lets start by creating a structure for our ~Node~. This is simply a tuple of our label and index.
+Lets start by creating a structure for our ~Node~. Unfortunately that name results in some awkwardness due to it being a built in type for node. We also will be needing to navigate to nodes easily by index when processing edges and labels
 
-#+name: Node
-#+begin_src typescript :eval yes :results silent
-  type Node = {
-      readonly label: NonNullable<string>
-      readonly index: NonNullable<number>
-  }
-#+end_src
-
-Now lets create the navigability map we will be building up
-
-#+name: nodesNavigableFrom
+#+name: Index-LabeledNode
 #+begin_src typescript
   type Index = number
-
-  const nodesNavigableFrom : Map<Index, {readonly node: Node, readonly navigableFrom: Set<Node>}> = new Map()
+  type LabeledNode = {
+      readonly label: string
+      readonly index: Index
+      readonly children: Array<LabeledNode>
+  }
 #+end_src
 
-And then let's create a factory function for ~Node~. Yes, I could do classes, but I don't love them as a primitive. Given the choice, I'd prefer to use basic types and factory functions, and while that's not the most idiomatic thing in Typescript, its also not so uncommon a pattern that a mob will be showing up at migGht front door for doing this. Furthermore, because javascript doesn't have the best support for comparison of non-primitives by value, we never actually want to instantiate the same ~Node~ twice. While that is possible with a constructor, it is more intuitive with a factory.
+Lets also create some types for the labels themselves so that we can refer to them without getting mixed up about other strings
 
-#+name: getNodesThatCanNavigateTo
+#+name: Label-LabelsList-Edge-EdgeList
 #+begin_src typescript
-  const getNodesThatCanNavigateTo = (index: Index) => {
-      let nodeNavigation = nodesNavigableFrom.get(index)
-      if(!nodeNavigation) {
-          const node: Node = {index, label: labels[index],}
-          nodeNavigation = { node, navigableFrom: new Set([node]) }
-          nodesNavigableFrom.set(index, nodeNavigation)
+  type Label = string // really just a single character
+  type LabelsList = string // just the string of labels, it can be indexed into
+  type Edge = [Index, Index]
+  type EdgeList = Array<Edge>
+#+end_src
+
+One last bit of instantiation; we're going to need to be able to jump to nodes by their index for example when iterating ~EdgeList~ or ~LabelsList~ so lets create a map from ~Index~ to ~LabeledNodes~. Yes, I could do classes, but I don't love them as a primitive. Given the choice, I'd prefer to use basic types and factory functions, and while that's not the most idiomatic thing in Typescript, its also not so uncommon a pattern that a mob will be showing up at migGht front door for doing this.
+
+Creating a map is easy, we just go through each edge, and for each one we simply wire up the connection between the ~fromNode~ and the ~toNode~. Because it is constrainted that no edge is duplicated, we don't even have to check if this connection is already known.
+
+The bangs below are necessary as we know that all nodes have been populated into ~nodeList~ in the previous block, but Typescript isn't smart enough to realize that and believes that a return value of ~undefined~ is possible.
+
+#+name: NodesList-createNodes
+#+begin_src typescript
+  type NodesList = Map<Index, LabeledNode>
+
+  const createNodes = (labels: LabelsList, edges: EdgeList) : NodesList => {
+      const nodes : NodesList = new Map(
+          [...labels].map((label, index) =>
+              [index, {label, index, children: []}]
+          )
+      )
+      for(const [fromIndex, toIndex] of edges) {
+          const fromNode = nodes.get(fromIndex)!
+          const toNode = nodes.get(toIndex)!
+          fromNode.children.push(toNode)
       }
-      return nodeNavigation.navigableFrom
+      return nodes
   }
 #+end_src
 
-Now, what do we do when we consider an edge?
+So with those pieces in place, we switch to thinking at the top level. Getting the same label factor would be a matter of, for each label, fetching the corresponding node, and counting the amount of nodes in it's subtree that share the root node's label.
 
-#+name: considerNavigabilityFromEddge
+#+name: getSameLabelFactor
 #+begin_src typescript
-  type Edge = {readonly fromIndex: Index, readonly toIndex: Index}
-
-  const considerNavigabilityFromEddge = ({fromIndex, toIndex}: Edge) : void => {
-      const setOfNodesThatCanNavigateToFrom = getNodesThatCanNavigateTo(fromIndex)
-      for(const node of getNodesThatCanNavigateTo(toIndex))
-          setOfNodesThatCanNavigateToFrom.add(node)
+  const getSameLabelFactor = function * (labels: LabelsList, edges: EdgeList) {
+      const nodes = createNodes(labels, edges)
+      for(const {index, label} of [...labels].map((label, index) => ({index, label})))
+          yield getLabeledNodeCount([label, nodes.get(index)!])
   }
 #+end_src
 
-Also, since we're dealing with sets we need a utility function to count the amount of values that match a certain predicate within it.
+We already have the ~createNodes~ function, and we sitll need the ~getLabeledNodeCount~ one. Note that with all the tree-walking, we are in dynamic-programming territory. This is a term I just recently learned basically means "caching" and a cache decorator which can wrap a function to memoize its result would be useful here. I could pull one out of any functional-style library, but then I have to figure out how to manage dependencies in an org notebook. Instead, lets just implement our own for fun.
 
-#+name: countSet
+The thing with caching functions is that you kind of have to decide *what* you are going to treat as the caching key. This is usually assumed to be strict equality in javascript, but I like the option of defining our own way to cache. Therefore an interface for a caching decorator should accept a function to determine a custom hash key.
+
+Also - because typing varadic functions in Typescript is confusing - especially when you want to retain generic signatures in decorators - let's just simplify and say that exactly one parameter is required for all cacheable functions. This is why I made the ~getLabeledNodeCount~ function above, take only a single parameter that is then destructured, but before we get to that, lets create the ~cache~ decorator itself.
+
+#+name: HashKeyFunction-CacheableFunction
 #+begin_src typescript
-  const countSet = <T> (set: Set<T>, predicate: (_: T) => Boolean) => {
-      let cnt = 0;
-      for(const x of set.values())
-          if(predicate(x))
-              cnt+=1
-      return cnt
+  type HashKeyFunction<Key> = (key: Key) => string
+  type CacheableFunction<Key, Result> = (key: Key) => Result
+#+end_src
+
+Frankly this is a big pain. I want to figure out how to create a standalone type for our ~cache~ decorator itself, but the syntax for doing so when there are generic parameters escapes me even after half an hour of banging my head on Typescript. If I just define the function and its type signature at the same time, its pretty straightforward if overly verbose and annoying to parse. From there the actual implementation of our funciton is easy.
+
+#+name: cache
+#+begin_src typescript :noweb strip-export
+  <<HashKeyFunction-CacheableFunction>>
+  const cache = <Key, Result>  (getHashOfKey: HashKeyFunction<Key>, fn: CacheableFunction<Key, Result>): CacheableFunction<Key, Result> => {
+      const knownValues : Map<string, Result> = new Map()
+      return (key: Key) => {
+          const hashKey = getHashOfKey(key)
+          if(knownValues.has(hashKey))
+              return knownValues.get(hashKey)!
+          const result = fn(key)
+          knownValues.set(hashKey, result)
+          return result
+      }
   }
 #+end_src
 
-#+begin_src typescript :eval yes
-  const labels = "aabbbca"
-  const edges = [[1, 3], [2, 5], [0, 1], [2, 6], [0, 2], [3, 4]].map(([fromIndex, toIndex]) => ({fromIndex, toIndex}))
+And now we can finally get to ~getLabeledNodeCount~. Which at this point is a pretty simple cacheable function that takes a tree node, and a label, and answers how many in that node's subtree match that label. This is the function that - to save on answering the same questions over and over - we want to cache. To do that we need to first tell it how to cache the parameter of the tuple ~Label, LabeledNode~ that is its input
 
-  <<Node>>
-  <<nodesNavigableFrom>>
-  <<getNodesThatCanNavigateTo>>
-  <<considerNavigabilityFromEddge>>
-  <<countSet>>
+#+name: GetLabeledNodeCountArgs-hashLabelNodeCombo
+#+begin_src typescript
+  type GetLabeledNodeCountArgs = [Label, LabeledNode]
 
-  for(const edge of edges)
-      considerNavigabilityFromEddge(edge)
-  for(const [index, {node: {label}, navigableFrom}] of nodesNavigableFrom.entries()) {
-      const sameLabelFactor = countSet(navigableFrom, (node) => node.label === label)
-      console.log(`Node[${index}](label = ${label}) has ${sameLabelFactor} with label ${label} in its subtree`)
-  }
+  const hashLabelNodeCombo = ([label, node]: GetLabeledNodeCountArgs) => `${label}${node.index}`
 #+end_src
 
-#+RESULTS:
-: Node[1](label = a) has 1 with label a in its subtree
-: Node[3](label = b) has 2 with label b in its subtree
-: Node[2](label = b) has 1 with label b in its subtree
-: Node[5](label = c) has 1 with label c in its subtree
-: Node[0](label = a) has 3 with label a in its subtree
-: Node[6](label = a) has 1 with label a in its subtree
-: Node[4](label = b) has 1 with label b in its subtree
+At this point, all that remains is to implement the "dumb way" of figuring out the number of nodes that share labels in the subtree. That is cone by walking the tree and counting =1= when the current node's label matches the label we're searching for, and then repeating on all of a node's children.
 
-The order is a bit off, lets write tests against the examples
+#+name: getLabeledNodeCount
+#+begin_src typescript :noweb strip-export
+  <<GetLabeledNodeCountArgs-hashLabelNodeCombo>>
+  const getLabeledNodeCount : CacheableFunction<GetLabeledNodeCountArgs, number> = cache(
+      hashLabelNodeCombo,
+      ([label, root]: GetLabeledNodeCountArgs) => (
+          (label === root.label ? 1 : 0)
+              + root.children.reduce((sum, child) => sum + getLabeledNodeCount([label, child]), 0)
+      )
+  )
+#+end_src
+
+And now, lets put it all together
+
+#+name: lets-do-it
+#+begin_src typescript :noweb yes
+  <<Index-LabeledNode>>
+  <<Label-LabelsList-Edge-EdgeList>>
+  <<NodesList-createNodes>>
+  <<getSameLabelFactor>>
+  <<cache>>
+  <<getLabeledNodeCount>>
+#+end_src
+
 
 #+name: test-against-example
-#+begin_src typescript :var input=example-1
-  type ExampleType = [[object, string, string, string]]
-  const [[_, edgesString, labels, outputString]] = (input as ExampleType)
-  const edges = JSON.parse(edgesString)
+#+begin_src typescript :eval yes :var data=example-1 :noweb yes
+  <<lets-do-it>>
 
-  <<Node>>
-  <<nodesNavigableFrom>>
-  <<getNodesThatCanNavigateTo>>
-  <<considerNavigabilityFromEddge>>
-  <<countSet>>
+  const [_, edgesString, labels, expectedOutputsString] = data[0] as [unknown, string, string, string]
 
-  for(const [fromIndex, toIndex] of edges)
-      considerNavigabilityFromEddge({fromIndex, toIndex})
-
-  const results = Array.from(labels).map((label, index) => {
-      const navigableFrom = getNodesThatCanNavigateTo(index)
-      return countSet(navigableFrom, (node) => node.label === label)
-  })
-
-  console.log(JSON.stringify(results) === outputString ? "PASS" : "FAIL", results)
+  const edges : EdgeList = JSON.parse(edgesString)
+  const recieved = JSON.stringify(Array.from(getSameLabelFactor(labels, edges)))
+  console.log(
+      recieved === expectedOutputsString ? `PASS` : `FAIL,\n  Expected: ${expectedOutputsString}\n  Recieved: ${recieved}`
+  )
 #+end_src
 
 
@@ -264,6 +293,11 @@ Nice, what about Example 2?
 #+call: test-against-example[:eval yes](input=example-2)
 
 #+RESULTS:
-: FAIL [ 3, 2, 1, 1 ]
+: PASS
 
-Uh oh. Well we have one passing, lets refactor a bit to simplify and maybe we'll find the bug
+And finally 3.
+
+#+call: test-against-example[:eval yes](input=example-3)
+
+#+RESULTS:
+: PASS
