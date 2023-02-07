@@ -68,7 +68,7 @@ So skrew it, ~n <= 105~. This isn't like a super-deep tree, let's just build it.
 
 I feel like I haven't done these in Typescript, plus I just launched a [[https://github.com/togakangaroo/create-ob-npx][new way to integrate TypeScript with org mode]], so let's do that.
 
-Lets start by creating a structure for our ~Node~. Unfortunately that name results in some awkwardness due to it being a built in type for node. We also will be needing to navigate to nodes easily by index when processing edges and labels
+Lets start by creating a structure for our ~Node~. Unfortunately that name results in some awkwardness due to it being a built in type for node. 
 
 #+name: Index-LabeledNode
 #+begin_src typescript
