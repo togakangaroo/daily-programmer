@@ -1,0 +1,228 @@
+#+TITLE: Number of Nodes in the Sub-Tree With the Same Label
+
+* Problem Statement
+- [[https://operation-code.slack.com/archives/C7JMZ5LAV/p1673533729987749][From the Operation Code Slack]]
+
+You are given a tree (i.e. a connected, undirected graph that has no cycles) consisting of ~n~ nodes numbered from ~0~ to ~n - 1~ and exactly ~n - 1~ edges. The root of the tree is the node ~0~, and each node of the tree has a label which is a lower-case character given in the string labels (i.e. The node with the number ~i~ has the label ~labels[i]~).
+
+The edges array is given on the form ~edges[i] = [ai, bi]~, which means there is an edge between nodes ~ai~ and ~bi~ in the tree.
+
+Return an array of size ~n~ where ~ans[i]~ is the number of nodes in the subtree of the ~ith~ node which have the same label as node ~i~.
+
+A subtree of a tree ~T~ is the tree consisting of a node in ~T~ and all of its descendant nodes.
+** Exmaple 1
+
+#+DOWNLOADED: screenshot @ 2023-01-13 21:15:43
+[[file:Problem_Statement/2023-01-13_21-15-43_screenshot.png]]
+
+
+#+name: example-1
+| n | edges                                 | labels  | output          |
+|---+---------------------------------------+---------+-----------------|
+| 7 | [[0,1],[0,2],[1,4],[1,5],[2,3],[2,6]] | abaedcd | [2,1,1,1,1,1,1] |
+
+*Explanation:* =Node 0= has =label 'a'= and its sub-tree has =node 2= with =label 'a'= as well, thus the answer is =2=. Notice that any node is part of its sub-tree. =Node 1= has a =label 'b'=. The sub-tree of =node 1= contains =nodes 1,4= and =5=, as =nodes 4 and 5= have different labels than =node 1=, the answer is just =1= (the node itself).
+** Example 2
+
+#+DOWNLOADED: screenshot @ 2023-01-13 21:20:49
+[[file:Problem_Statement/2023-01-13_21-20-49_screenshot.png]]
+
+#+name: example-2
+| n | edges               | labels | output     |
+|---+---------------------+--------+------------|
+| 4 | [[0,1],[1,2],[0,3]] | bbbb   | [4,2,1,1] |
+
+** Example 3
+
+#+DOWNLOADED: screenshot @ 2023-01-13 21:24:50
+[[file:Problem_Statement/2023-01-13_21-24-50_screenshot.png]]
+
+#+name: example-3
+| n | edges                     | labels | output      |
+|---+---------------------------+--------+-------------|
+| 5 | [[0,1],[0,2],[1,3],[0,4]] | aabab  | [3,2,1,1,1] |
+
+** Constraints
+- ~1 <= n <= 105~
+- ~ai~=bi~
+- ~labels~ is consisting of only of lowercase English letters.
+
+* Brainstorming
+
+Note: This isn't really my process. I tried a bunch of different stuff being clever with hashes and streams and optimizations
+
+First it occurs to me that ~n~ is completely ancillary. Specifically, it *must* be true that ~n = length(edges)+1 = length(labels)~ for any of this to be valid. This was originally written into the constraints which I didn't bother copying but its worth pointing out that not only is it a constraint but the problem literally makes no sense if this is not true.
+
+
+-----
+
+I started coding several versions of this solution ([[https://raw.githubusercontent.com/togakangaroo/daily-programmer/1439fd713802ee4d49b7f69bc32359951a968626/number-of-nodes-with-same-label-in-subtree/README.org#:~:text=like%20this%20idea.-,*%20Implementations,-%3APROPERTIES%3A%0A%3Aheader%2Dargs][see commit 1439fd713802ee4d49b7f69bc32359951a968626]] and subsequent ones) and it just didn't feel right. For one thing, while I was creating a system that was generic and at any point in processing edges you could get an answer, you end up moving through lists multiple times. This gave some really nice models but it just ultimately seemed weird overkill that is be more complex than it needs to be.
+
+So skrew it, ~n <= 105~. This isn't like a super-deep tree, let's just build it.
+
+* Implementations
+:PROPERTIES:
+:header-args: :noweb yes
+:header-args:typescript: :eval no
+:END:
+
+I feel like I haven't done these in Typescript, plus I just launched a [[https://github.com/togakangaroo/create-ob-npx][new way to integrate TypeScript with org mode]], so let's do that.
+
+Lets start by creating a structure for our ~Node~. Unfortunately that name results in some awkwardness due to it being a built in type for node. We also will be needing to navigate to nodes easily by index when processing edges and labels
+
+#+name: Index-LabeledNode
+#+begin_src typescript
+  type Index = number
+  type LabeledNode = {
+      readonly label: string
+      readonly index: Index
+      readonly children: Array<LabeledNode>
+  }
+#+end_src
+
+Lets also create some types for the labels themselves so that we can refer to them without getting mixed up about other strings
+
+#+name: Label-LabelsList-Edge-EdgeList
+#+begin_src typescript
+  type Label = string // really just a single character
+  type LabelsList = string // just the string of labels, it can be indexed into
+  type Edge = [Index, Index]
+  type EdgeList = Array<Edge>
+#+end_src
+
+One last bit of instantiation; we're going to need to be able to jump to nodes by their index for example when iterating ~EdgeList~ or ~LabelsList~ so lets create a map from ~Index~ to ~LabeledNodes~. Yes, I could do classes, but I don't love them as a primitive. Given the choice, I'd prefer to use basic types and factory functions, and while that's not the most idiomatic thing in Typescript, its also not so uncommon a pattern that a mob will be showing up at migGht front door for doing this.
+
+Creating a map is easy, we just go through each edge, and for each one we simply wire up the connection between the ~fromNode~ and the ~toNode~. Because it is constrainted that no edge is duplicated, we don't even have to check if this connection is already known.
+
+The bangs below are necessary as we know that all nodes have been populated into ~nodeList~ in the previous block, but Typescript isn't smart enough to realize that and believes that a return value of ~undefined~ is possible.
+
+#+name: NodesList-createNodes
+#+begin_src typescript
+  type NodesList = Map<Index, LabeledNode>
+
+  const createNodes = (labels: LabelsList, edges: EdgeList) : NodesList => {
+      const nodes : NodesList = new Map(
+          [...labels].map((label, index) =>
+              [index, {label, index, children: []}]
+          )
+      )
+      for(const [fromIndex, toIndex] of edges) {
+          const fromNode = nodes.get(fromIndex)!
+          const toNode = nodes.get(toIndex)!
+          fromNode.children.push(toNode)
+      }
+      return nodes
+  }
+#+end_src
+
+So with those pieces in place, we switch to thinking at the top level. Getting the same label factor would be a matter of, for each label, fetching the corresponding node, and counting the amount of nodes in it's subtree that share the root node's label.
+
+#+name: getSameLabelFactor
+#+begin_src typescript
+  const getSameLabelFactor = function * (labels: LabelsList, edges: EdgeList) {
+      const nodes = createNodes(labels, edges)
+      for(const {index, label} of [...labels].map((label, index) => ({index, label})))
+          yield getLabeledNodeCount([label, nodes.get(index)!])
+  }
+#+end_src
+
+We already have the ~createNodes~ function, and we sitll need the ~getLabeledNodeCount~ one. Note that with all the tree-walking, we are in dynamic-programming territory. This is a term I just recently learned basically means "caching" and a cache decorator which can wrap a function to memoize its result would be useful here. I could pull one out of any functional-style library, but then I have to figure out how to manage dependencies in an org notebook. Instead, lets just implement our own for fun.
+
+The thing with caching functions is that you kind of have to decide *what* you are going to treat as the caching key. This is usually assumed to be strict equality in javascript, but I like the option of defining our own way to cache. Therefore an interface for a caching decorator should accept a function to determine a custom hash key.
+
+Also - because typing varadic functions in Typescript is confusing - especially when you want to retain generic signatures in decorators - let's just simplify and say that exactly one parameter is required for all cacheable functions. This is why I made the ~getLabeledNodeCount~ function above, take only a single parameter that is then destructured, but before we get to that, lets create the ~cache~ decorator itself.
+
+#+name: HashKeyFunction-CacheableFunction
+#+begin_src typescript
+  type HashKeyFunction<Key> = (key: Key) => string
+  type CacheableFunction<Key, Result> = (key: Key) => Result
+#+end_src
+
+Frankly this is a big pain. I want to figure out how to create a standalone type for our ~cache~ decorator itself, but the syntax for doing so when there are generic parameters escapes me even after half an hour of banging my head on Typescript. If I just define the function and its type signature at the same time, its pretty straightforward if overly verbose and annoying to parse. From there the actual implementation of our funciton is easy.
+
+#+name: cache
+#+begin_src typescript :noweb strip-export
+  <<HashKeyFunction-CacheableFunction>>
+  const cache = <Key, Result>  (getHashOfKey: HashKeyFunction<Key>, fn: CacheableFunction<Key, Result>): CacheableFunction<Key, Result> => {
+      const knownValues : Map<string, Result> = new Map()
+      return (key: Key) => {
+          const hashKey = getHashOfKey(key)
+          if(knownValues.has(hashKey))
+              return knownValues.get(hashKey)!
+          const result = fn(key)
+          knownValues.set(hashKey, result)
+          return result
+      }
+  }
+#+end_src
+
+And now we can finally get to ~getLabeledNodeCount~. Which at this point is a pretty simple cacheable function that takes a tree node, and a label, and answers how many in that node's subtree match that label. This is the function that - to save on answering the same questions over and over - we want to cache. To do that we need to first tell it how to cache the parameter of the tuple ~Label, LabeledNode~ that is its input
+
+#+name: GetLabeledNodeCountArgs-hashLabelNodeCombo
+#+begin_src typescript
+  type GetLabeledNodeCountArgs = [Label, LabeledNode]
+
+  const hashLabelNodeCombo = ([label, node]: GetLabeledNodeCountArgs) => `${label}${node.index}`
+#+end_src
+
+At this point, all that remains is to implement the "dumb way" of figuring out the number of nodes that share labels in the subtree. That is cone by walking the tree and counting =1= when the current node's label matches the label we're searching for, and then repeating on all of a node's children.
+
+#+name: getLabeledNodeCount
+#+begin_src typescript :noweb strip-export
+  <<GetLabeledNodeCountArgs-hashLabelNodeCombo>>
+  const getLabeledNodeCount : CacheableFunction<GetLabeledNodeCountArgs, number> = cache(
+      hashLabelNodeCombo,
+      ([label, root]: GetLabeledNodeCountArgs) => (
+          (label === root.label ? 1 : 0)
+              + root.children.reduce((sum, child) => sum + getLabeledNodeCount([label, child]), 0)
+      )
+  )
+#+end_src
+
+And now, lets put it all together
+
+#+name: lets-do-it
+#+begin_src typescript :noweb yes
+  <<Index-LabeledNode>>
+  <<Label-LabelsList-Edge-EdgeList>>
+  <<NodesList-createNodes>>
+  <<getSameLabelFactor>>
+  <<cache>>
+  <<getLabeledNodeCount>>
+#+end_src
+
+
+#+name: test-against-example
+#+begin_src typescript :eval yes :var data=example-1 :noweb yes
+  <<lets-do-it>>
+
+  const [_, edgesString, labels, expectedOutputsString] = data[0] as [unknown, string, string, string]
+
+  const edges : EdgeList = JSON.parse(edgesString)
+  const recieved = JSON.stringify(Array.from(getSameLabelFactor(labels, edges)))
+  console.log(
+      recieved === expectedOutputsString ? `PASS` : `FAIL,\n  Expected: ${expectedOutputsString}\n  Recieved: ${recieved}`
+  )
+#+end_src
+
+
+Let's test it against Example 1
+
+#+call: test-against-example[:eval yes](input=example-1)
+
+#+RESULTS:
+: PASS
+
+Nice, what about Example 2?
+
+#+call: test-against-example[:eval yes](input=example-2)
+
+#+RESULTS:
+: PASS
+
+And finally 3.
+
+#+call: test-against-example[:eval yes](input=example-3)
+
+#+RESULTS:
+: PASS

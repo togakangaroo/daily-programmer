@@ -23,3 +23,4 @@ What you find here, are not writeups of me solving these problems, they're the a
 - [[./tic-tac-toe-game][Check Tic Tac Toe Winner]]
 - [[./island-perimeter][Calculate Island Perimeter]]
 - [[./maximum-ice-cream-bars][Maximum Ice Cream Bars]]
+- [[./number-of-nodes-with-same-label-in-subtree][Number of Nodes With Same Label in Subtree]]
