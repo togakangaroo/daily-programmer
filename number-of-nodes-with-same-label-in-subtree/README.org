@@ -49,91 +49,16 @@ A subtree of a tree ~T~ is the tree consisting of a node in ~T~ and all of its d
 
 * Brainstorming
 
+Note: This isn't really my process. I tried a bunch of different stuff being clever with hashes and streams and optimizations
+
 First it occurs to me that ~n~ is completely ancillary. Specifically, it *must* be true that ~n = length(edges)+1 = length(labels)~ for any of this to be valid. This was originally written into the constraints which I didn't bother copying but its worth pointing out that not only is it a constraint but the problem literally makes no sense if this is not true.
 
-Next there's the point that ~n <= 105~. This isn't like a super-deep tree, while I *want* to do better than brute-force here, realistically brute-force would be just fine.
-
-Another thought bubble is that the number of duplicates in ~labels~ set upper bounds. In [[Example 3]] we have ~labels="aabab"~. That means a node associated with ~a~ can only have =3, 2, or 1= count and in fact *some* node associated with ~a~ must have a =1= count (maybe even two nodes). At the very least it is useful in the following situation: Consider a tree as follows
-
-#+begin_src plantuml :file Problem_Statement/brainstorming-diagram.png
-  @startuml
-  hide empty description
-  [*] -> a0
-  a0 -> a1
-  a0 --> b2
-  a1 -> b3
-  b3 -> b4
-  b2 -> c5
-#+end_src
-
-#+RESULTS:
-[[file:Problem_Statement/brainstorming-diagram.png]]
-
-If you are trying to get the same-label factor for =a0= you need only to take one step. This gives you the factor =2= and since you know it is impossible for there to be more than two =a= nodes, you can stop navigating the subtree.
-
-In fact, as the above example shows, this will *also* tell you the factor for =a1=. And once we've established the factor for a node, it might as well not exist. After we've preformed the above navigation, we might as well be working with two disconnected trees. Nodes =a0= and =a1= can no longer affect any output since nothing beneath them can possibly be an =a=
-
-#+begin_src plantuml :file Problem_Statement/brainstorming-diagram2.png
-  @startuml
-  hide empty description
-  [*] -> b3
-  [*] --> b2
-  b3 -> b4
-  b2 -> c5
-#+end_src
-
-#+RESULTS:
-[[file:Problem_Statement/brainstorming-diagram2.png]]
-
-One more thought is that while the last contraint about labels being only english letters might feel meaningless, it actually sets an upper bound for how many different labels we might have; 26. This means that grouping by node label and then jumping around from there might not be such a bad tactical move, we just aren't going to have that much stuff to go through.
-
-Finally, there's the interesting setup of our connections. The first item is where we're jumping from, the next where we're jumping to. You can navigate an entire subtree pretty easily this way and if we're going to be doing that a lot, sticking them into a hashtree by the first element might be a great idea up front.
-
-So interestingly, I feel like this problem is actually a good fit for mutability and object orientation. For example in the above, if ~a1~ is a mutable node it can be done in a way where you can implment visitor pattern such that when you call ~a1.visit(fn)~ it will apply ~fn(a1)~ before delegating to children until its factor is known, and will immediately delegate to children once it is. I like this idea.
 
 -----
 
-You know, I started coding the above ([[https://raw.githubusercontent.com/togakangaroo/daily-programmer/1439fd713802ee4d49b7f69bc32359951a968626/number-of-nodes-with-same-label-in-subtree/README.org#:~:text=like%20this%20idea.-,*%20Implementations,-%3APROPERTIES%3A%0A%3Aheader%2Dargs][see commit 1439fd713802ee4d49b7f69bc32359951a968626]]) and it just doesn't feel right. For one thing you end up moving through lists multiple times so while you might end up with really nice models, it just seems like weird overkill that will be more complex than it needs to be.
+I started coding several versions of this solution ([[https://raw.githubusercontent.com/togakangaroo/daily-programmer/1439fd713802ee4d49b7f69bc32359951a968626/number-of-nodes-with-same-label-in-subtree/README.org#:~:text=like%20this%20idea.-,*%20Implementations,-%3APROPERTIES%3A%0A%3Aheader%2Dargs][see commit 1439fd713802ee4d49b7f69bc32359951a968626]] and subsequent ones) and it just didn't feel right. For one thing, while I was creating a system that was generic and at any point in processing edges you could get an answer, you end up moving through lists multiple times. This gave some really nice models but it just ultimately seemed weird overkill that is be more complex than it needs to be.
 
-One particular reason for this is the realization that you don't actually know what the *root* node of the tree is up front. You just have edges to navigate. In fact, the problem doesn't even seem to hinge on this stuff being a single tree.
-
-Can we do things in one pass? I have a feeling we can. If the folloing are our edges we can progres through them as follows
-
-#+begin_src plantuml :file Problem_Statement/brainstorming-diagram3.png
-  @startuml
-  hide empty description
-  a1 -> b3
-  b2 -> c5
-  a0 -> a1
-  a6 <-- b2
-  a0 --> b2
-  b3 -> b4
-  [*] -> a0
-#+end_src
-
-#+RESULTS:
-[[file:Problem_Statement/brainstorming-diagram3.png]]
-
-As we move through the edges here is what we will know about each node in terms of what their minimal factor must at least be and what nodes are navigable to upwards from there
-
-| edge   |   | a1 | b3 | b2 | c5 | a0 | a6 | b4 |   | upwards navigability                                  | notes                                                                      |
-|--------+---+----+----+----+----+----+----+----+---+-------------------------------------------------------+----------------------------------------------------------------------------|
-| a1->b3 |   |  1 |  1 |    |    |    |    |    |   | a1<b3 b3                                              |                                                                            |
-| b2->c5 |   |  1 |  1 |  1 |  1 |    |    |    |   | a1<b3 b3 b2<c5 c5                                     | Effectively two disconnected trees each with two differently labeled nodes |
-| a0->a1 |   |  1 |  1 |  1 |  1 |  2 |    |    |   | a1<b3 b3 b2<c5 c5 a0<a1,b3                            | a0 is reachable from a1 & b3, this means it has a min factor of 2          |
-| b2->a6 |   |  1 |  1 |  1 |  1 |  2 |  1 |    |   | a1<b3 b3 b2<c5,a6 c5 a0<a1,b3 a6                      | b2 is reachable from a6 too                                                |
-| a0->b2 |   |  1 |  1 |  1 |  1 |  1 |  1 |    |   | a1<b3 b3 b2<c5,a6 c5 a0<a1,b3,b2,c5,a6 a6             | a0 connects to b2 subtree and therefore is minimum of 3                    |
-| b3->b4 |   |  1 |  2 |  1 |  1 |  3 |  1 |  1 |   | a1<b3,b4 b3<b4 b2<c5,a6 c5 a0<a1,b3,b2,c5,a6,b4 a6 b4 |                                                                            |
-
-To make the above invented notation ab it clearer, what happened on the =a0->a1= row was that we found out =a0= navigated down to =a1=. This means that =a0= is reachable from =a1=. We already knew that =a1= is reachable from =b3= so we can now say that =a0= is reachable from =a1= and =b3=.
-
-Initially I was thinking the running tallies in the middle columns would be important but having done the exercise it seems like they don't matter at all. At every single point you can get the totals simply by reviewing the navigability chart for each node, seeing how many share the label, and adding =1=.
-
-So if that's the case, should we just flat out calculate the navigability chart? The worst case scenario is where the entire tree is one flat list of max =n=105= in which case the memory usage would be =105+104+103+...+1= or =106*105/2= which is about space for storing 5K nodes. Not really bad at all. So heck, why even bother with all that other stuff? Lets do it.
-
-I am now realizing that the connectivity thing might not make sense
-
-Oh forget about it, lets just build a tree
+So skrew it, ~n <= 105~. This isn't like a super-deep tree, let's just build it.
 
 * Implementations
 :PROPERTIES:
