@@ -9,7 +9,7 @@ Build a chessboard UI in any GUI system or language. Place pieces on it in the s
 :header-args:python+: :python (format "%s/bin/python" (org-entry-get (point) "venv-path" 1))
 :END:
 
-For the piece manipulation UI you can click on a piece to "select" it and click on any other square to move it to there. Multiple pieces can sit on top of each other.
+For the piece manipulation UI you can click on a piece to "select" it and click on any other square to move it to there. Pieces disappear when another piece lands on top of them.
 
 
 #+DOWNLOADED: screenshot @ 2023-04-27 23:53:20
@@ -130,12 +130,15 @@ The initial board configuration, color selection, using dataclasses, and event h
               if event.type == pygame.locals.MOUSEBUTTONUP:
                   x, y = event.pos
                   row, col = y // self.tile_size, x // self.tile_size
+                  piece_at_click_location = next((p for p in self.pieces if p.row == row and p.col == col), None)
                   if self.selected_piece:
+                      if piece_at_click_location and piece_at_click_location != self.selected_piece:
+                          self.pieces.remove(piece_at_click_location)
                       self.selected_piece.row = row
                       self.selected_piece.col = col
                       self.selected_piece = None
                   else:
-                      self.selected_piece = next((p for p in self.pieces if p.row == row and p.col == col), None)
+                      self.selected_piece = piece_at_click_location
 
 
 
@@ -167,6 +170,7 @@ The initial board configuration, color selection, using dataclasses, and event h
 
 * In Racket
 #+begin_ai
+
 #+end_ai
 
 #+begin_src racket :results silent
