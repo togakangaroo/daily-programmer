@@ -1,0 +1,295 @@
+#+TITLE: Chessboard UI
+* Prompt
+
+Build a chessboard UI in any GUI system or language. Place pieces on it in the standard chess starting positions. Make it possible to move pieces from their current positions into any other square.
+
+* In Python Pygame
+:PROPERTIES:
+:venv-path: /tmp/python-chessboard
+:header-args:python+: :python (format "%s/bin/python" (org-entry-get (point) "venv-path" 1))
+:END:
+
+For the piece manipulation UI you can click on a piece to "select" it and click on any other square to move it to there. Multiple pieces can sit on top of each other.
+
+
+#+DOWNLOADED: screenshot @ 2023-04-27 23:53:20
+#+ATTR_HTML: :width 500px
+[[file:In_Python_Pygame/2023-04-27_23-53-20_screenshot.png]]
+
+
+I want to use some sort of simple gaming engine. My kids are getting older and I feel like I'll need some familiarity there. I'm lazy though, so going to have to have chatgpt guide me through it (via org-ai). I did not ask it to favor functional programming. Next time I should.
+
+:Setup:
+
+First, lets set up a virtual environment.
+
+#+begin_src emacs-lisp :var venv-path=(org-entry-get (point) "venv-path" 1) :results silent
+  (when (file-exists-p venv-path)
+    (delete-directory venv-path t))
+  (make-directory venv-path t)
+  (let ((default-directory venv-path))
+    (shell-command-to-string "pyenv exec python -m venv ."))
+#+end_src
+
+And now install dependencies. Normally I'd use something like poetry but there isn't a codebase even here, much less a lockfile, so easier to just do this from here
+
+#+begin_src emacs-lisp :var venv-path=(org-entry-get (point) "venv-path" 1) :results silent
+  (async-shell-command (format "%s/bin/python -m pip install pygame IPython" venv-path))
+#+end_src
+
+I can start up an ipython to this venv too
+
+#+begin_src emacs-lisp :var venv-path=(org-entry-get (point) "venv-path" 1) :results silent
+(run-python (format "%s/bin/python -m IPython" venv-path) nil 't)
+#+end_src
+
+:END:
+
+Asking chatgpt for all the code can exhaust the gpt-3.5 token limit. Instead I asked it to help me select a game library (we settled on pygame) and to give me an outline with top level functions and classes.
+
+From there I drilled in asking it to implement functions or bits of functionality at a time (similar to what I would be doing with copilot which I just don't have installed yet) and doing heavy fix-up with each one.
+
+The initial board configuration, color selection, using dataclasses, and event handling for modifying the selcted piece had significant hand-coding, the rest was largely auto-generated.
+
+#+begin_src python :results silent :tangle /tmp/python_chessboard.py
+  import pygame
+  import pygame.locals
+  from dataclasses import dataclass
+  from typing import Optional
+
+  end_game = object()
+
+  BLACK = (0, 0, 0)
+  WHITE = (255, 255, 255)
+  DARK_GRAY = (100, 100, 100)
+  LIGHT_GRAY = (230, 230, 230)
+
+  @dataclass(frozen=False,)
+  class Piece:
+      symbol: str
+      color: str
+      row: int
+      col: int
+
+  class Board:
+      selected_piece: Optional[Piece] = None
+
+      def __init__(self, tile_size, screen_width, screen_height):
+          self.tile_size = tile_size
+          self.screen_width = screen_width
+          self.screen_height = screen_height
+          self.pieces = [
+              ,*(Piece('♙', WHITE, 6, c) for c in range(0, 8)),
+              Piece('♖', WHITE, 7, 0),
+              Piece('♘', WHITE, 7, 1),
+              Piece('♗', WHITE, 7, 2),
+              Piece('♕', WHITE, 7, 3),
+              Piece('♔', WHITE, 7, 4),
+              Piece('♗', WHITE, 7, 5),
+              Piece('♘', WHITE, 7, 6),
+              Piece('♖', WHITE, 7, 7),
+
+              ,*(Piece('♟', BLACK, 1, c) for c in range(0, 8)),
+              Piece('♜', BLACK, 0, 0),
+              Piece('♞', BLACK, 0, 1),
+              Piece('♝', BLACK, 0, 2),
+              Piece('♚', BLACK, 0, 3),
+              Piece('♛', BLACK, 0, 4),
+              Piece('♝', BLACK, 0, 5),
+              Piece('♞', BLACK, 0, 6),
+              Piece('♜', BLACK, 0, 7),
+          ]
+
+      def draw_pieces(self, screen):
+          font_size = int(self.tile_size * 0.75)
+          font = pygame.font.Font("/Library/Fonts/Arial Unicode.ttf", font_size)
+          piece_background_scale = 0.7
+          for piece in self.pieces:
+              x = piece.col * self.tile_size + self.tile_size // 2
+              y = piece.row * self.tile_size + self.tile_size // 2
+              piece_text = font.render(piece.symbol, True, BLACK)
+              piece_rect = piece_text.get_rect(center=(x, y))
+              screen.blit(piece_text, piece_rect)
+          if self.selected_piece:
+              x = self.selected_piece.col * self.tile_size + self.tile_size // 2
+              y = self.selected_piece.row * self.tile_size + self.tile_size // 2
+              pygame.draw.rect(screen, (0, 255, 0), pygame.Rect(x - self.tile_size//2, y - self.tile_size//2, self.tile_size, self.tile_size), 4)
+
+      def draw_board(self, screen):
+          for row in range(8):
+              for column in range(8):
+                  color = LIGHT_GRAY if (row + column) % 2 == 0 else DARK_GRAY
+                  rect = pygame.Rect(column * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size)
+                  pygame.draw.rect(screen, color, rect)
+
+      def handle_events(self):
+          for event in pygame.event.get():
+              if event.type == pygame.locals.QUIT:
+                  return end_game
+
+              if event.type == pygame.locals.MOUSEBUTTONUP:
+                  x, y = event.pos
+                  row, col = y // self.tile_size, x // self.tile_size
+                  if self.selected_piece:
+                      self.selected_piece.row = row
+                      self.selected_piece.col = col
+                      self.selected_piece = None
+                  else:
+                      self.selected_piece = next((p for p in self.pieces if p.row == row and p.col == col), None)
+
+
+
+  SCREEN_WIDTH = 640
+  SCREEN_HEIGHT = 640
+  TILE_SIZE = SCREEN_WIDTH // 8
+
+  screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+  pygame.display.set_caption("Chess")
+
+
+  def main():
+      board = Board(TILE_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT)
+      pygame.init()
+      while True:
+          if end_game == board.handle_events():
+              break
+
+          screen.fill((255, 255, 255))
+          board.draw_board(screen)
+          board.draw_pieces(screen)
+          pygame.display.flip()
+
+      pygame.quit()
+
+  if __name__ == '__main__':
+      main()
+#+end_src
+
+* In Racket
+#+begin_ai
+#+end_ai
+
+#+begin_src racket :results silent
+  #lang racket/gui
+
+  (require racket/draw)
+
+  ;; Chessboard size
+  (define width 480)
+  (define height 480)
+
+  ;; Board configuration
+  (define rows 8)
+  (define columns 8)
+  (define square-size (/ width columns))
+
+  ;; Colors
+  (define white (make-object color% 255 255 255))
+  (define black (make-object color% 0 0 0))
+  (define light-gray (make-object color% 211 211 211))
+  (define dark-gray (make-object color% 169 169 169))
+
+  (define initial-board
+    (vector
+     (vector "♖" "♘" "♗" "♕" "♔" "♗" "♘" "♖")
+     (vector "♙" "♙" "♙" "♙" "♙" "♙" "♙" "♙")
+     (vector #f #f #f #f #f #f #f #f)
+     (vector #f #f #f #f #f #f #f #f)
+     (vector #f #f #f #f #f #f #f #f)
+     (vector #f #f #f #f #f #f #f #f)
+     (vector "♟" "♟" "♟" "♟" "♟" "♟" "♟" "♟")
+     (vector "♜" "♞" "♝" "♛" "♚" "♝" "♞" "♜")))
+
+
+  (define frame (new frame% [label "Chessboard"] [width width] [height height]))
+
+  ;; Create a canvas to draw on
+  (define canvas (new canvas%
+                      [parent frame]
+                      [min-width width]
+                      [min-height height]
+                      [paint-callback (lambda (canvas dc)
+                                        (draw-chessboard dc)
+                                        (draw-pieces dc))]))
+  (define (draw-chessboard dc)
+    (for* ([row (in-range rows)]
+           [col (in-range columns)])
+      (define color (if (even? (+ row col)) light-gray dark-gray))
+      (send dc set-pen color 1 'solid)
+      (send dc set-brush color 'solid)
+      (send dc draw-rectangle (* col square-size) (* row square-size) square-size square-size)))
+
+  (define (draw-pieces dc)
+    (for* ([row (in-range rows)]
+           [col (in-range columns)])
+      (define piece (vector-ref (vector-ref initial-board row) col))
+      (when piece
+        (define color (if (char-ci<=? #\a (string-ref piece 0)) black white))
+        (define x (* col square-size))
+        (define y (* row square-size))
+        (send dc set-font (make-object font% (/ square-size 2) 'default 'normal 'bold))
+        (send dc set-text-foreground (if (equal? color white) black white))
+        (send dc draw-text piece (+ x (/ square-size 4)) (+ y (/ square-size 8))))))
+
+  (send frame show #t)
+#+end_src
+* Racket R-Cade
+#+begin_src racket :tangle /tmp/chess-r-cade.rkt
+  #lang debug racket
+
+  (require r-cade)
+  (require debug/repl)
+
+  (define width 480)
+  (define height 480)
+
+  (define rows 8)
+  (define columns 8)
+  (define square-size (/ width columns))
+
+  (define white (color 15))
+  (define black (color 0))
+  (define light-gray (color 6))
+  (define dark-gray (color 5))
+
+  (debug-repl)
+  (define initial-board
+    '(("♖" "♘" "♗" "♕" "♔" "♗" "♘" "♖")
+      ("♙" "♙" "♙" "♙" "♙" "♙" "♙" "♙")
+      (#f #f #f #f #f #f #f #f)
+      (#f #f #f #f #f #f #f #f)
+      (#f #f #f #f #f #f #f #f)
+      (#f #f #f #f #f #f #f #f)
+      ("♟" "♟" "♟" "♟" "♟" "♟" "♟" "♟")
+      ("♜" "♞" "♝" "♛" "♚" "♝" "♞" "♜")))
+
+  (define (draw-rectangle-filled x y width height color)
+    (define sprite-row (make-list width #b10000000))
+    (define sprite (make-list height sprite-row))
+    (set-color! color)
+    (for* ([row-y (in-range y (+ y height))]
+           [col-x (in-range x (+ x width))])
+      (draw col-x row-y sprite)))
+
+  (define (draw-chessboard)
+    (for* ([row (in-range rows)]
+           [col (in-range columns)])
+      (define color (if (even? (+ row col)) light-gray dark-gray))
+      (draw-rectangle-filled (* col square-size) (* row square-size) square-size square-size color)))
+
+  ;; (define (draw-pieces board)
+  ;;   (for* ([row (in-range rows)]
+  ;;          [col (in-range columns)])
+  ;;     (define piece (vector-ref (vector-ref board row) col))
+  ;;     (when piece
+  ;;       (define x (* col square-size))
+  ;;       (define y (* row square-size))
+  ;;       (define piece-color (if (< row 2) white black))
+  ;;       (draw-text piece (+ x (/ square-size 4)) (+ y (/ square-size 8)) piece-color "bold"))))
+  (define (game-loop)
+    (cls)
+    (draw-chessboard))
+    ;; (draw-pieces initial-board))
+
+  (run game-loop 320 240 #:fps 30)
+#+end_src
