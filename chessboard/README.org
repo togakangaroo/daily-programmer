@@ -173,7 +173,7 @@ The initial board configuration, color selection, using dataclasses, and event h
 
 #+end_ai
 
-#+begin_src racket :results silent
+#+begin_src racket :results silent :tangle /tmp/chess.rkt
   #lang racket/gui
 
   (require racket/draw)
@@ -207,8 +207,23 @@ The initial board configuration, color selection, using dataclasses, and event h
 
   (define frame (new frame% [label "Chessboard"] [width width] [height height]))
 
-  ;; Create a canvas to draw on
-  (define canvas (new canvas%
+  (define msg (new message% [parent frame]
+                   [label "No events so far..."]))
+
+
+  (define board-canvas%
+    (class canvas%
+      (define/override (on-event event)
+        (match (send event get-event-type)
+          ['left-down (let ([c (quotient (send event get-x) square-size)]
+                            [r (quotient (send event get-y) square-size)])
+                        (send msg set-label (format "Clicked: ~a,~a" c r)))]
+          [_ (void)]))
+      (define/override (on-char event)
+        (send msg set-label "Canvas keyboard"))
+      (super-new)))
+
+  (define canvas (new board-canvas%
                       [parent frame]
                       [min-width width]
                       [min-height height]
