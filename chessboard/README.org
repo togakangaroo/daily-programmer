@@ -232,7 +232,6 @@ The initial board configuration, color selection, using dataclasses, and event h
         (define x (* col square-size))
         (define y (* row square-size))
         (send dc set-font (make-object font% (/ square-size 2) 'default 'normal 'bold))
-        (send dc set-text-foreground (if (equal? color white) black white))
         (send dc draw-text piece (+ x (/ square-size 4)) (+ y (/ square-size 8))))))
 
   (send frame show #t)
