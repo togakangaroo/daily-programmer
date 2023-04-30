@@ -177,6 +177,8 @@ The initial board configuration, color selection, using dataclasses, and event h
   #lang racket/gui
 
   (require racket/draw)
+  (require racket/generator)
+  (require threading)
 
   ;; Chessboard size
   (define width 480)
@@ -192,6 +194,7 @@ The initial board configuration, color selection, using dataclasses, and event h
   (define black (make-object color% 0 0 0))
   (define light-gray (make-object color% 211 211 211))
   (define dark-gray (make-object color% 169 169 169))
+  (define mint (make-object color% 130 225 165))
 
   (define initial-board
     (vector
@@ -204,6 +207,15 @@ The initial board configuration, color selection, using dataclasses, and event h
      (vector "♟" "♟" "♟" "♟" "♟" "♟" "♟" "♟")
      (vector "♜" "♞" "♝" "♛" "♚" "♝" "♞" "♜")))
 
+  (define pieces (for/hash ([row (in-range (vector-length initial-board))]
+                            #:when 't
+                            [col (in-range (vector-length (vector-ref initial-board row)))]
+                            #:when 't
+                            [symbol (list (~> initial-board (vector-ref _ row) (vector-ref _ col)))]
+                            #:when symbol)
+                  (values (vector row col) symbol)))
+
+  (define selected #f)
 
   (define frame (new frame% [label "Chessboard"] [width width] [height height]))
 
@@ -217,7 +229,9 @@ The initial board configuration, color selection, using dataclasses, and event h
         (match (send event get-event-type)
           ['left-down (let ([c (quotient (send event get-x) square-size)]
                             [r (quotient (send event get-y) square-size)])
-                        (send msg set-label (format "Clicked: ~a,~a" c r)))]
+                        (send msg set-label (format "Clicked: ~a,~a" c r))
+                        (set! selected (cons c r))
+                        (send canvas refresh))]
           [_ (void)]))
       (define/override (on-char event)
         (send msg set-label "Canvas keyboard"))
@@ -236,18 +250,18 @@ The initial board configuration, color selection, using dataclasses, and event h
       (define color (if (even? (+ row col)) light-gray dark-gray))
       (send dc set-pen color 1 'solid)
       (send dc set-brush color 'solid)
-      (send dc draw-rectangle (* col square-size) (* row square-size) square-size square-size)))
+      (send dc draw-rectangle (* col square-size) (* row square-size) square-size square-size))
+    (when selected
+      (send dc set-pen mint 4 'solid)
+      (send dc draw-rectangle (* (car selected) square-size) (* (cdr selected) square-size) square-size square-size)))
 
   (define (draw-pieces dc)
-    (for* ([row (in-range rows)]
-           [col (in-range columns)])
-      (define piece (vector-ref (vector-ref initial-board row) col))
-      (when piece
-        (define color (if (char-ci<=? #\a (string-ref piece 0)) black white))
-        (define x (* col square-size))
-        (define y (* row square-size))
-        (send dc set-font (make-object font% (/ square-size 2) 'default 'normal 'bold))
-        (send dc draw-text piece (+ x (/ square-size 4)) (+ y (/ square-size 8))))))
+    (for ([(loc piece) pieces])
+      (match-define (vector row col) loc)
+      (define x (* col square-size))
+      (define y (* row square-size))
+      (send dc set-font (make-object font% (/ square-size 2) 'default 'normal 'bold))
+      (send dc draw-text piece (+ x (/ square-size 4)) (+ y (/ square-size 8)))))
 
   (send frame show #t)
 #+end_src
