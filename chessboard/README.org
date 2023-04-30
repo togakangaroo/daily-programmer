@@ -227,11 +227,13 @@ The initial board configuration, color selection, using dataclasses, and event h
     (class canvas%
       (define/override (on-event event)
         (match (send event get-event-type)
-          ['left-down (let ([c (quotient (send event get-x) square-size)]
-                            [r (quotient (send event get-y) square-size)])
+          ['left-down (let* ([c (quotient (send event get-x) square-size)]
+                             [r (quotient (send event get-y) square-size)]
+                             [cell (vector r c)])
                         (send msg set-label (format "Clicked: ~a,~a" c r))
-                        (set! selected (cons c r))
-                        (send canvas refresh))]
+                        (when (hash-ref pieces cell #f)
+                          (set! selected cell)
+                          (send canvas refresh)))]
           [_ (void)]))
       (define/override (on-char event)
         (send msg set-label "Canvas keyboard"))
@@ -252,8 +254,9 @@ The initial board configuration, color selection, using dataclasses, and event h
       (send dc set-brush color 'solid)
       (send dc draw-rectangle (* col square-size) (* row square-size) square-size square-size))
     (when selected
+      (match-define (vector r c) selected)
       (send dc set-pen mint 4 'solid)
-      (send dc draw-rectangle (* (car selected) square-size) (* (cdr selected) square-size) square-size square-size)))
+      (send dc draw-rectangle (* c square-size) (* r square-size) square-size square-size)))
 
   (define (draw-pieces dc)
     (for ([(loc piece) pieces])
