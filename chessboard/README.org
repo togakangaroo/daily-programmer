@@ -270,6 +270,10 @@ A lesson learned here is that chatgpt is not great at racket. It knows about som
   (send frame show #t)
 #+end_src
 
+
+#+DOWNLOADED: screenshot @ 2023-04-30 14:25:05
+[[file:In_Racket/2023-04-30_14-25-05_screenshot.png]]
+
 In developing this, the following launcher script was particularly useful as it would auto-launch the UI on each change, letting me test whatever I did before shutting it down by itself
 
 #+begin_src emacs-lisp :dir /tmp
