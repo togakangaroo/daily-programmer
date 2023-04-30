@@ -169,9 +169,10 @@ The initial board configuration, color selection, using dataclasses, and event h
 #+end_src
 
 * In Racket
-#+begin_ai
 
-#+end_ai
+I do enjoy racket and so would like to figure out how to do UIs in racket. I suspect it is a better teaching language than python and therefore might want to use it in the future.
+
+A lesson learned here is that chatgpt is not great at racket. It knows about some libraries but it often makes up functions and is iffy with instructions like "use functional patterns" and "prefer pattern matching". It is not too uncommon even to get unmatched parens in responses. I do think that gpt-4 will be better at this but haven't verifed it too muich
 
 #+begin_src racket :results silent :tangle /tmp/chess.rkt
   #lang racket/gui
@@ -180,16 +181,13 @@ The initial board configuration, color selection, using dataclasses, and event h
   (require racket/generator)
   (require threading)
 
-  ;; Chessboard size
-  (define width 480)
-  (define height 480)
+  (define width 800)
+  (define height 800)
 
-  ;; Board configuration
   (define rows 8)
   (define columns 8)
   (define square-size (/ width columns))
 
-  ;; Colors
   (define white (make-object color% 255 255 255))
   (define black (make-object color% 0 0 0))
   (define light-gray (make-object color% 211 211 211))
@@ -197,21 +195,20 @@ The initial board configuration, color selection, using dataclasses, and event h
   (define mint (make-object color% 130 225 165))
 
   (define initial-board
-    (vector
-     (vector "♖" "♘" "♗" "♕" "♔" "♗" "♘" "♖")
-     (vector "♙" "♙" "♙" "♙" "♙" "♙" "♙" "♙")
-     (vector #f #f #f #f #f #f #f #f)
-     (vector #f #f #f #f #f #f #f #f)
-     (vector #f #f #f #f #f #f #f #f)
-     (vector #f #f #f #f #f #f #f #f)
-     (vector "♟" "♟" "♟" "♟" "♟" "♟" "♟" "♟")
-     (vector "♜" "♞" "♝" "♛" "♚" "♝" "♞" "♜")))
+    '(("♖" "♘" "♗" "♕" "♔" "♗" "♘" "♖")
+      ("♙" "♙" "♙" "♙" "♙" "♙" "♙" "♙")
+      (#f #f #f #f #f #f #f #f)
+      (#f #f #f #f #f #f #f #f)
+      (#f #f #f #f #f #f #f #f)
+      (#f #f #f #f #f #f #f #f)
+      ("♟" "♟" "♟" "♟" "♟" "♟" "♟" "♟")
+      ("♜" "♞" "♝" "♛" "♚" "♝" "♞" "♜")))
 
-  (define pieces (for/hash ([row (in-range (vector-length initial-board))]
+  (define pieces (for/hash ([row (in-range (length initial-board))]
                             #:when 't
-                            [col (in-range (vector-length (vector-ref initial-board row)))]
+                            [col (in-range (length (list-ref initial-board row)))]
                             #:when 't
-                            [symbol (list (~> initial-board (vector-ref _ row) (vector-ref _ col)))]
+                            [symbol (list (~> initial-board (list-ref _ row) (list-ref _ col)))]
                             #:when symbol)
                   (values (vector row col) symbol)))
 
@@ -222,21 +219,23 @@ The initial board configuration, color selection, using dataclasses, and event h
   (define msg (new message% [parent frame]
                    [label "No events so far..."]))
 
-
   (define board-canvas%
     (class canvas%
       (define/override (on-event event)
         (match (send event get-event-type)
           ['left-down (let* ([c (quotient (send event get-x) square-size)]
                              [r (quotient (send event get-y) square-size)]
-                             [cell (vector r c)])
+                             [target-cell (vector r c)])
                         (send msg set-label (format "Clicked: ~a,~a" c r))
-                        (when (hash-ref pieces cell #f)
-                          (set! selected cell)
-                          (send canvas refresh)))]
+                        (cond [selected (~> selected
+                                            (hash-ref pieces _)
+                                            (hash-set* pieces selected #f
+                                                            target-cell _)
+                                            (set! pieces _))
+                                        (set! selected #f)]
+                              [(hash-ref pieces target-cell #f) (set! selected target-cell)])
+                        (send canvas refresh))]
           [_ (void)]))
-      (define/override (on-char event)
-        (send msg set-label "Canvas keyboard"))
       (super-new)))
 
   (define canvas (new board-canvas%
@@ -246,6 +245,7 @@ The initial board configuration, color selection, using dataclasses, and event h
                       [paint-callback (lambda (canvas dc)
                                         (draw-chessboard dc)
                                         (draw-pieces dc))]))
+
   (define (draw-chessboard dc)
     (for* ([row (in-range rows)]
            [col (in-range columns)])
@@ -259,7 +259,8 @@ The initial board configuration, color selection, using dataclasses, and event h
       (send dc draw-rectangle (* c square-size) (* r square-size) square-size square-size)))
 
   (define (draw-pieces dc)
-    (for ([(loc piece) pieces])
+    (for ([(loc piece) pieces]
+          #:when piece)
       (match-define (vector row col) loc)
       (define x (* col square-size))
       (define y (* row square-size))
@@ -267,6 +268,12 @@ The initial board configuration, color selection, using dataclasses, and event h
       (send dc draw-text piece (+ x (/ square-size 4)) (+ y (/ square-size 8)))))
 
   (send frame show #t)
+#+end_src
+
+In developing this, the following launcher script was particularly useful as it would auto-launch the UI on each change, letting me test whatever I did before shutting it down by itself
+
+#+begin_src emacs-lisp :dir /tmp
+  (async-shell-command "watchexec -e rkt -- gtimeout 5s racket chess.rkt")
 #+end_src
 * Racket R-Cade
 #+begin_src racket :tangle /tmp/chess-r-cade.rkt
