@@ -275,63 +275,9 @@ In developing this, the following launcher script was particularly useful as it 
 #+begin_src emacs-lisp :dir /tmp
   (async-shell-command "watchexec -e rkt -- gtimeout 5s racket chess.rkt")
 #+end_src
-* Racket R-Cade
-#+begin_src racket :tangle /tmp/chess-r-cade.rkt
-  #lang debug racket
 
-  (require r-cade)
-  (require debug/repl)
+I also tried this using the r-cade gaming framework but it doesn't support mouse-based interaction and that's a bummer.
 
-  (define width 480)
-  (define height 480)
+* TODO In Clojurescript
 
-  (define rows 8)
-  (define columns 8)
-  (define square-size (/ width columns))
-
-  (define white (color 15))
-  (define black (color 0))
-  (define light-gray (color 6))
-  (define dark-gray (color 5))
-
-  (debug-repl)
-  (define initial-board
-    '(("♖" "♘" "♗" "♕" "♔" "♗" "♘" "♖")
-      ("♙" "♙" "♙" "♙" "♙" "♙" "♙" "♙")
-      (#f #f #f #f #f #f #f #f)
-      (#f #f #f #f #f #f #f #f)
-      (#f #f #f #f #f #f #f #f)
-      (#f #f #f #f #f #f #f #f)
-      ("♟" "♟" "♟" "♟" "♟" "♟" "♟" "♟")
-      ("♜" "♞" "♝" "♛" "♚" "♝" "♞" "♜")))
-
-  (define (draw-rectangle-filled x y width height color)
-    (define sprite-row (make-list width #b10000000))
-    (define sprite (make-list height sprite-row))
-    (set-color! color)
-    (for* ([row-y (in-range y (+ y height))]
-           [col-x (in-range x (+ x width))])
-      (draw col-x row-y sprite)))
-
-  (define (draw-chessboard)
-    (for* ([row (in-range rows)]
-           [col (in-range columns)])
-      (define color (if (even? (+ row col)) light-gray dark-gray))
-      (draw-rectangle-filled (* col square-size) (* row square-size) square-size square-size color)))
-
-  ;; (define (draw-pieces board)
-  ;;   (for* ([row (in-range rows)]
-  ;;          [col (in-range columns)])
-  ;;     (define piece (vector-ref (vector-ref board row) col))
-  ;;     (when piece
-  ;;       (define x (* col square-size))
-  ;;       (define y (* row square-size))
-  ;;       (define piece-color (if (< row 2) white black))
-  ;;       (draw-text piece (+ x (/ square-size 4)) (+ y (/ square-size 8)) piece-color "bold"))))
-  (define (game-loop)
-    (cls)
-    (draw-chessboard))
-    ;; (draw-pieces initial-board))
-
-  (run game-loop 320 240 #:fps 30)
-#+end_src
+I want one on the web but I also want to do it in something fun. Which is clojurescript! Lets do it
