@@ -1,6 +1,11 @@
+#+OPTIONS: toc:nil
+#+OPTIONS: html-postamble:nil
 
-I recently got laid off and I should practice
-[[https://leetcode.com/problems/integer-to-english-words/description/][This is a leetcode problem]]. I recently got laid off and I should practice
+[[https://leetcode.com/problems/integer-to-english-words/description/][This is a leetcode problem]] posted to the underdog devs slack. I recently got laid off and I should practice
+
+
+This is the actual process of me solving the problem. The final ruby-file can be viewed [[./number_to_english.rb][here]].
+
 * Problem Statement
 #+begin_quote
 Convert a non-negative integer num to its English words representation.
@@ -71,8 +76,10 @@ You know, I've seen ruby pop up several times in JDs I've looked at and...I'm no
 
 Clearly I'm going to need to do pattern matching, lets see how it looks in ruby
 
+I'm on a mac which already has ruby installed, but pattern matching in ruby got more powerful in 2.7 and the installed version is src_shell[]{ruby -v} {{{results(=ruby 2.6.10p210 (2022-04-12 revision 67958) [universal.arm64e-darwin23]=)}}}. I can ~brew install ruby~ to get latest but it doesn't symlink automatically. I'll have to explicitly call ~/opt/homebrew/opt/ruby/bin/ruby~ (or ~irb~)
+
 #+name: playground-pattern-matching
-#+begin_src ruby :var num=0
+#+begin_src ruby :var num=0 :exports both
   case num
   in 0
     "zero"
@@ -296,10 +303,10 @@ Now we just have to do the splitting of digits. Oh, and handle zero
   end
 #+end_src
 
-And here's all of it
+And put it all together
 
 #+name: all-together-now
-#+begin_src ruby :results silent :session
+#+begin_src ruby :results silent :session :exports none
   <<digit-to-english>>
 
   <<two-digits-to-english>>
@@ -313,7 +320,7 @@ And here's all of it
   <<number-to-english>>
 #+end_src
 
-lets test it out. Note that 
+lets test it out. 
 
 #+begin_src ruby :results output :tangle number_to_english.rb
   <<all-together-now>>
@@ -336,3 +343,5 @@ lets test it out. Note that
 1000000000, one billion
 2000000011, two billion eleven
 #+end_example
+
+I've also tangled the file so the full ruby-only can be viewed [[./number_to_english.rb][here]].
