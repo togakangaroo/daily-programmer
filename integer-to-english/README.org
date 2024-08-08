@@ -23,6 +23,8 @@ Input: num = 1234567
 Output: "One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven"
 
 * Brainstorming
+What's the max here? That detemrmines how many decimal place value names I have to hard code src_emacs-lisp[]{(expt 2 31)} {{{results(=2147483648=)}}}. Ok, so that's just "billions", easy.
+
 Let's see if we can just say the rules in english and I'll try to avoid saying that the right answer is just to throw it at ChatGPT.
 
 I'm thinking about examining the number form the back forward
@@ -103,7 +105,7 @@ Clearly I'm going to need to do pattern matching, lets see how it looks in ruby
 
 * Implementation
 :PROPERTIES:
-:header-args+: :noweb yes
+:header-args+: :noweb strip-export :exports both
 :header-args:ruby+: :ruby "/opt/homebrew/opt/ruby/bin/ruby"
 :END:
 
@@ -157,6 +159,8 @@ Now lets try to do two digits
       ""
     in ["0", d]
       digit_to_english d
+    in ["1", "0"]
+      "ten"
     in ["1", "1"]
       "eleven"
     in ["1", "2"]
@@ -173,6 +177,8 @@ Now lets try to do two digits
       "thirty #{digit_to_english d}"
     in ["5", d]
       "fifty #{digit_to_english d}"
+    in ["8", d]
+      "eighty #{digit_to_english d}"
     in [d1, d2]
       "#{digit_to_english d1}ty #{digit_to_english d2}"
     end
@@ -209,8 +215,10 @@ Ok, so its becoming clear that it might be useful for ~dte~ to be able to handle
     case digits
     in x if x.length <= 2
       two_digits_to_english x
+    in ["0", *d23]
+      two_digits_to_english d23
     in [d1, *d23]
-      "#{two_digits_to_english [d1]} hundred #{two_digits_to_english d23}"
+      "#{two_digits_to_english [d1]} hundred #{two_digits_to_english d23}".strip
     end
   end
 #+end_src
@@ -236,4 +244,95 @@ now this can be simplified to the following. Here we alias our new ~three_digits
 - for a 9 digit number its ~(dte d123) million (6dte d456789)~ - we'll alias this to 9dte
 - for a 10 digit number its ~(dte d1) billion (9dte d234567890)~
 
-So now, we just know the breaks and teh word associated to each of the breaks and then we do something like ~(dte head..break) word rest~
+So now, we just know the breaks and the word associated to each of the breaks and then we do something like ~(dte head..break) word rest~
+
+Ok so lets do that. There's the question of what the structure for those breaks/word associations should look like. While we could do an array or a hash, because we're always processing it from highest break to lowest I think the best approach is more like a linked list as it can be unrolled more easily. Quick google tells me Ruby has one-line structs that can be used for this. Note that we have special handling for "hundreds and below" already so no need to go lower
+
+#+name: dynamic-place-name
+#+begin_src ruby :results silent :session
+  PlaceName = Struct.new(:place, :name, :next)
+  ALL_PLACE_NAMES = PlaceName.new(10, "billion",
+                     PlaceName.new(7, "million",
+                      PlaceName.new(4, "thousand")))
+#+end_src
+
+Note the capitalization here is interesting. I got stuck on it for a bit. In ruby - unlike other languages - all caps matters for making your variable visible down the scope chain
+
+We're almost there, we can now unroll this across all our digits
+
+There's one gocha here, in that if the next set of digits are all 0, then we don't want to say anything. This will allow us to handle situations like =10000= recursively without saying the "hundred" that you *would* say if you've got a number like =100= or =10100=
+
+#+name: many-digits-to-english
+#+begin_src ruby :results silent :session
+  def many_digits_to_english(digits, place_name)
+    if digits.all? { |d| d == "0" } # the hundreds in 1000
+      ""
+    elsif not place_name # terminal condition and when 3 digit or lower
+      three_digits_to_english digits
+    elsif digits.length < place_name.place # when not in the billions and need to get down to the place name that matters
+      many_digits_to_english(digits, place_name.next)
+    else
+      split_at = digits.length - place_name.place
+      place_digits = digits[0..split_at]
+      rest_digits = digits[(split_at + 1)..-1]
+      if place_digits.all? { |d| d == "0" } # situations like 1000001
+        many_digits_to_english(rest_digits, place_name.next)
+      else # normal case
+        "#{three_digits_to_english place_digits} #{place_name.name} #{many_digits_to_english(rest_digits, place_name.next)}"
+      end
+    end
+  end
+#+end_src
+Now we just have to do the splitting of digits. Oh, and handle zero
+
+#+name: number-to-english
+#+begin_src ruby :results silent :session
+  def number_to_english(num)
+    if num == 0
+      "zero"
+    else
+      many_digits_to_english(num.to_s.split(""), ALL_PLACE_NAMES).strip
+    end
+  end
+#+end_src
+
+And here's all of it
+
+#+name: all-together-now
+#+begin_src ruby :results silent :session
+  <<digit-to-english>>
+
+  <<two-digits-to-english>>
+
+  <<three-digits-to-english>>
+
+  <<dynamic-place-name>>
+
+  <<many-digits-to-english>>
+
+  <<number-to-english>>
+#+end_src
+
+lets test it out. Note that 
+
+#+begin_src ruby :results output :tangle number_to_english.rb
+  <<all-together-now>>
+
+  [0, 4, 12, 99, 100, 911, 1000, 10001, 100000, 1000001, 1000000000, 2000000011].each { |n| puts "#{n}, #{(number_to_english n)}" }
+#+end_src
+
+#+RESULTS:
+#+begin_example
+0, zero
+4, four
+12, twelve
+99, ninety nine
+100, one hundred
+911, nine hundred eleven
+1000, one thousand
+10001, ten thousand one
+100000, one hundred thousand
+1000001, one million one
+1000000000, one billion
+2000000011, two billion eleven
+#+end_example
