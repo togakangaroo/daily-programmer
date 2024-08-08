@@ -27,7 +27,7 @@ Let's see if we can just say the rules in english and I'll try to avoid saying t
 
 I'm thinking about examining the number form the back forward
 
-- If lterally 0 then say zero
+- If literally 0 then say zero
 - For the ones
   - if 1-9 then say the digit
   - if 0 then say nothing
@@ -59,13 +59,181 @@ I'm thinking about examining the number form the back forward
 
 I'm not the most clear on the more advanced numbers but I feel like if I get 0-9999 right then the rest will fall into place
 
+I do think that maybe we need to handle the case of a two digit number together, all the exceptions are in the interactions there
+
+* Playground
+:PROPERTIES:
+:header-args:ruby: :ruby "/opt/homebrew/opt/ruby/bin/ruby"
+:END:
+You know, I've seen ruby pop up several times in JDs I've looked at and...I'm not a ruby guy, so like, lets do it in ruby to demenstrate that I can still sling it
+
+Clearly I'm going to need to do pattern matching, lets see how it looks in ruby
+
+#+name: playground-pattern-matching
+#+begin_src ruby :var num=0
+  case num
+  in 0
+    "zero"
+  in x if 1 <= x && x <= 5
+    "low"
+  in x if 5 < x && x < 10
+    "high"
+  end
+#+end_src
+
+#+call: playground-pattern-matching(0)
+
+#+RESULTS:
+: zero
+
+#+call: playground-pattern-matching(3)
+
+#+RESULTS:
+: low
+
+#+call: playground-pattern-matching(9)
+
+#+RESULTS:
+: high
+
+#+call: playground-pattern-matching(4.5)
+
+#+RESULTS:
+: low
+
 * Implementation
+:PROPERTIES:
+:header-args+: :noweb yes
+:header-args:ruby+: :ruby "/opt/homebrew/opt/ruby/bin/ruby"
+:END:
 
-You know, I've seen ruby pop up several times in JDs I've looked at and...I'm not a ruby guy, so like, lets do it in ruby
+Well, we'll need a way to convert just flat out digits to english, right? But for our needs we never say "zero" (except literally for 0), you just ignore it
 
-#+begin_src ruby :var num=9112
-  1+num
+#+name: digit-to-english
+#+begin_src ruby :results silent :session
+  def digit_to_english(digit)
+    case digit
+    in "0"
+      ""
+    in "1"
+      "one"
+    in "2"
+      "two"
+    in "3"
+      "three"
+    in "4"
+      "four"
+    in "5"
+      "five"
+    in "6"
+      "six"
+    in "7"
+      "seven"
+    in "8"
+      "eight"
+    in "9"
+      "nine"
+    end
+  end
+#+end_src
+#+begin_src ruby
+  <<digit-to-english>>
+
+  digit_to_english "4"
 #+end_src
 
 #+RESULTS:
-: 9113
+: four
+
+Now lets try to do two digits
+
+#+name: two-digits-to-english
+#+begin_src ruby :results silent :session
+  def two_digits_to_english(digits)
+    case digits
+    in [d]
+      digit_to_english d
+    in ["0", "0"]
+      ""
+    in ["0", d]
+      digit_to_english d
+    in ["1", "1"]
+      "eleven"
+    in ["1", "2"]
+      "twelve"
+    in ["1", "3"]
+      "thirteen"
+    in ["1", "5"]
+      "fifteen"
+    in ["1", d]
+      "#{digit_to_english d}teen"
+    in ["2", d]
+      "twenty #{digit_to_english d}"
+    in ["3", d]
+      "thirty #{digit_to_english d}"
+    in ["5", d]
+      "fifty #{digit_to_english d}"
+    in [d1, d2]
+      "#{digit_to_english d1}ty #{digit_to_english d2}"
+    end
+  end
+#+end_src
+
+#+begin_src ruby
+  <<digit-to-english>>
+  <<two-digits-to-english>>
+
+  [0, 4, 12, 16, 25, 36, 50, 99].map { |n| (two_digits_to_english (n.to_s.split "")) }
+#+end_src
+
+#+RESULTS:
+|   | four | twelve | sixteen | twenty five | thirty six | fifty | ninety nine |
+
+woah look at that, it worked!
+
+Ok, so now we're getting to understand the rest of the pattern. First of all, I'll observe that we can use ~two_digits_to_english~ with single digit numbers too, so lets alias it to ~dte~ and use that as much as possible
+- for a 3 digit number its ~(dte d1) hundred (dte d23)~ we'll alias this ~3dte~
+- for a 4 digit number its ~(dte d1) thousand (3dte d234)~
+- for a 5 digit number its ~(dte d12) thousand (3dte d345)~
+- for a 6 digit number its ~(3dte d123) thousand (3dte d456)~ we'll alias this to 6dte
+- for a 7 digit number its ~(dte d1) million (6dte d234567)~
+- for a 8 digit number its ~(dte d12) million (6dte d345678)~
+- for a 9 digit number its ~(3dte d123) million (6dte d456789)~ - we'll alias this to 9dte
+- for a 10 digit number its ~(dte d1) billion (9dte d234567890)~
+
+Ok, so its becoming clear that it might be useful for ~dte~ to be able to handle 3 digits, that would simplify things
+
+#+name: three-digits-to-english
+#+begin_src ruby :results silent :session
+  def three_digits_to_english(digits)
+    case digits
+    in x if x.length <= 2
+      two_digits_to_english x
+    in [d1, *d23]
+      "#{two_digits_to_english [d1]} hundred #{two_digits_to_english d23}"
+    end
+  end
+#+end_src
+
+#+begin_src ruby
+  <<digit-to-english>>
+  <<two-digits-to-english>>
+  <<three-digits-to-english>>
+
+  [0, 4, 12, 99, 100, 145, 232, 911].map { |n| (three_digits_to_english (n.to_s.split "")) }
+#+end_src
+
+#+RESULTS:
+|   | four | twelve | ninety nine | one hundred | one hundred fourty five | two hundred thirty two | nine hundred eleven |
+
+now this can be simplified to the following. Here we alias our new ~three_digits_to_english~ as ~dte~
+
+- for a 4 digit number its ~(dte d1) thousand (dte d234)~
+- for a 5 digit number its ~(dte d12) thousand (dte d345)~
+- for a 6 digit number its ~(dte d123) thousand (dte d456)~ we'll alias this to 6dte
+- for a 7 digit number its ~(dte d1) million (6dte d234567)~
+- for a 8 digit number its ~(dte d12) million (6dte d345678)~
+- for a 9 digit number its ~(dte d123) million (6dte d456789)~ - we'll alias this to 9dte
+- for a 10 digit number its ~(dte d1) billion (9dte d234567890)~
+
+So now, we just know the breaks and teh word associated to each of the breaks and then we do something like ~(dte head..break) word rest~
