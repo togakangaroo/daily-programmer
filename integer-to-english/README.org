@@ -1,0 +1,71 @@
+
+I recently got laid off and I should practice
+[[https://leetcode.com/problems/integer-to-english-words/description/][This is a leetcode problem]]. I recently got laid off and I should practice
+* Problem Statement
+#+begin_quote
+Convert a non-negative integer num to its English words representation.
+#+end_quote
+#+begin_src python :eval no
+  0 <= num <= 2**31 - 1
+#+end_src
+** Example 1
+
+Input: num = 123
+Output: "One Hundred Twenty Three"
+** Example 2
+
+Input: num = 12345
+Output: "Twelve Thousand Three Hundred Forty Five"
+
+** Example 3
+
+Input: num = 1234567
+Output: "One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven"
+
+* Brainstorming
+Let's see if we can just say the rules in english and I'll try to avoid saying that the right answer is just to throw it at ChatGPT.
+
+I'm thinking about examining the number form the back forward
+
+- If lterally 0 then say zero
+- For the ones
+  - if 1-9 then say the digit
+  - if 0 then say nothing
+- For the tens
+  - if 4, 6-9 then its the digit+ty
+  - if 5, then fifty
+  - if 3, then thirty
+  - if 2, then twenty
+  - if 0, then nothing
+  - if 1, then
+    - do not run the ones
+    - if ones place is
+      - 0 then ten
+      - 1 then eleven
+      - 2 then twelve
+      - 3 then thirteen
+      - 5 then fifteen
+      - 4, 6-9 then digit+teen
+- For hundres
+  - digit+hundred
+- For thousands
+  - digit+thousand
+- Tens thousands
+  - same rules as tens+thousand
+- Hundred thousands
+  - same rules as hundreds+thousand
+- Millions
+  - same as ones+million
+
+I'm not the most clear on the more advanced numbers but I feel like if I get 0-9999 right then the rest will fall into place
+
+* Implementation
+
+You know, I've seen ruby pop up several times in JDs I've looked at and...I'm not a ruby guy, so like, lets do it in ruby
+
+#+begin_src ruby :var num=9112
+  1+num
+#+end_src
+
+#+RESULTS:
+: 9113
