@@ -6,3 +6,5 @@ __pycache__/
 
 # Node stuff
 node_modules/
+.lsp
+.clj-kondo
