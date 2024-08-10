@@ -1,5 +1,7 @@
 This is [this leetcode problem](https://leetcode.com/problems/spiral-matrix-iii/description/) from [Underdog Devs](https://underdog-devs.slack.com/archives/C02FFHZT200/p1723032739134259)
 
+[Go to tangled solution file](./matrix-spiral-order.kts)
+
 
 # Problem Statement
 

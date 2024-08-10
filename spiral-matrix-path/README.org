@@ -3,6 +3,8 @@
 
 This is [[https://leetcode.com/problems/spiral-matrix-iii/description/][this leetcode problem]] from [[https://underdog-devs.slack.com/archives/C02FFHZT200/p1723032739134259][Underdog Devs]]
 
+[[./matrix-spiral-order.kts][Go to tangled solution file]]
+
 * Problem Statement
 You start at the cell ~(rStart, cStart)~ of an rows x cols grid facing east. The northwest corner is at the first row and column in the grid, and the southeast corner is at the last row and column.
 
@@ -269,8 +271,7 @@ That's right, what if we started in column 2?
 : res3: kotlin.String = >>> 
 
 Oh that's cool. And the right answer. Lets see it with Example 2
-
-#+begin_src kotlin
+#+begin_src kotlin :tangle matrix-spiral-order.kts
   var rows = 5
   var columns = 6
   var rStart = 1
