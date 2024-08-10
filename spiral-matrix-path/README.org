@@ -1,0 +1,208 @@
+This is [this leetcode problem](https://leetcode.com/problems/spiral-matrix-iii/description/) from [Underdog Devs](https://underdog-devs.slack.com/archives/C02FFHZT200/p1723032739134259)
+
+* Problem Statement
+You start at the cell ~(rStart, cStart)~ of an rows x cols grid facing east. The northwest corner is at the first row and column in the grid, and the southeast corner is at the last row and column.
+
+You will walk in a clockwise spiral shape to visit every position in this grid. Whenever you move outside the grid's boundary, we continue our walk outside the grid (but may return to the grid boundary later.). Eventually, we reach all rows * cols spaces of the grid.
+
+Return an array of coordinates representing the positions of the grid in the order you visited them.
+
+** Example 1:
+
+Input :: ~rows = 1, cols = 4, rStart = 0, cStart = 0~
+Output :: ~[[0,0],[0,1],[0,2],[0,3]]~
+
+** Example 2:
+
+Input :: ~rows = 5, cols = 6, rStart = 1, cStart = 4~
+Output :: ~[[1,4],[1,5],[2,5],[2,4],[2,3],[1,3],[0,3],[0,4],[0,5],[3,5],[3,4],[3,3],[3,2],[2,2],[1,2],[0,2],[4,5],[4,4],[4,3],[4,2],[4,1],[3,1],[2,1],[1,1],[0,1],[4,0],[3,0],[2,0],[1,0],[0,0]]~
+
+#+DOWNLOADED: screenshot @ 2024-08-08 14:46:20
+[[file:Problem_Statement/2024-08-08_14-46-20_screenshot.png]]
+
+
+** Constraints:
+
+- ~1 <= rows, cols <= 100~
+- ~0 <= rStart < rows~
+- ~0 <= cStart < cols~
+
+
+* Brianstorming
+This is largely a matter of charting out a spiral. We can do that via an iterable stream.
+ - Infinite spiral starting at 0, 0
+ - Map translate each by the "start" point
+ - Filter for each point being in bounds
+ - End after we've yielded the correct number of points
+
+ I guess a spiral itself is just an equation. I could calculate each position from the previous of course but I wonder if I could derive the formula to do it without induction
+
+ #+begin_src picture
+   +----+
+   |+--+
+   ||>+|
+   |+-+|
+   +---+
+ #+end_src
+
+ | row,col | direction | run |
+ |---------+-----------+-----|
+ | 0,0     | →         |   1 |
+ | 0,1     | ↓         |   1 |
+ | 1,1     | ←         |   2 |
+ | 1,0     | ←         |     |
+ | 1,-1    | ↑         |   2 |
+ | 0,-1    | ↑         |     |
+ | -1,-1   | →         |   3 |
+ | -1,0    | →         |     |
+ | -1,1    | →         |     |
+ | -1,2    | ↓         |   3 |
+ | 0,2     | ↓         |     |
+ | 1,2     | ↓         |     |
+ | 2,2     | ←         |   4 |
+ | 2,1     | ←         |     |
+ | 2,0     | ←         |     |
+ | 2,-1    | ←         |     |
+ | 2,-2    | ↑         |   4 |
+ | 1,-2    | ↑         |     |
+ | 0,-2    | ↑         |     |
+ | -1,-2   | ↑         |     |
+ | -2,-2   | →         |   5 |
+ | -2,-1   | →         |     |
+ | -2,0    | →         |     |
+ | -2,1    | →         |     |
+ | -2,2    | →         |     |
+ | -2,3    | ↓         |   5 |
+
+ - → on 1, 3, 5, ...
+   - (0,0) (-1,-1) (-2,-2), ...
+ - ↓ on 1', 3', 5', ...
+   - (0,1) (-1,2) (-2,3), ...
+ - ← on 2, 4, ...
+   - (1,1) (2,2)
+ - ↑ on 2', 4'
+   - (1,-1) (2,-2)
+
+ok, so I think I can figure out the pattern. Starting with the ordinal numbers:
+
+- for each =n= in =1..=
+  - when =n= is odd
+    - start at =( (1-n)/2, (1-n)/2 )=
+      - for each =n'= in =0..(n-1)= do =( (1-n)/2, (1-n)/2+n')=
+    - start at =( (1-n)/2+n, (1-n)/2 )=
+      - for each =n'= in =0..(n-1)= do =( (1-n)/2+n, (1-n)/2+n')=
+  - when n is even
+    - start at =(n/2, n/2)=
+      - for each =n`= in =0..n= do =(n/2, n/2-n')=
+    - start at =(n/2, n/-2)=
+      - for each =n`= in =0..n= do =(n/2-n', n/-2)=
+
+That would actually be fun to do it this way, but it seems like it would be more work than tracking state
+
+What language would I pick? One that has nice iterables I guess. Have I done a typescript one lately
+
+Lets first of all enable a good typescript mode
+
+#+begin_src emacs-lisp :results silent
+  (create-ob-npx :name "ob-typescript"
+                 :language "typescript"
+                 :npx-arguments "ts-node"
+                 :file-extension ".ts")
+  (add-to-list 'org-babel-tangle-lang-exts '("typescript" . "ts"))
+#+end_src
+#+begin_src typescript
+  const foo : string = "Hi there"
+  console.log(foo)
+#+end_src
+
+* Implementation
+#+begin_ai
+#+end_ai
+#+begin_src typescript 
+  type Coordinate = {
+      row: number,
+      col: number,
+  }
+
+  const ordinals = function * (): Iterable<number> {
+      for(let i=1; ; i+=1) yield i
+  }
+
+  const range = function * (min:number, max:number): Iterable<number> {
+      for(let n = min; n <= max; n+=1) yield n
+  }
+
+  const zip = function<T1, T2> * (seq1: Iterable<T1>, seq2: Iterable<T2>) {
+      const it1 = seq1[Symbol.iterator]()
+      const it2 = seq2[Symbol.iterator]()
+      while(true) {
+          const r1 = it1.next()
+          const r2 = it2.next()
+          if(r1.done || r2.done)
+              return
+          yield [r1.value, r2.value]
+      }
+  }
+
+  const take = function<T> * (count: number, seq: Iterable<T>) {
+      const it = seq[Symbol.iterator]()
+      for(const n of range(0, count)) {
+          const x = it.next()
+          if(x.done)
+              return
+          yield it.value
+      }
+  }
+
+  const spiral = function * (): Generator<Coordinate> {
+      let row = 0, col = 0
+      yield {row, col}
+      const sideSizes = ordinals()[Symbol.iterator]()
+      while(true) {
+          const sideSize = sideSizes.next()
+          // →
+          for(const n of range(0, n))
+              yield {row, col: (col+=1)}
+          // ↓
+          for(const n of range(0, n))
+              yield {row: {row+=1}, col}
+          const sideSize = sideSizes.next()
+          // ←
+          for(const n of range(0, n))
+              yield {row, col: (col-=1)}
+          // →
+          for(const n of range(0, n))
+              yield {row: {row-=1}, col}
+      }
+  }
+
+  console.log(Array.from(take(25, spiral())))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,30): error TS1005: '(' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,37): error TS1005: ')' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,47): error TS1005: ',' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,51): error TS1109: Expression expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,57): error TS1005: ';' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,71): error TS1005: ';' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(26,26): error TS1005: '(' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(26,34): error TS1005: ')' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(26,60): error TS1005: ',' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(27,11): error TS1005: ':' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,5): error TS1005: ',' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,8): error TS1005: ':' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,9): error TS1359: Identifier expected. 'const' is a reserved word that cannot be used here.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,15): error TS1005: ',' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,17): error TS1005: ',' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,20): error TS1005: ',' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,25): error TS1005: ',' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,35): error TS1005: ';' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(34,1): error TS1128: Declaration or statement expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(47,29): error TS1005: ',' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(47,32): error TS1005: ':' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(54,29): error TS1005: ',' expected.
+../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(54,32): error TS1005: ':' expected.
+#+end_example
+
