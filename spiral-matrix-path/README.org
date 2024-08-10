@@ -1,4 +1,7 @@
-This is [this leetcode problem](https://leetcode.com/problems/spiral-matrix-iii/description/) from [Underdog Devs](https://underdog-devs.slack.com/archives/C02FFHZT200/p1723032739134259)
+#+OPTIONS: toc:nil
+#+OPTIONS: html-postamble:nil
+
+This is [[https://leetcode.com/problems/spiral-matrix-iii/description/][this leetcode problem]] from [[https://underdog-devs.slack.com/archives/C02FFHZT200/p1723032739134259][Underdog Devs]]
 
 * Problem Statement
 You start at the cell ~(rStart, cStart)~ of an rows x cols grid facing east. The northwest corner is at the first row and column in the grid, and the southeast corner is at the last row and column.
@@ -139,35 +142,8 @@ oh ok, that gives me a good amount to go on
 :PROPERTIES:
 :header-args:kotlin: :noweb strip-export :exports both
 :END:
-#+begin_ai
-Using kotlin, what would be a good structure to represent coordinates of an integer row and a column. It should be something with minimal syntax that can be used with destructuring
 
-[AI]: In Kotlin, a good way to represent coordinates using an integer row and a column would be to create a simple data class. Data classes in Kotlin provide a concise syntax and allow for easy destructuring. Here’s an example of how you could define such a class:
-
-```kotlin
-data class Coordinates(val row: Int, val column: Int)
-```
-
-You can use this `Coordinates` class in your code with destructuring like this:
-
-```kotlin
-fun main() {
-    val coord = Coordinates(3, 5)
-
-    // Destructuring the coordinates
-    val (row, column) = coord
-
-    println("Row: $row, Column: $column") // Output: Row: 3, Column: 5
-}
-```
-
-With this structure:
-- You have a clear and concise definition of the coordinate representation.
-- The `data class` automatically provides useful methods such as `toString()`, `equals()`, and `hashCode()`.
-- The destructuring feature allows you to easily unpack the properties of the `Coordinates` object into separate variables.
-
-[ME]:
-#+end_ai
+Ok, now just coding it up while having ChatGPT help me with syntax (I'm actually typing everything, not copy-pasting to build up some muscle memory)
 
 #+name: coordinates-and-spiral
 #+begin_src kotlin :eval no
@@ -204,6 +180,7 @@ With this structure:
 #+end_src
 
 test it
+
 #+begin_src kotlin
   <<coordinates-and-spiral>>
   "\n"+spiral().take(15).map{ "[${it.row}, ${it.column}]"}.joinToString("\n")
