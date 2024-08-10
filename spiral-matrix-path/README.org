@@ -128,7 +128,11 @@ Oh ok, so what do generators look like?
 
 oh ok, that gives me a good amount to go on
 
+
 * Implementation
+:PROPERTIES:
+:header-args:kotlin: :noweb strip-export
+:END:
 #+begin_ai
 Using kotlin, what would be a good structure to represent coordinates of an integer row and a column. It should be something with minimal syntax that can be used with destructuring
 
@@ -160,7 +164,7 @@ With this structure:
 #+end_ai
 
 #+name: coordinates-and-spiral
-#+begin_src kotlin
+#+begin_src kotlin :eval no
   data class Coordinates(val row: Int, val column: Int)
 
 
@@ -191,28 +195,33 @@ With this structure:
               yield(Coordinates(--row, col))
       }
   }
-
-  spiral().take(15).toList().joinToString("\n")
-
 #+end_src
 
-#+RESULTS: coordinates-and-spiral
+test it
+#+begin_src kotlin
+  <<coordinates-and-spiral>>
+  "\n"+spiral().take(15).map{ "[${it.row}, ${it.column}]"}.joinToString("\n")
+#+end_src
+
+#+RESULTS:
 #+begin_example
-res40: kotlin.String = Coordinates(row=0, column=0)
-Coordinates(row=0, column=1)
-Coordinates(row=1, column=1)
-Coordinates(row=1, column=0)
-Coordinates(row=1, column=-1)
-Coordinates(row=0, column=-1)
-Coordinates(row=-1, column=-1)
-Coordinates(row=-1, column=0)
-Coordinates(row=-1, column=1)
-Coordinates(row=-1, column=2)
-Coordinates(row=0, column=2)
-Coordinates(row=1, column=2)
-Coordinates(row=2, column=2)
-Coordinates(row=2, column=1)
-Coordinates(row=2, column=0)
-res41: kotlin.String = >>> 
+res47: kotlin.String = 
+[0, 0]
+[0, 1]
+[1, 1]
+[1, 0]
+[1, -1]
+[0, -1]
+[-1, -1]
+[-1, 0]
+[-1, 1]
+[-1, 2]
+[0, 2]
+[1, 2]
+[2, 2]
+[2, 1]
+[2, 0]
+res48: kotlin.String = >>> 
 #+end_example
 
+Yes, that looks right.
