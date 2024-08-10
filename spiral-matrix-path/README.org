@@ -99,110 +99,120 @@ ok, so I think I can figure out the pattern. Starting with the ordinal numbers:
 
 That would actually be fun to do it this way, but it seems like it would be more work than tracking state
 
-What language would I pick? One that has nice iterables I guess. Have I done a typescript one lately
+What language would I pick? One that has nice iterables I guess. You know, I've been talking to a company that's heavily java lately, and though I can't bring myself to actually do java, I've never done Kotlin and that should be fun
 
-Lets first of all enable a good typescript mode
+** Install Kotlin
+Install with sdkman src_shell[:results silent]{"sdk install kotlin"}
 
-#+begin_src emacs-lisp :results silent
-  (create-ob-npx :name "ob-typescript"
-                 :language "typescript"
-                 :npx-arguments "ts-node"
-                 :file-extension ".ts")
-  (add-to-list 'org-babel-tangle-lang-exts '("typescript" . "ts"))
-#+end_src
-#+begin_src typescript
-  const foo : string = "Hi there"
-  console.log(foo)
-#+end_src
+I also need to install [[https://github.com/zweifisch/ob-kotlin][ob-kotlin]] if I want to work in the org document then src_emacs-lisp[]{(require 'ob-kotlin)} {{{results(=ob-kotlin=)}}}
 
-* Implementation
-#+begin_ai
-#+end_ai
-#+begin_src typescript 
-  type Coordinate = {
-      row: number,
-      col: number,
-  }
+#+BEGIN_SRC kotlin
+  (1..100).filter {it % 19 == 0}.reduce {a,b -> a + b}
+#+END_SRC
 
-  const ordinals = function * (): Iterable<number> {
-      for(let i=1; ; i+=1) yield i
-  }
+#+RESULTS:
+: res14: kotlin.Int = 285
+: res15: kotlin.String = >>>
 
-  const range = function * (min:number, max:number): Iterable<number> {
-      for(let n = min; n <= max; n+=1) yield n
-  }
+Oh ok, so what do generators look like?
 
-  const zip = function<T1, T2> * (seq1: Iterable<T1>, seq2: Iterable<T2>) {
-      const it1 = seq1[Symbol.iterator]()
-      const it2 = seq2[Symbol.iterator]()
-      while(true) {
-          const r1 = it1.next()
-          const r2 = it2.next()
-          if(r1.done || r2.done)
-              return
-          yield [r1.value, r2.value]
-      }
-  }
 
-  const take = function<T> * (count: number, seq: Iterable<T>) {
-      const it = seq[Symbol.iterator]()
-      for(const n of range(0, count)) {
-          const x = it.next()
-          if(x.done)
-              return
-          yield it.value
-      }
-  }
-
-  const spiral = function * (): Generator<Coordinate> {
-      let row = 0, col = 0
-      yield {row, col}
-      const sideSizes = ordinals()[Symbol.iterator]()
-      while(true) {
-          const sideSize = sideSizes.next()
-          // →
-          for(const n of range(0, n))
-              yield {row, col: (col+=1)}
-          // ↓
-          for(const n of range(0, n))
-              yield {row: {row+=1}, col}
-          const sideSize = sideSizes.next()
-          // ←
-          for(const n of range(0, n))
-              yield {row, col: (col-=1)}
-          // →
-          for(const n of range(0, n))
-              yield {row: {row-=1}, col}
-      }
-  }
-
-  console.log(Array.from(take(25, spiral())))
+#+begin_src kotlin
+  val infiniteCounter = generateSequence(1) { it + 1 }
+  infiniteCounter.take(5).toList()
 #+end_src
 
 #+RESULTS:
+: res22: kotlin.collections.List<kotlin.Int> = [1, 2, 3, 4, 5]
+: res23: kotlin.String = >>> 
+
+oh ok, that gives me a good amount to go on
+
+* Implementation
+#+begin_ai
+Using kotlin, what would be a good structure to represent coordinates of an integer row and a column. It should be something with minimal syntax that can be used with destructuring
+
+[AI]: In Kotlin, a good way to represent coordinates using an integer row and a column would be to create a simple data class. Data classes in Kotlin provide a concise syntax and allow for easy destructuring. Here’s an example of how you could define such a class:
+
+```kotlin
+data class Coordinates(val row: Int, val column: Int)
+```
+
+You can use this `Coordinates` class in your code with destructuring like this:
+
+```kotlin
+fun main() {
+    val coord = Coordinates(3, 5)
+
+    // Destructuring the coordinates
+    val (row, column) = coord
+
+    println("Row: $row, Column: $column") // Output: Row: 3, Column: 5
+}
+```
+
+With this structure:
+- You have a clear and concise definition of the coordinate representation.
+- The `data class` automatically provides useful methods such as `toString()`, `equals()`, and `hashCode()`.
+- The destructuring feature allows you to easily unpack the properties of the `Coordinates` object into separate variables.
+
+[ME]: 
+#+end_ai
+
+#+name: coordinates-and-spiral
+#+begin_src kotlin
+  data class Coordinates(val row: Int, val column: Int)
+
+
+  fun spiral(): Sequence<Coordinates> = sequence {
+      var row = 0
+      var col = 0
+
+      yield(Coordinates(row, col))
+
+      val ordinals = generateSequence(1) { it + 1}
+      val sideSizes = ordinals.iterator()
+
+      while (true) {
+          var sideSize = sideSizes.next()
+          // →
+          for (n in 0 until sideSize)
+              yield(Coordinates(row, ++col))
+          // ↓
+          for (n in 0 until sideSize)
+              yield(Coordinates(++row, col))
+
+          var nextSideSize = sideSizes.next()
+          // ←
+          for (n in 0 until nextSideSize)
+              yield(Coordinates(row, --col))
+          // ↑
+          for (n in 0 until nextSideSize)
+              yield(Coordinates(--row, col))
+      }
+  }
+
+  spiral().take(15).toList().joinToString("\n")
+
+#+end_src
+
+#+RESULTS: coordinates-and-spiral
 #+begin_example
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,30): error TS1005: '(' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,37): error TS1005: ')' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,47): error TS1005: ',' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,51): error TS1109: Expression expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,57): error TS1005: ';' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(14,71): error TS1005: ';' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(26,26): error TS1005: '(' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(26,34): error TS1005: ')' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(26,60): error TS1005: ',' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(27,11): error TS1005: ':' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,5): error TS1005: ',' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,8): error TS1005: ':' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,9): error TS1359: Identifier expected. 'const' is a reserved word that cannot be used here.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,15): error TS1005: ',' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,17): error TS1005: ',' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,20): error TS1005: ',' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,25): error TS1005: ',' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(28,35): error TS1005: ';' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(34,1): error TS1128: Declaration or statement expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(47,29): error TS1005: ',' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(47,32): error TS1005: ':' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(54,29): error TS1005: ',' expected.
-../../../../../var/folders/4n/84d11f0n5h7d_1rfml8k_jr40000gn/T/babel-iggbad/ts-src-JMXFFv.ts(54,32): error TS1005: ':' expected.
+res40: kotlin.String = Coordinates(row=0, column=0)
+Coordinates(row=0, column=1)
+Coordinates(row=1, column=1)
+Coordinates(row=1, column=0)
+Coordinates(row=1, column=-1)
+Coordinates(row=0, column=-1)
+Coordinates(row=-1, column=-1)
+Coordinates(row=-1, column=0)
+Coordinates(row=-1, column=1)
+Coordinates(row=-1, column=2)
+Coordinates(row=0, column=2)
+Coordinates(row=1, column=2)
+Coordinates(row=2, column=2)
+Coordinates(row=2, column=1)
+Coordinates(row=2, column=0)
+res41: kotlin.String = >>> 
 #+end_example
 
