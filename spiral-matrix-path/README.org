@@ -124,7 +124,7 @@ Oh ok, so what do generators look like?
 
 #+RESULTS:
 : res22: kotlin.collections.List<kotlin.Int> = [1, 2, 3, 4, 5]
-: res23: kotlin.String = >>> 
+: res23: kotlin.String = >>>
 
 oh ok, that gives me a good amount to go on
 
@@ -160,7 +160,7 @@ With this structure:
 - The `data class` automatically provides useful methods such as `toString()`, `equals()`, and `hashCode()`.
 - The destructuring feature allows you to easily unpack the properties of the `Coordinates` object into separate variables.
 
-[ME]: 
+[ME]:
 #+end_ai
 
 #+name: coordinates-and-spiral
@@ -205,7 +205,7 @@ test it
 
 #+RESULTS:
 #+begin_example
-res47: kotlin.String = 
+res0: kotlin.String =
 [0, 0]
 [0, 1]
 [1, 1]
@@ -221,7 +221,114 @@ res47: kotlin.String =
 [2, 2]
 [2, 1]
 [2, 0]
-res48: kotlin.String = >>> 
+res1: kotlin.String = >>>
 #+end_example
 
+
+
+
 Yes, that looks right.
+
+So now we're going to want to do the rest of this. translate and filter, then keep drawing from the sequence until we have all our squares filled
+
+#+name: grid-in-spiral-order
+#+begin_src kotlin :eval no
+  var spiralCoordinates = spiral().map{ Coordinates(it.row+rStart, it.column+cStart)}
+  var onGridSpiral = spiralCoordinates.filter { it.row in 0..(rows-1) && it.column in 0..(columns-1) }
+  var gridInSpiralOrder = onGridSpiral.take(rows*columns)
+#+end_src
+
+And to view output output, do this
+#+begin_src kotlin
+#+end_src
+#+name: all-together
+#+begin_src kotlin
+  <<coordinates-and-spiral>>
+  <<grid-in-spiral-order>>
+  "\n"+gridInSpiralOrder.map{ "[${it.row}, ${it.column}]"}.joinToString("\n")
+#+end_src
+
+Lets see it with values from example 1
+
+#+begin_src kotlin
+  var rows = 1
+  var columns = 4
+  var rStart = 0
+  var cStart = 0
+  <<all-together>>
+#+end_src
+
+#+RESULTS:
+: res0: kotlin.String = 
+: [0, 0]
+: [0, 1]
+: [0, 2]
+: [0, 3]
+: res1: kotlin.String = >>> 
+
+
+That's right, what if we started in column 2?
+
+#+begin_src kotlin
+  var rows = 1
+  var columns = 4
+  var rStart = 0
+  var cStart = 2
+  <<all-together>>
+#+end_src
+
+#+RESULTS:
+: res2: kotlin.String = 
+: [0, 2]
+: [0, 3]
+: [0, 1]
+: [0, 0]
+: res3: kotlin.String = >>> 
+
+Oh that's cool. And the right answer. Lets see it with Example 2
+
+#+begin_src kotlin
+  var rows = 5
+  var columns = 6
+  var rStart = 1
+  var cStart = 4
+  <<all-together>>
+#+end_src
+
+#+RESULTS:
+#+begin_example
+res4: kotlin.String = 
+[1, 4]
+[1, 5]
+[2, 5]
+[2, 4]
+[2, 3]
+[1, 3]
+[0, 3]
+[0, 4]
+[0, 5]
+[3, 5]
+[3, 4]
+[3, 3]
+[3, 2]
+[2, 2]
+[1, 2]
+[0, 2]
+[4, 5]
+[4, 4]
+[4, 3]
+[4, 2]
+[4, 1]
+[3, 1]
+[2, 1]
+[1, 1]
+[0, 1]
+[4, 0]
+[3, 0]
+[2, 0]
+[1, 0]
+[0, 0]
+res5: kotlin.String = >>> 
+#+end_example
+
+Why yes. That's the exactly same answer!
