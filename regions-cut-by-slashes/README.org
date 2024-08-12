@@ -1,0 +1,55 @@
+This is a [[https://leetcode.com/problems/regions-cut-by-slashes/description/][Leetecode problem]] posted on [[https://underdog-devs.slack.com/archives/C02FFHZT200/p1723305799756219][UnderdogDevs Slack]]
+
+* Problem Statement
+An =n x n= grid is composed of =1 x 1= squares where each =1 x 1= square consists of a ='/'=, ='\'=, or blank space =' '=. These characters divide the square into contiguous regions.
+
+Given the grid grid represented as a string array, return the number of regions.
+
+Note that backslash characters are escaped, so a ='\'= is represented as ='\\'=.
+
+** Example 1:
+- Input ::
+#+begin_src js :eval no :exports code
+  [ " /" ,
+    "/ " ]
+#+end_src
+- Output :: 2. One region for top left and another bottom right
+** Example 1:
+- Input ::
+#+begin_src js :eval no :exports code
+  [ " /" ,
+    "  " ]
+#+end_src
+- Output :: 1. One region wraps around the slash
+
+** Example 3:
+- Input ::
+#+begin_src java :eval no :exports code
+  [ "/\" ,
+    "\/" ]
+#+end_src
+- Output :: 5. One region inmiddle and another at each corner
+
+** Constraints:
+
+- ~n == grid.length == grid[i].length~
+- ~1 <= n <= 30~
+- ~grid[i][j] is either '/', '\', or ' '.~
+
+* Brainstorming
+
+So...this is a roblem about connectivity. Basically a "how many graphs do we have here" problem. A given cell (1x1 square) is actually one or two two nodes in our graph.
+- If =" "=
+  - A single Node connected in every direction
+- If ="/"=
+  - NodeA (the top) will be connected left and upward
+  - NodeB will be connected right and downward
+- If ="\"=
+  - NodeA (the top) will be connected right and upward
+  - NodeB will be connected left and downward
+
+Where exactly it will be connected in each direction is interesting since "left" could be either the single Node, NodeA, or NodeB depending on what is going on in that cell. it could also be no connection at all if near a boundary.
+
+From there, once you have the graphs built out, its a much simpler problem of just visiting each node and counting.
+
+One thing to note is that the contraints are really pretty good here. At worst we have ~30x30=900~ cells, which is at worst ~1800~ nodes. Even if we do something dumb and scan the graph once for each node =O(n^2)= that's really only 3.24 million. Easily done on even a low power computer.
