@@ -3,6 +3,8 @@
 
 This is a [[https://leetcode.com/problems/regions-cut-by-slashes/description/][Leetecode problem]] posted on [[https://underdog-devs.slack.com/archives/C02FFHZT200/p1723305799756219][UnderdogDevs Slack]]
 
+To view the solution directly as a Kotlin file [[./regions-cut-by-slashes.kts][see here]].
+
 * Problem Statement
 An =n x n= grid is composed of =1 x 1= squares where each =1 x 1= square consists of a ='/'=, ='\'=, or blank space =' '=. These characters divide the square into contiguous regions.
 
@@ -335,7 +337,7 @@ Putting it all together
 : 1
 : res90: kotlin.String = >>>
 
-#+begin_src kotlin
+#+begin_src kotlin :tangle regions-cut-by-slashes.kts
   <<all-together>>
   println(countSlashDelineatedRegions(arrayOf("/\\",
                                               "\\/")))

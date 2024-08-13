@@ -1,5 +1,7 @@
 This is a [Leetecode problem](https://leetcode.com/problems/regions-cut-by-slashes/description/) posted on [UnderdogDevs Slack](https://underdog-devs.slack.com/archives/C02FFHZT200/p1723305799756219)
 
+To view the solution directly as a Kotlin file [see here](./regions-cut-by-slashes.kts).
+
 
 # Problem Statement
 
