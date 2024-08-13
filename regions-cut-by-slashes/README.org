@@ -41,7 +41,7 @@ Note that backslash characters are escaped, so a ='\'= is represented as ='\\'=.
 
 * Brainstorming
 
-So...this is a roblem about connectivity. Basically a "how many graphs do we have here" problem. A given cell (1x1 square) is actually one or two two nodes in our graph.
+So...this is a problem about connectivity. Basically a "how many graphs do we have here" problem. A given cell (1x1 square) is actually one or two two nodes in our graph.
 - If =" "=
   - A single Node connected in every direction
 - If ="/"=
@@ -63,6 +63,8 @@ One thing to note is that the contraints are really pretty good to us here. At w
 :END:
 
 While, I'm pretty sure this is unnecessary, where my mind goes to with the plan I laid out above is to doing some basic OO here. You have cells and those contain nodes. Nodes are interconnected to each other. Each cell can contain 1 or 2 nodes (although extensibility would be possible) and these nodes will interconnect
+
+Kotlin works well for this.
 
 Note that for the purposes of our graph-separation, the cells don't actually matter, they are a tool for constructing and connecting nodes, they are not integral to our structure beyond that
 
@@ -118,6 +120,7 @@ By knowing the direction, each node can know whether it should connect and how
   - → NENode :: no
   - → SENode :: no
   - → SWNode :: yes
+  - ...
 - NWNode
   - → no to all
   - ← FullNode :: yes
@@ -125,6 +128,8 @@ By knowing the direction, each node can know whether it should connect and how
   - ← NENode :: yes
   - ← SENode :: yes
   - ← SWNode :: no
+  - ...
+- ...
 
 So basically each node can "reject" to make a connection. This implies a double-dispatch sort of thing might be a good idea
 
@@ -256,7 +261,7 @@ So now lets run that and see our nodes
 
 #+RESULTS:
 : [FullNode(#c=2), NodeNW(#c=1), NodeSE(#c=1), NodeNW(#c=1), NodeSE(#c=1), FullNode(#c=2)]
-: res66: kotlin.String = >>> 
+: res66: kotlin.String = >>>
 
 
 #+begin_src kotlin
@@ -270,8 +275,86 @@ So now lets run that and see our nodes
 
 #+RESULTS:
 : [NodeNE(#c=1), NodeSW(#c=1), FullNode(#c=2), FullNode(#c=2), FullNode(#c=2)]
-: res68: kotlin.String = >>> 
+: res68: kotlin.String = >>>
 
 
 
-Ok, this looks right. 
+Ok, this looks right. Now we have only to count the number of fully interconnected nodes. We do that by navigating from each node to finding all navigable ones from there. The amount of times we *start* on a node that has not been visited is the amount of non-interconnected graphs we have. I like using a generator as a sort of "multipurpose" version of this operation. It will yield back a node for each graph as in a bidirectionally-connected structure like this, any node in a graph can be considered the "root".
+
+#+name: define-get-non-interconnected-graphs
+#+begin_src kotlin
+  fun getNonInterconnectedGraphs(nodes: Iterable<Node>) : Sequence<Node> = sequence {
+      var visited: MutableSet<Node> = mutableSetOf()
+
+      fun visit(node: Node) {
+          if(visited.contains(node))
+              return
+          visited.add(node)
+          for(n in node.children.asIterable())
+              visit(n)
+      }
+      for(n in nodes) {
+          if(!visited.contains(n))
+              yield(n)
+          visit(n)
+      }
+  }
+#+end_src
+
+Putting it all together
+
+#+name: all-together
+#+begin_src kotlin
+  <<define-direction>>
+  <<define-node-types>>
+  <<define-cell-type>>
+  <<define-getNodes>>
+  <<define-get-non-interconnected-graphs>>
+  fun countSlashDelineatedRegions(input: Array<String>): Int {
+      return getNonInterconnectedGraphs(getNodes(input)).toList().size
+  }
+#+end_src
+
+#+begin_src kotlin
+  <<all-together>>
+  println(countSlashDelineatedRegions(arrayOf(" /",
+                                              "/ ")))
+#+end_src
+
+#+RESULTS:
+: 2
+: res88: kotlin.String = >>>
+
+#+begin_src kotlin
+  <<all-together>>
+  println(countSlashDelineatedRegions(arrayOf(" /",
+                                              "  ")))
+#+end_src
+
+#+RESULTS:
+: 1
+: res90: kotlin.String = >>>
+
+#+begin_src kotlin
+  <<all-together>>
+  println(countSlashDelineatedRegions(arrayOf("/\\",
+                                              "\\/")))
+#+end_src
+
+#+RESULTS:
+: 5
+: res92: kotlin.String = >>>
+
+#+begin_src kotlin
+  <<all-together>>
+  println(countSlashDelineatedRegions(arrayOf("\\/",
+                                              "/\\")))
+#+end_src
+
+#+RESULTS:
+: 4
+: res94: kotlin.String = >>>
+
+That's right!
+
+A future possible evolution would be to simplify ~Node~ futher. The subclasses are doupled to the concept of cells and children do not need to be mutable beyond the invocation of ~getNodes~. I would potentially consider creating a simplified `GraphNode` type and mapping each of the returned nodes to that.
