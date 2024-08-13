@@ -1,3 +1,6 @@
+#+OPTIONS: toc:nil
+#+OPTIONS: html-postamble:nil
+
 This is a [[https://leetcode.com/problems/regions-cut-by-slashes/description/][Leetecode problem]] posted on [[https://underdog-devs.slack.com/archives/C02FFHZT200/p1723305799756219][UnderdogDevs Slack]]
 
 * Problem Statement
@@ -42,14 +45,233 @@ So...this is a roblem about connectivity. Basically a "how many graphs do we hav
 - If =" "=
   - A single Node connected in every direction
 - If ="/"=
-  - NodeA (the top) will be connected left and upward
-  - NodeB will be connected right and downward
+  - NodeNW (the top) will be connected left and upward
+  - NodeSE will be connected right and downward
 - If ="\"=
-  - NodeA (the top) will be connected right and upward
-  - NodeB will be connected left and downward
+  - NodeNE (the top) will be connected right and upward
+  - NodeSW will be connected left and downward
 
-Where exactly it will be connected in each direction is interesting since "left" could be either the single Node, NodeA, or NodeB depending on what is going on in that cell. it could also be no connection at all if near a boundary.
+Where exactly it will be connected in each direction is interesting since "left" could be either the single Node, NodeA, or NodeB depending on what is going on in that cell. it could also be no connection at all if near a boundary. I think it might be smart to do this in two asses, one to set the nodes in each cell and another to actually connect the nodes.
 
 From there, once you have the graphs built out, its a much simpler problem of just visiting each node and counting.
 
-One thing to note is that the contraints are really pretty good here. At worst we have ~30x30=900~ cells, which is at worst ~1800~ nodes. Even if we do something dumb and scan the graph once for each node =O(n^2)= that's really only 3.24 million. Easily done on even a low power computer.
+One thing to note is that the contraints are really pretty good to us here. At worst we have ~30x30=900~ cells, which is at worst ~1800~ nodes. Even if we do something dumb and scan the graph once for each node =O(n^2)= that's really only 3.24 million. Easily done on even a low power computer.
+
+* Implementation
+:PROPERTIES:
+:header-args:kotlin: :noweb strip-export :exports both
+:END:
+
+While, I'm pretty sure this is unnecessary, where my mind goes to with the plan I laid out above is to doing some basic OO here. You have cells and those contain nodes. Nodes are interconnected to each other. Each cell can contain 1 or 2 nodes (although extensibility would be possible) and these nodes will interconnect
+
+Note that for the purposes of our graph-separation, the cells don't actually matter, they are a tool for constructing and connecting nodes, they are not integral to our structure beyond that
+
+#+begin_src kotlin
+  val input = arrayOf(" /",
+                      "/ ")
+
+  abstract class Node {
+      val children: MutableSet<Node> = mutableSetOf()
+  }
+  class FullNode : Node() {}
+  class NodeNW : Node() {}
+  class NodeNE : Node() {}
+  class NodeSW : Node() {}
+  class NodeSE : Node() {}
+
+  class Cell(val type: Char) {
+      val nodes: Array<Node> = when (type) {
+          ' ' -> arrayOf(FullNode())
+          '/' -> arrayOf(NodeNW(), NodeSE())
+          '\\' -> arrayOf(NodeNE(), NodeSW())
+          else -> throw IllegalArgumentException("Invalid cell type: $type")
+      }
+      override fun toString(): String {
+          return "Cell($type, n=${nodes.size})"
+      }
+  }
+
+  val cellGrid = input.map { row -> row.map { char ->
+                                        Cell(char)
+                                    }.toTypedArray()}.toTypedArray()
+  "\n"+cellGrid.map {r -> r.map {c -> c.toString() }.joinToString("")}.joinToString("\n")
+#+end_src
+
+#+RESULTS:
+: res53: kotlin.String =
+: Cell( , n=1)Cell(/, n=2)
+: Cell(/, n=2)Cell( , n=1)
+: res54: kotlin.String = >>>
+
+This works, now we need to interconnect our nodes. We'll use cardinal directions for communicating ho
+
+#+name: define-direction
+#+begin_src kotlin
+  enum class Direction { NORTH, EAST, SOUTH, WEST }
+#+end_src
+
+By knowing the direction, each node can know whether it should connect and how
+
+- FullNode
+  - → FullNode :: yes
+  - → NWNode :: yes
+  - → NENode :: no
+  - → SENode :: no
+  - → SWNode :: yes
+- NWNode
+  - → no to all
+  - ← FullNode :: yes
+  - ← NWNode :: no
+  - ← NENode :: yes
+  - ← SENode :: yes
+  - ← SWNode :: no
+
+So basically each node can "reject" to make a connection. This implies a double-dispatch sort of thing might be a good idea
+
+
+#+name: define-node-types
+#+begin_src kotlin
+  abstract class Node {
+      val children: MutableSet<Node> = mutableSetOf()
+      abstract fun connectTo(node: Node, direction: Direction)
+      abstract fun connectFrom(node: Node, direction: Direction) //from node we were connecting in direction
+      override fun toString(): String {
+          return "${this::class.simpleName}(#c=${children.size})"
+      }
+  }
+
+
+  class FullNode : Node() {
+      override fun connectTo(node: Node, direction: Direction) {
+          node.connectFrom(this, direction)
+      }
+      override fun connectFrom(node: Node, direction: Direction) {
+          node.children.add(this)
+      }
+
+  }
+
+  class NodeNW : Node() {
+      override fun connectTo(node: Node, direction: Direction) {
+          if (direction == Direction.NORTH || direction == Direction.WEST)
+            node.connectFrom(this, direction)
+      }
+      override fun connectFrom(node: Node, direction: Direction) {
+          if (direction == Direction.SOUTH || direction == Direction.EAST)
+            node.children.add(this)
+      }
+  }
+
+  class NodeNE : Node() {
+      override fun connectTo(node: Node, direction: Direction) {
+          if (direction == Direction.NORTH || direction == Direction.EAST)
+            node.connectFrom(this, direction)
+      }
+      override fun connectFrom(node: Node, direction: Direction) {
+          if (direction == Direction.SOUTH || direction == Direction.WEST)
+            node.children.add(this)
+      }
+  }
+
+  class NodeSW : Node() {
+      override fun connectTo(node: Node, direction: Direction) {
+          if (direction == Direction.SOUTH || direction == Direction.WEST)
+            node.connectFrom(this, direction)
+      }
+      override fun connectFrom(node: Node, direction: Direction) {
+          if (direction == Direction.NORTH || direction == Direction.EAST)
+            node.children.add(this)
+      }
+  }
+
+  class NodeSE : Node() {
+      override fun connectTo(node: Node, direction: Direction) {
+          if (direction == Direction.SOUTH || direction == Direction.EAST)
+            node.connectFrom(this, direction)
+      }
+      override fun connectFrom(node: Node, direction: Direction) {
+          if (direction == Direction.NORTH || direction == Direction.WEST)
+            node.children.add(this)
+      }
+  }
+#+end_src
+
+A Cell can also `connectTo` other cells, it does this by fully trying to interconnect is nodes with the other's
+
+#+name: define-cell-type
+#+begin_src kotlin :results silent
+  class Cell(val type: Char) {
+      val nodes: Array<Node> = when (type) {
+          ' ' -> arrayOf(FullNode())
+          '/' -> arrayOf(NodeNW(), NodeSE())
+          '\\' -> arrayOf(NodeNE(), NodeSW())
+          else -> throw IllegalArgumentException("Invalid cell type: $type")
+      }
+
+      fun connectTo(otherCell: Cell?, direction: Direction) {
+          if (otherCell == null) return
+          for (thisNode in nodes)
+              for (otherNode in otherCell.nodes)
+                  thisNode.connectTo(otherNode, direction)
+      }
+
+      override fun toString(): String {
+          return "Cell($type, n=${nodes.size})"
+      }
+  }
+#+end_src
+We then simply need to use cells to interconnect our nodes. Again, since Cells aren't actually integral to the graph structure, we use the cell structure, but really only care about the nodes this generates.
+
+#+name: define-getNodes
+#+begin_src kotlin
+  fun getNodes(input: Array<String>): Set<Node> {
+    val cellGrid = input.map { row -> row.map { char ->
+                                          Cell(char)
+                                      }.toTypedArray()}.toTypedArray()
+
+    for (r in cellGrid.indices) {
+        for (c in cellGrid[r].indices) {
+            val thisCell = cellGrid[r][c]
+            cellGrid.getOrNull(r - 1)?.getOrNull(c)?.let { thisCell.connectTo(it, Direction.NORTH) } // Up
+            cellGrid.getOrNull(r)?.getOrNull(c + 1)?.let { thisCell.connectTo(it, Direction.EAST) } // Right
+            cellGrid.getOrNull(r + 1)?.getOrNull(c)?.let { thisCell.connectTo(it, Direction.SOUTH) } // Down
+            cellGrid.getOrNull(r)?.getOrNull(c - 1)?.let { thisCell.connectTo(it, Direction.WEST) } // Left
+        }
+    }
+
+    return cellGrid.flatMap { it.asIterable() }.flatMap { it.nodes.asIterable() }.toSet()
+  }
+#+end_src
+
+So now lets run that and see our nodes
+
+#+begin_src kotlin
+  <<define-direction>>
+  <<define-node-types>>
+  <<define-cell-type>>
+  <<define-getNodes>>
+  println(getNodes(arrayOf(" /",
+                           "/ ")))
+#+end_src
+
+#+RESULTS:
+: [FullNode(#c=2), NodeNW(#c=1), NodeSE(#c=1), NodeNW(#c=1), NodeSE(#c=1), FullNode(#c=2)]
+: res66: kotlin.String = >>> 
+
+
+#+begin_src kotlin
+  <<define-direction>>
+  <<define-node-types>>
+  <<define-cell-type>>
+  <<define-getNodes>>
+  println(getNodes(arrayOf("\\ ",
+                           "  ")))
+#+end_src
+
+#+RESULTS:
+: [NodeNE(#c=1), NodeSW(#c=1), FullNode(#c=2), FullNode(#c=2), FullNode(#c=2)]
+: res68: kotlin.String = >>> 
+
+
+
+Ok, this looks right. 
