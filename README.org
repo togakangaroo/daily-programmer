@@ -25,4 +25,5 @@ What you find here, are not writeups of me solving these problems, they're the a
 - [[./maximum-ice-cream-bars][Maximum Ice Cream Bars]]
 - [[./number-of-nodes-with-same-label-in-subtree][Number of Nodes With Same Label in Subtree]]
 - [[./integer-to-english][Convert an Integer to English]]
-- [[./spiral-matrix-path][Matrix cells in spiral order]]
+- [[./spiral-matrix-path][Matrix Cells in Spiral Order]]
+- [[./regions-cut-by-slashes][Regions Cut by Slashes]]
