@@ -55,6 +55,7 @@ Since I want to share this with Job, let's do it in python since he knows python
 * Implementation in Python
 :PROPERTIES:
 :header-args: :noweb strip-export
+:header-args:python+: :exports both
 :END:
 
 So first, we're going to need the ability to follow the 1s around and accumulate individual islands

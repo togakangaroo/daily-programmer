@@ -79,6 +79,58 @@ Lets see if we can use that to get an island
     accumulate(example1, island, set(), (1, 1))
     return island
 
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+</tr>
+
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-right">1</td>
+</tr>
+
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+</tr>
+
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-right">3</td>
+</tr>
+
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-right">0</td>
+</tr>
+
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-right">2</td>
+</tr>
+
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">3</td>
+</tr>
+</tbody>
+</table>
+
 Yes! We can.
 
 Ok, so then lets figure out the islands
@@ -101,8 +153,12 @@ So that will yield back once for each island. Will it give us the right answers?
     
     return sum((1 for _ in get_islands(example1)))
 
+    1
+
     
     return sum((1 for _ in get_islands(example2)))
+
+    4
 
 Why yes! Yes it will.
 
