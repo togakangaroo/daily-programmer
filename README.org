@@ -27,3 +27,4 @@ What you find here, are not writeups of me solving these problems, they're the a
 - [[./integer-to-english][Convert an Integer to English]]
 - [[./spiral-matrix-path][Matrix Cells in Spiral Order]]
 - [[./regions-cut-by-slashes][Regions Cut by Slashes]]
+- [[./count-number-of-islands][Count Number of Islands]]
