@@ -1,3 +1,6 @@
+#+OPTIONS: toc:nil
+#+OPTIONS: html-postamble:nil
+
 This is a [[https://leetcode.com/problems/lemonade-change/description/][leetcode problem]] that was done in the [[https://underdog-devs.slack.com/archives/C02FFHZT200/p1723684246585919][UnderdogDevs slack]]
 
 * Problem Statement

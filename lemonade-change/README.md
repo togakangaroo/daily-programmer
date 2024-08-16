@@ -1,17 +1,5 @@
-
-# Table of Contents
-
-1.  [Problem Statement](#orged2bee2)
-    1.  [Example 1:](#org3154d70)
-    2.  [Example 2:](#orgfc9f328)
-    3.  [Constraints:](#org8833c88)
-2.  [Brainstorming](#orgc162afa)
-3.  [Implementation](#orge53d3b7)
-
 This is a [leetcode problem](https://leetcode.com/problems/lemonade-change/description/) that was done in the [UnderdogDevs slack](https://underdog-devs.slack.com/archives/C02FFHZT200/p1723684246585919)
 
-
-<a id="orged2bee2"></a>
 
 # Problem Statement
 
@@ -21,8 +9,6 @@ Note that you do not have any change in hand at first.
 
 Given an integer array bills where bills[i] is the bill the ith customer pays, return true if you can provide every customer with the correct change, or false otherwise.
 
-
-<a id="org3154d70"></a>
 
 ## Example 1:
 
@@ -34,8 +20,6 @@ Given an integer array bills where bills[i] is the bill the ith customer pays, r
     -   Since all customers got correct change, we output true.
 
 
-<a id="orgfc9f328"></a>
-
 ## Example 2:
 
 -   **Input:** `bills = [5,5,10,10,20]`
@@ -46,15 +30,11 @@ Given an integer array bills where bills[i] is the bill the ith customer pays, r
     -   Since not every customer received the correct change, the answer is false.
 
 
-<a id="org8833c88"></a>
-
 ## Constraints:
 
 -   `1 <= bills.length <= 10000`
 -   `bills[i]` is either `5, 10, or 20`.
 
-
-<a id="orgc162afa"></a>
 
 # Brainstorming
 
@@ -77,8 +57,6 @@ So does that mean that the actual bills you have can practically speaking matter
 
 I'm not convinced that the number of 10s or 20s matters, but the total number of 5s definitely does, and so does the size of the bank of course. If we simply track each of the 3 denominations separately that certainly works as well. Actually there is no way to give a 20 as change, so tracking them doesn't matter either
 
-
-<a id="orge53d3b7"></a>
 
 # Implementation
 
