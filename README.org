@@ -4,28 +4,28 @@ What you find here, are not writeups of me solving these problems, they're the a
 
 * Implementations
 
-- [[./sliding-puzzle][Sliding Puzzle]]
-- [[./roman-to-integer][Roman Numeral to Integer]]
-- [[./matrix-sum-of-region][Matrix Sum of Regions]]
-- [[./sum-consecutive-elements][Sum Consecutive Elements]]
-- [[./sentence-screen-fitting][Sentence Screen Fitting]]
-- [[./meeting-scheduler][Meeting Scheduler]]
-- [[./maze-generation][Maze Generation]]
-- [[./restore-ip-address][Restore IP Address]]
-- [[./gradient-blend][Gradient Blend]]
-- [[./get-directories][Get Directories]]
-- [[./order-analysis][Order Analysis]]
-- [[./missing-ranges][Missing Ranges]]
-- [[./generate-parentheses][Generate Parentheses]]
-- [[./self-crossing][Self Crossing]]
-- [[./sort-matrix-diagonally][Sort the Matrix Diagonally]]
-- [[./battleship-board][Battleship Board]]
-- [[./tic-tac-toe-game][Check Tic Tac Toe Winner]]
-- [[./island-perimeter][Calculate Island Perimeter]]
-- [[./maximum-ice-cream-bars][Maximum Ice Cream Bars]]
-- [[./number-of-nodes-with-same-label-in-subtree][Number of Nodes With Same Label in Subtree]]
-- [[./integer-to-english][Convert an Integer to English]]
-- [[./spiral-matrix-path][Matrix Cells in Spiral Order]]
-- [[./regions-cut-by-slashes][Regions Cut by Slashes]]
-- [[./count-number-of-islands][Count Number of Islands]]
-- [[./lemonade-change][Lemonade Change]]
+- [[./lemonade-change][Lemonade Change]] (in Emacs Lisp)
+- [[./count-number-of-islands][Count Number of Islands]] (in Python)
+- [[./regions-cut-by-slashes][Regions Cut by Slashes]] (in Kotlin)
+- [[./spiral-matrix-path][Matrix Cells in Spiral Order]] (in Kotlin)
+- [[./integer-to-english][Convert an Integer to English]] (in Ruby)
+- [[./number-of-nodes-with-same-label-in-subtree][Number of Nodes With Same Label in Subtree]] (in Typescript)
+- [[./maximum-ice-cream-bars][Maximum Ice Cream Bars]] (in Emacs Lisp)
+- [[./island-perimeter][Calculate Island Perimeter]] (in Racket implementing a custom DSL)
+- [[./tic-tac-toe-game][Check Tic Tac Toe Winner]] (in Python)
+- [[./battleship-board][Battleship Board]] (in Racket and Javascript)
+- [[./sort-matrix-diagonally][Sort the Matrix Diagonally]] (in Python)
+- [[./self-crossing][Self Crossing]] (in Racket)
+- [[./generate-parentheses][Generate Parentheses]] (in Racket and Javascript)
+- [[./missing-ranges][Missing Ranges]] (in Python, C#, two Rackets, and Javascript)
+- [[./order-analysis][Order Analysis]] (in Racket)
+- [[./get-directories][Get Directories]] (in Python)
+- [[./gradient-blend][Gradient Blend]] (in CSS and Javascript)
+- [[./restore-ip-address][Restore IP Address]] (in Javascript)
+- [[./maze-generation][Maze Generation]] (in Python)
+- [[./meeting-scheduler][Meeting Scheduler]] (in Javascript)
+- [[./sentence-screen-fitting][Sentence Screen Fitting]] (in Javascript)
+- [[./sum-consecutive-elements][Sum Consecutive Elements]] (in Python)
+- [[./matrix-sum-of-region][Matrix Sum of Regions]] (in Racket)
+- [[./roman-to-integer][Roman Numeral to Integer]] (in Ruby)
+- [[./sliding-puzzle][Sliding Puzzle]] (in Python)
