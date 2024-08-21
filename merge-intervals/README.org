@@ -1,0 +1,96 @@
+#+OPTIONS: toc:nil
+#+OPTIONS: html-postamble:nil
+
+This is a [[https://leetcode.com/problems/merge-intervals/description/][leetcode]] [[https://rands-leadership.slack.com/archives/CEX9Y74DB/p1724196987741039?thread_ts=1724195920.502929&cid=CEX9Y74DB][posted to]] the Rands Leadership Slack
+
+* Problem Statement
+Given an array of intervals where ~intervals[i] = [start[i], end[i]]~, merge all overlapping intervals, and return the shortest array possible representing the, non-overlapping intervals that cover all the intervals in the input.
+
+** Example 1
+
+  [1,3]*Input*:
+
+  ~intervls~
+
+  #+name: example-1/input/intervals
+  |  1 |  3 |
+  |  8 | 10 |
+  |  2 |  6 |
+  | 15 | 18 |
+
+  *Output*:
+
+  #+name: example-1/output
+  |  1 |  6 |
+  |  8 | 10 |
+  | 15 | 18 |
+
+  *Explanation*: Since intervals ~[1,3]~ and ~[2,6]~ overlap, merge them into ~[1,6]~.
+
+**   Example 2:
+
+  *Input*:
+  #+name: example-2/input/intervals
+  | 1 | 4 |
+  | 4 | 5 |
+
+  *Output*:
+  #+name: example-2/output
+  | 1 | 5 |
+
+  *Explanation*: Intervals ~[1,4]~ and ~[4,5]~ are considered overlapping.
+
+** Constraints
+
+- ~1 <= intervals.length <= 10^4~
+- ~intervals[i].length == 2~
+- ~0 <= start[i] <= end[i] <= 10^4~
+
+* Brainstorming
+
+Well first of all, the second half of the question is a red herring. If you've merged all overlapping intervals, then what remains is the smallest set of non-overlapping intervals that covers all
+
+So really this is just about merging intervals which is easy enough. First sort by start, then move through the list one at a time merging intervals until your each a gap between the current end and next next start
+
+* Implementation
+:PROPERTIES:
+:header-args: :noweb strip-export :exports both
+:END:
+
+** In Python
+
+#+name: python/merge-intervals
+#+begin_src python :var intervals=example-1/input/intervals
+  def merge_intervals(intervals):
+      sorted_by_start = iter(sorted(intervals, key=lambda t: t[0]))
+      current_start, current_end = next(sorted_by_start)
+
+      for next_start, next_end in sorted_by_start:
+          if current_end < next_start:
+              yield (current_start, current_end)
+              current_start, current_end = next_start, next_end
+          else:
+              current_end = next_end
+
+      yield (current_start, current_end)
+
+  return list(merge_intervals(intervals))
+#+end_src
+
+Run it on example-1
+
+#+call: python/merge-intervals(intervals=example-1/input/intervals)
+
+#+RESULTS:
+|  1 |  6 |
+|  8 | 10 |
+| 15 | 18 |
+
+Run it on example-2
+
+#+call: python/merge-intervals(intervals=example-2/input/intervals)
+
+#+RESULTS:
+| 1 | 5 |
+
+It works!
