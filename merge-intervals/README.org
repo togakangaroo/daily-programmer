@@ -54,7 +54,7 @@ So really this is just about merging intervals which is easy enough. First sort 
 
 * Implementation
 :PROPERTIES:
-:header-args: :noweb strip-export :exports both
+:header-args: :noweb strip-export :exports both :eval never-export
 :END:
 
 ** In Python
