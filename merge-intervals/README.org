@@ -69,7 +69,7 @@ So really this is just about merging intervals which is easy enough. First sort 
           if current_end < next_start:
               yield (current_start, current_end)
               current_start, current_end = next_start, next_end
-          else:
+          elif current_end < next_end:
               current_end = next_end
 
       yield (current_start, current_end)
@@ -94,3 +94,11 @@ Run it on example-2
 | 1 | 5 |
 
 It works!
+
+What about the edge case where an interval is fully contained ~[1,7] [2, 4]~?
+
+
+#+call: python/merge-intervals(intervals='((1 7) (2 4)))
+
+#+RESULTS:
+| 1 | 7 |
