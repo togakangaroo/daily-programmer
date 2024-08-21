@@ -12,7 +12,7 @@ Given an array of intervals where `intervals[i] = [start[i], end[i]]`, merge all
 
 `intervls`
 
-<table id="org1e6baac" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgfe8fc56" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -45,7 +45,7 @@ Given an array of intervals where `intervals[i] = [start[i], end[i]]`, merge all
 
 **Output**:
 
-<table id="org8750a0c" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org2dcd4f3" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -78,7 +78,7 @@ Given an array of intervals where `intervals[i] = [start[i], end[i]]`, merge all
 
 **Input**:
 
-<table id="org0364737" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org9c76d80" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -101,7 +101,7 @@ Given an array of intervals where `intervals[i] = [start[i], end[i]]`, merge all
 
 **Output**:
 
-<table id="orgc1a576b" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org1edd59e" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -147,7 +147,7 @@ So really this is just about merging intervals which is easy enough. First sort 
             if current_end < next_start:
                 yield (current_start, current_end)
                 current_start, current_end = next_start, next_end
-            else:
+            elif current_end < next_end:
                 current_end = next_end
     
         yield (current_start, current_end)
@@ -201,4 +201,22 @@ Run it on example-2
 </table>
 
 It works!
+
+What about the edge case where an interval is fully contained `[1,7] [2, 4]`?
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">7</td>
+</tr>
+</tbody>
+</table>
 
