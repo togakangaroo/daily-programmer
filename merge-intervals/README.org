@@ -102,3 +102,44 @@ What about the edge case where an interval is fully contained ~[1,7] [2, 4]~?
 
 #+RESULTS:
 | 1 | 7 |
+
+** In Emacs Lisp
+#+name: emacs-lisp/merge-intervals
+#+begin_src emacs-lisp :var intervals=example-1/input/intervals :lexical t
+  (require 'dash)
+  (cl-loop with sorted-intervals = (--sort (< (car it) (car other)) intervals)
+           with (current-start current-end) = (car sorted-intervals)
+           for (next-start next-end) in (cdr sorted-intervals)
+           if (< current-end next-start)
+           collect `(,current-start ,current-end) into res
+           and do (setq current-start next-start)
+           and do (setq current-end next-end)
+           else if (< current-end next-end)
+           do (setq current-end next-end)
+           finally return (append res `((,current-start ,current-end))))
+#+end_src
+
+
+
+#+call: emacs-lisp/merge-intervals(intervals=example-1/input/intervals)
+
+#+RESULTS:
+|  1 |  6 |
+|  8 | 10 |
+| 15 | 18 |
+
+Run it on example-2
+
+#+call: emacs-lisp/merge-intervals(intervals=example-2/input/intervals)
+
+#+RESULTS:
+| 1 | 5 |
+
+and now that edge case
+
+#+call: emacs-lisp/merge-intervals(intervals='((1 7) (2 4)))
+
+#+RESULTS:
+| 1 | 7 |
+
+Sweet! I love that loop facility macro, so fun!

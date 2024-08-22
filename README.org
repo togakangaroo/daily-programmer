@@ -4,7 +4,7 @@ What you find here, are not writeups of me solving these problems, they're the a
 
 * Implementations
 
-- [[./merge-intervals][Merge Intervals]] (in Python)
+- [[./merge-intervals][Merge Intervals]] (in Python, Emacs Lisp)
 - [[./lemonade-change][Lemonade Change]] (in Emacs Lisp)
 - [[./count-number-of-islands][Count Number of Islands]] (in Python)
 - [[./regions-cut-by-slashes][Regions Cut by Slashes]] (in Kotlin)
