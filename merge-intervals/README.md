@@ -8,11 +8,11 @@ Given an array of intervals where `intervals[i] = [start[i], end[i]]`, merge all
 
 ## Example 1
 
-[1,3]\*Input\*:
+**Input**:
 
 `intervls`
 
-<table id="orgfe8fc56" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orga641bb1" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -45,7 +45,7 @@ Given an array of intervals where `intervals[i] = [start[i], end[i]]`, merge all
 
 **Output**:
 
-<table id="org2dcd4f3" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org6b05732" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -78,7 +78,7 @@ Given an array of intervals where `intervals[i] = [start[i], end[i]]`, merge all
 
 **Input**:
 
-<table id="org9c76d80" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgc5d3304" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -101,7 +101,7 @@ Given an array of intervals where `intervals[i] = [start[i], end[i]]`, merge all
 
 **Output**:
 
-<table id="org1edd59e" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org7ad11ca" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -219,4 +219,83 @@ What about the edge case where an interval is fully contained `[1,7] [2, 4]`?
 </tr>
 </tbody>
 </table>
+
+
+## In Emacs Lisp
+
+    (require 'dash)
+    (cl-loop with sorted-intervals = (--sort (< (car it) (car other)) intervals)
+             with (current-start current-end) = (car sorted-intervals)
+             for (next-start next-end) in (cdr sorted-intervals)
+             if (< current-end next-start)
+             collect `(,current-start ,current-end) into res
+             and do (setq current-start next-start)
+             and do (setq current-end next-end)
+             else if (< current-end next-end)
+             do (setq current-end next-end)
+             finally return (append res `((,current-start ,current-end))))
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">6</td>
+</tr>
+
+<tr>
+<td class="org-right">8</td>
+<td class="org-right">10</td>
+</tr>
+
+<tr>
+<td class="org-right">15</td>
+<td class="org-right">18</td>
+</tr>
+</tbody>
+</table>
+
+Run it on example-2
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">5</td>
+</tr>
+</tbody>
+</table>
+
+and now that edge case
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">7</td>
+</tr>
+</tbody>
+</table>
+
+Sweet! I love that loop facility macro, so fun!
 
