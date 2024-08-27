@@ -1,0 +1,138 @@
+#+OPTIONS: toc:nil
+#+OPTIONS: html-postamble:nil
+#+title: N-ary Tree Postorder Traversal
+
+This is a [[https://leetcode.com/problems/n-ary-tree-postorder-traversal/description/][leetcode]] [[https://underdog-devs.slack.com/archives/C02FFHZT200/p1724669638086089][posted to]] underdog devs
+* Problem Statement
+Given the root of an n-ary tree, return the postorder traversal of its nodes' values.
+
+Nary-Tree input serialization is represented in their level order traversal. Each group of children is separated by the null value (See examples)
+
+** Example 1:
+
+
+- Input :: ~root = [1,null,3,2,4,null,5,6]~
+
+    #+DOWNLOADED: screenshot @ 2024-08-26 16:04:41
+[[file:Problem_Statement/2024-08-26_16-04-41_screenshot.png]]
+
+- Output :: ~[5,6,3,2,4,1]~
+
+** Example 2:
+
+
+- Input :: root = ~[1,null,2,3,4,5,null,null,6,7,null,8,null,9,10,null,null,11,null,12,null,13,null,null,14]~
+          #+DOWNLOADED: screenshot @ 2024-08-26 16:05:28
+          [[file:Problem_Statement/2024-08-26_16-05-28_screenshot.png]]
+
+- Output :: ~[2,6,14,11,7,3,12,8,4,13,9,10,5,1]~
+
+** Brainstorming
+
+Ok, honestly, I *did* have to look up what "postorder" meant. I had no idea. "Move left to right descending into children". It basically means depth first search but you put yourself last.
+
+That's easy enough, the only other difficulty here is building up the three itself. We can't play things directly from the input array since the width of things "in each node" is variable. We have to read through it once to build up the structure. How do we do that? Well, given that we seem to be scanning left to right and giving the next down level by level, that seems like a stack to me.
+
+I keep hearing people talk about Go, should we do it in Go? [[https://krisztianfekete.org/literate-go-in-spacemacs/][Here's a doc about setting it up.]] src_emacs-lisp[:results silent]{(require 'ob-go)}
+
+#+begin_src go :var val=2 :eval never-export
+  package main
+  import "fmt"
+
+  func main() {
+  	fmt.Println("This is " + "literate!")
+  	fmt.Println("1 +", val, "=", val+1)
+  }
+#+end_src
+
+#+RESULTS:
+: This is literate!
+: 1 + 2 = 3
+
+Ok, nice. Let's go
+
+** Implementation
+:PROPERTIES:
+:header-args:go: :noweb strip-export :eval never-export :exports both
+:END:
+
+So, first thing's first, we're going to need some sort of structure for representing a node. I've never written go before so relying on some back and forth with AI here
+
+#+name: go/define-TreeNode
+#+begin_src go
+  type TreeNode[T any] struct {
+  	Value    T
+  	Children []*TreeNode[T]
+  }
+
+  // String method to implement fmt.Stringer interface
+  func (n *TreeNode[T]) String() string {
+  	return n.stringWithIndent(0)
+  }
+
+  // Helper method to handle indentation
+  func (n *TreeNode[T]) stringWithIndent(level int) string {
+  	var sb strings.Builder
+  	// Create an indentation prefix based on the level
+  	indent := strings.Repeat("  ", level)
+  	// Add the value of the node with the current indentation
+  	sb.WriteString(fmt.Sprintf("%s%v", indent, n.Value))
+
+  	// If there are children, format them
+  	if len(n.Children) > 0 {
+  		sb.WriteString(" {\n")
+  		for _, child := range n.Children {
+  			// Increase the indentation level for child nodes
+  			sb.WriteString(child.stringWithIndent(level + 1) + "\n")
+  		}
+  		sb.WriteString(indent + "}")
+  	}
+  	return sb.String()
+  }
+#+end_src
+
+Ok, and that can be intitialized and printed?
+#+begin_src go
+  package main
+
+  import (
+        "fmt"
+        "strings"
+  )
+
+  <<go/define-TreeNode>>
+
+  func main() {
+  	root := &TreeNode[string]{
+  		Value: "root",
+  		Children: []*TreeNode[string]{
+  			{
+  				Value: "child1",
+  				Children: nil,
+  			},
+  			{
+  				Value: "child2",
+  				Children: []*TreeNode[string]{
+  					{
+  						Value: "grandchild1",
+  						Children: nil,
+  					},
+  				},
+  			},
+  		},
+  	}
+
+  	fmt.Println(root)
+  }
+#+end_src
+
+#+RESULTS:
+: root {
+:   child1
+:   child2 {
+:     grandchild1
+:   }
+: }
+
+
+
