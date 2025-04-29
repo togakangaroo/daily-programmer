@@ -1,0 +1,1219 @@
+I am looking for a job now and my last six months have been more devops focused. Let's get back into some coding
+
+For this I just asked Mistral to cook me up a simple problem, here's what it gave me
+
+* Problem Statement
+
+In a magic square, all of the numbers from =1= to =n^2= appear, and the sums of the numbers in any row, column, or diagonal are always equal. Given an integer ~n (1 <= n <= 9)~, write a function that creates an
+and returns such a magic square for the given size.
+
+Here is an example of a =3x3= magic square:
+#+begin_quote
+[8, 1, 6]
+[3, 5, 7]
+[4, 9, 2]
+#+end_quote
+
+
+Create a function called =magicSquare= that takes in an integer =n= and returns a 2D list representing the magic square for the given size.
+
+** Example:
+#+begin_src python :eval no
+magic_square(3) == [[8, 1, 6], [3, 5, 7], [4, 9, 2]]
+#+end_src
+
+** Constraints:
+- The function should be able to handle any valid input from =1 to 9=.
+- Use only basic data structures and built-in functions (avoid external libraries).
+
+
+* Brainstorming
+:PROPERTIES:
+:header-args:python+: :eval no
+:END:
+A quick Google seems to indicate that magic squares are always possible, or at least possible enough that I think the constraints of the problem make sense. Sounds like there's "simple" techniques to do it. Maybe I'll look into those for a second implementation after I do this one.
+
+I also want to use python because eh, it keeps coming up lately. I'll probably use elisp later.
+
+Now what do we actually do? Well, a depth first search seems like the obvious thing, right?
+
+In fact we know what the sum of every span (column, row, diagonal) in the square must be - it must be ~sum(1..n^2)/n~ which for a 3-quare would be ~45/3=15~. We could shortcut the DFS process by picking a number, then checking if that forces the sum of any spans to exceed it.
+
+Additionally we *could* set a lower bound as well. If you are in a 3-square row that already contains a =1= then a =2= is out of the question since there would be no way to get to =15= with that. We could generalize it as a branch being a dead end if the row's current sum ~sum(span)~ plus the highest values possible in the remaining cells (~sum(n, n-1, n-2)~ ~n-len(span) times~) is less than our =Target= from above. This is good to know but feels more complicated thatn it might be worth within our constraints so lets punt on it.
+
+Now, what sort of datastructure would be good here? What comes to mind is a 2d structure comprised of linked lists so that you can easily get the current spans as we go. Even though I'm picturing actually putting values into cells, it is probably best that this thing be immutable just because that works better for the detph first search, right? Lets write down the sort of operations we want to be able to do easily:
+
+#+begin_src python
+  new_square = set(square, row=0, column=2, value=7)
+#+end_src
+and the check for sums would be something like this
+
+This seems like a good idea at first for an api
+#+begin_src python
+  if any((target_sum != sum(span) for span in get_spans(new_square, row=0, column=2))):
+      return
+#+end_src
+
+but wait, that's not quite right, a span that isn't filled out yet isn't going to be the right sum but is not a dead end either. So I guess we could delegate the whole thing to the set function so it would be impossible to enter an invalid state. ~try_set~ instead of ~set~ and return ~True~ or ~False~ as to whether it succeeded. That would be easy enough to check so long as we have some sort of ~undefined~ token we could ignore (or coerce to 0 which works for the purposes of summing).
+
+Finally I want to think about the structure. We really do need immutability I feel unless we want to be really invested in fastidiously cleaning up after each and every depth first search. Now normally I would say that some sort of copy-on-write implementation is what we want, but in this case we're simply storing integers. Copy-on-write would typically work by storing references to the "immutable" bits but that would just be references which aren't any smaller on the stack than integers are, right? I'm sure there's stuff you can do to make improvements here but at such small =n= it just doesn't seem like such a big deal to copy all the numbers in our square on each ~try_set()~
+
+
+* Python Solution
+:PROPERTIES:
+:header-args:python+: :session magic-square-generation
+:header-args:python+: :results silent
+:END:
+
+
+Alright that gives us some ideas of what to go on, I think our spans can be just a 2d matrix of numbers too. A simple implementation of a ~get_spans~ function therefore might be this
+#+begin_src python
+  def get_spans(square_cells: MagicSquareCells, row: number, column: number):
+      # This row
+      yield square_cells[row]
+      # This column
+      yield [r[column] for r in square_cells]
+      # \ Diagonal
+      square_side_size = len(square_cells)
+      if row == column:
+          yield [square_cells[x][x] for x in range(square_side_size)]
+      # / Diagonal
+      if row == square_side_size - column - 1:
+          yield [square_cells[x][square_side_size - x - 1] for x in range(square_side_size)]
+#+end_src
+
+But you know what? I want to push myself a bit, I have only passing experience with Pandas, and I know it implements copy-on-write semantics for =DataFrame= so - even though it might not be the most efficient, lets learn something and do this with pandas
+
+First some types and imports
+#+begin_src python :tangle magic_square_generation.py
+  import pandas as pd
+  import numpy as np
+  from typing import Iterable
+  from dataclasses import dataclass, field
+
+  MagicSquareCells = pd.DataFrame
+
+  @dataclass(frozen=True)
+  class Position:
+      row: int
+      column: int
+#+end_src
+
+lets also build out a class for our magic square builder with some helper values set
+#+begin_src python :tangle magic_square_generation.py
+  @dataclass(frozen=True)
+  class MagicSquareBuilder:
+      cells: MagicSquareCells
+      side_size: int = field(init=False)
+      max_span_sum: int = field(init=False)
+
+      def __post_init__(self):
+          object.__setattr__(self, 'side_size', self.cells.shape[0])
+          # Using Godel's(?) equation for summing up sequential sequences / square_size
+          object.__setattr__(self, 'max_span_sum', self.side_size*(1+self.side_size**2)/2)
+#+end_src
+
+Now lets implement ~get_spans~
+
+#+begin_src python :tangle magic_square_generation.py
+  def get_spans(square: MagicSquareBuilder, position: Position) -> Iterable[np.ndarray]:
+      row, column = position
+      # This row
+      yield square.cells.iloc[row, :].values
+
+      # This column
+      yield square.cells.iloc[:, column].values
+
+      # \ Diagonal (main diagonal)
+      if row == column:
+          yield np.diag(square.cells.values)
+
+      # / Diagonal (anti-diagonal)
+      if row == square.side_size - column - 1:
+          yield np.diag(np.fliplr(square.cells.values))
+#+end_src
+
+lets test this
+#+begin_src python :results output pp replace
+  data = np.arange(1, 17)
+  square = MagicSquareBuilder(cells=pd.DataFrame(data.reshape(4, 4)))
+  print(list(get_spans(square, (0, 1))))
+  print(list(get_spans(square, (1, 1))))
+  print(list(get_spans(square, (2, 1))))
+#+end_src
+
+#+RESULTS:
+: [array([1, 2, 3, 4]), array([ 2,  6, 10, 14])]
+: [array([5, 6, 7, 8]), array([ 2,  6, 10, 14]), array([ 1,  6, 11, 16])]
+: [array([ 9, 10, 11, 12]), array([ 2,  6, 10, 14]), array([ 4,  7, 10, 13])]
+
+That works really well, nice
+
+So then the next step is to implement our ~try_set~
+
+#+begin_src python :tangle magic_square_generation.py
+  def try_set(square: MagicSquareBuilder, position: Position, value: int) -> None | MagicSquareBuilder:
+      """Return a new square with position set to the passed in value. This will
+      do some basic checking to ensure that the returned square could potentially
+      still be a magic square. If not it will return None.
+
+      """
+      spans = get_spans(square, position)
+      if any((square.max_span_sum < (span.sum() + value)) for span in spans):
+          return None
+
+      new_cells = square.cells.copy()
+      new_cells.iloc[*position] = value
+      return MagicSquareBuilder(cells=new_cells)
+#+end_src
+
+Lets experiment with that one
+
+#+begin_src python :results output pp replace
+  print(try_set(square, (1, 1), 10)) #should be none
+  print(try_set(square, (0, 1), 1)) #should be fine
+#+end_src
+
+#+RESULTS:
+: None
+: MagicSquareBuilder(cells=    0   1   2   3
+: 0   1   1   3   4
+: 1   5   6   7   8
+: 2   9  10  11  12
+: 3  13  14  15  16, side_size=4, max_span_sum=34.0)
+
+
+Alright, so now I guess lets implement the depth first search itself, we have all the pieces out in front of us. The plan here is to move through the full list of positions that need to be filled out from top left to bottom right. At each position we will try all the remaining possibilities drilling down to the following position as needed
+
+That does mean that we'll need a helper function to get all remaining values
+#+begin_src python :tangle magic_square_generation.py
+  def remaining_values_to_try(square: MagicSquareBuilder) -> set[int]:
+      already_used_values = set(square.cells.values.flatten())
+      possible_values = set(range(1, square.side_size**2+1))
+      return possible_values - already_used_values
+#+end_src
+lets just try that out
+#+begin_src python :results output pp replace
+  print(remaining_values_to_try(MagicSquareBuilder(cells=pd.DataFrame([[1, 0], [3, 0]]))))
+#+end_src
+
+#+RESULTS:
+: {2, 4}
+
+Oh yes, we also need a way of testing if a square is magic or not
+
+#+begin_src python :tangle magic_square_generation.py
+  def is_magic_square(square: MagicSquareBuilder) -> bool:
+      if remaining_values_to_try(square):
+          return False
+      row_sums = square.cells.sum(axis=1)
+      first_row_sum = row_sums.iloc[0]
+      all_rows_equal = (row_sums == first_row_sum).all()
+      if not all_rows_equal:
+          return False
+      col_sums = square.cells.sum(axis=0)
+      all_cols_sum_same_as_rows = (col_sums == first_row_sum).all()
+      if not all_cols_sum_same_as_rows:
+          return False
+      return first_row_sum == np.diag(square.cells.values).sum() == np.diag(np.fliplr(square.cells.values)).sum()
+#+end_src
+#+begin_src python :results output pp replace
+  print(is_magic_square(MagicSquareBuilder(cells=pd.DataFrame([[1,2],[3,4]])))) # should be false
+  print(is_magic_square(MagicSquareBuilder(cells=pd.DataFrame([
+      [8, 1, 6],
+      [3, 5, 7],
+      [4, 9, 2],
+  ]) )))# should be true
+  print(is_magic_square(MagicSquareBuilder(cells=pd.DataFrame([[1,1],[1,1]])))) # false
+#+end_src
+
+#+RESULTS:
+: False
+: True
+: False
+
+ok, that works well
+
+#+begin_src python :tangle magic_square_generation.py
+  remaining_recursions = 100
+  def fill_magic_square(square: None | MagicSquareBuilder, remaining_positions: list[Position]) -> None | MagicSquareBuilder:
+      """Move through the list of positions that need to be filled. At each
+      position we try all the remaining possibilities and recurse to the next
+      position as needed.
+      """
+      print("fill_magic_square\n", square and square.cells.to_string(index=False, header=False), "\n", remaining_positions)
+      global remaining_recursions
+      remaining_recursions -= 1
+      if remaining_recursions < 0:
+          raise Exception("recursion limit exceeded")
+      if not square:
+          return None
+      if not remaining_positions:
+          # If we are out of positions to test and there's a square, then that's going to be the answer
+          return square if is_magic_square(square) else None
+
+      next_position, *other_positions = remaining_positions
+      for value in remaining_values_to_try(square):
+          print("trying", value, "at", next_position, "from", remaining_values_to_try(square))
+          square_with_value = try_set(square, next_position, value)
+          res = fill_magic_square(square_with_value, other_positions)
+          if res:
+              return res
+
+      return None
+#+end_src
+
+**Wait, we need to actually make sure its a magic square at some point here**
+
+Finally, lets write a function to create our square and positions list
+
+#+begin_src python :tangle magic_square_generation.py
+  def find_magic_square(size: int) -> None | MagicSquareCells:
+      # While prefilling with zeros is not technically correct and would in many situations be better
+      # to use nan, when working specifically with magic squares it kind of doesn't matter and
+      # prefilling with zeros is just more efficient
+      square = MagicSquareBuilder(cells=pd.DataFrame(np.zeros((size, size), dtype=int)))
+      positions = list((r, c) for r in range(size) for c in range(size))
+      square = fill_magic_square(square, positions)
+      return square and square.cells
+#+end_src
+
+Lets test it out
+#+begin_src python :results output pp replace
+  remaining_recursions = 200
+  print(find_magic_square(3))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+fill_magic_square
+ 0 0 0
+0 0 0
+0 0 0 
+ [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 1 at (0, 0) from {1, 2, 3, 4, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 0 0
+0 0 0
+0 0 0 
+ [(0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 2 at (0, 1) from {2, 3, 4, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 0
+0 0 0
+0 0 0 
+ [(0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 3 at (0, 2) from {3, 4, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+0 0 0
+0 0 0 
+ [(1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 0) from {4, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+4 0 0
+0 0 0 
+ [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 1) from {5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+4 5 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ 1 2 3
+4 5 6
+0 0 0 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 9 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 7 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ 1 2 3
+4 5 6
+7 0 0 
+ [(2, 1), (2, 2)]
+trying 8 at (2, 1) from {8, 9}
+fill_magic_square
+ 1 2 3
+4 5 6
+7 8 0 
+ [(2, 2)]
+trying 9 at (2, 2) from {9}
+fill_magic_square
+ None 
+ []
+trying 9 at (2, 1) from {8, 9}
+fill_magic_square
+ None 
+ [(2, 2)]
+trying 7 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 1) from {5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+4 6 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ 1 2 3
+4 6 5
+0 0 0 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 9 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 7 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 7 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 1) from {5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+4 7 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 9, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 9, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 1) from {5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+4 8 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {9, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {9, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {9, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {9, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 1) from {5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+4 9 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {8, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 0) from {4, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+5 0 0
+0 0 0 
+ [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 1) from {4, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+5 4 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ 1 2 3
+5 4 6
+0 0 0 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ 1 2 3
+5 4 6
+8 0 0 
+ [(2, 1), (2, 2)]
+trying 9 at (2, 1) from {9, 7}
+fill_magic_square
+ None 
+ [(2, 2)]
+trying 7 at (2, 1) from {9, 7}
+fill_magic_square
+ 1 2 3
+5 4 6
+8 7 0 
+ [(2, 2)]
+trying 9 at (2, 2) from {9}
+fill_magic_square
+ None 
+ []
+trying 9 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 7 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ 1 2 3
+5 4 6
+7 0 0 
+ [(2, 1), (2, 2)]
+trying 8 at (2, 1) from {8, 9}
+fill_magic_square
+ 1 2 3
+5 4 6
+7 8 0 
+ [(2, 2)]
+trying 9 at (2, 2) from {9}
+fill_magic_square
+ None 
+ []
+trying 9 at (2, 1) from {8, 9}
+fill_magic_square
+ None 
+ [(2, 2)]
+trying 7 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 1) from {4, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+5 6 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 4, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 4, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {8, 9, 4, 7}
+fill_magic_square
+ 1 2 3
+5 6 4
+0 0 0 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 9 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 7 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 7 at (1, 2) from {8, 9, 4, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 1) from {4, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+5 7 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 4, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 4, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {8, 9, 4, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 9, 4, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 1) from {4, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+5 8 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {9, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {9, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {9, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {9, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 1) from {4, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+5 9 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {8, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {8, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 0) from {4, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+6 0 0
+0 0 0 
+ [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 1) from {4, 5, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+6 4 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ 1 2 3
+6 4 5
+0 0 0 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ 1 2 3
+6 4 5
+8 0 0 
+ [(2, 1), (2, 2)]
+trying 9 at (2, 1) from {9, 7}
+fill_magic_square
+ None 
+ [(2, 2)]
+trying 7 at (2, 1) from {9, 7}
+fill_magic_square
+ 1 2 3
+6 4 5
+8 7 0 
+ [(2, 2)]
+trying 9 at (2, 2) from {9}
+fill_magic_square
+ None 
+ []
+trying 9 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 7 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ 1 2 3
+6 4 5
+7 0 0 
+ [(2, 1), (2, 2)]
+trying 8 at (2, 1) from {8, 9}
+fill_magic_square
+ 1 2 3
+6 4 5
+7 8 0 
+ [(2, 2)]
+trying 9 at (2, 2) from {9}
+fill_magic_square
+ None 
+ []
+trying 9 at (2, 1) from {8, 9}
+fill_magic_square
+ None 
+ [(2, 2)]
+trying 7 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 1) from {4, 5, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+6 5 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 4, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 4, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {8, 9, 4, 7}
+fill_magic_square
+ 1 2 3
+6 5 4
+0 0 0 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 9 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 7 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ 1 2 3
+6 5 4
+7 0 0 
+ [(2, 1), (2, 2)]
+trying 8 at (2, 1) from {8, 9}
+fill_magic_square
+ 1 2 3
+6 5 4
+7 8 0 
+ [(2, 2)]
+trying 9 at (2, 2) from {9}
+fill_magic_square
+ None 
+ []
+trying 9 at (2, 1) from {8, 9}
+fill_magic_square
+ None 
+ [(2, 2)]
+trying 7 at (1, 2) from {8, 9, 4, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 1) from {4, 5, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+6 7 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 4, 5}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 4, 5}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {8, 9, 4, 5}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 9, 4, 5}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 1) from {4, 5, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+6 8 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {9, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {9, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {9, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {9, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 1) from {4, 5, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+6 9 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {8, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {8, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 0) from {4, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+7 0 0
+0 0 0 
+ [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 1) from {4, 5, 6, 8, 9}
+fill_magic_square
+ 1 2 3
+7 4 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 9, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 9, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 1) from {4, 5, 6, 8, 9}
+fill_magic_square
+ 1 2 3
+7 5 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 4, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 4, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {8, 9, 4, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 9, 4, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 1) from {4, 5, 6, 8, 9}
+fill_magic_square
+ 1 2 3
+7 6 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 4, 5}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 4, 5}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {8, 9, 4, 5}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 9, 4, 5}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 1) from {4, 5, 6, 8, 9}
+fill_magic_square
+ 1 2 3
+7 8 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {9, 4, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {9, 4, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {9, 4, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {9, 4, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 1) from {4, 5, 6, 8, 9}
+fill_magic_square
+ None 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 0) from {4, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+8 0 0
+0 0 0 
+ [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 1) from {4, 5, 6, 7, 9}
+fill_magic_square
+ 1 2 3
+8 4 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {9, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {9, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {9, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {9, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 1) from {4, 5, 6, 7, 9}
+fill_magic_square
+ 1 2 3
+8 5 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {9, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {9, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {9, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {9, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 1) from {4, 5, 6, 7, 9}
+fill_magic_square
+ 1 2 3
+8 6 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {9, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {9, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {9, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {9, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 1) from {4, 5, 6, 7, 9}
+fill_magic_square
+ 1 2 3
+8 7 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {9, 4, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {9, 4, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {9, 4, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {9, 4, 5, 6}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 1) from {4, 5, 6, 7, 9}
+fill_magic_square
+ None 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 0) from {4, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 3
+9 0 0
+0 0 0 
+ [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 1) from {4, 5, 6, 7, 8}
+fill_magic_square
+ 1 2 3
+9 4 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {8, 5, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 1) from {4, 5, 6, 7, 8}
+fill_magic_square
+ 1 2 3
+9 5 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {8, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {8, 4, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 1) from {4, 5, 6, 7, 8}
+fill_magic_square
+ 1 2 3
+9 6 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 4 at (1, 2) from {8, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 2) from {8, 4, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 7 at (1, 1) from {4, 5, 6, 7, 8}
+fill_magic_square
+ None 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 1) from {4, 5, 6, 7, 8}
+fill_magic_square
+ None 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 4 at (0, 2) from {3, 4, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 4
+0 0 0
+0 0 0 
+ [(1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 3 at (1, 0) from {3, 5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 4
+3 0 0
+0 0 0 
+ [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 1) from {5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 4
+3 5 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 6 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ 1 2 4
+3 5 6
+0 0 0 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 9 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 7 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 7 at (1, 2) from {8, 9, 6, 7}
+fill_magic_square
+ 1 2 4
+3 5 7
+0 0 0 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (2, 0) from {8, 9, 6}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 9 at (2, 0) from {8, 9, 6}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+trying 6 at (2, 0) from {8, 9, 6}
+fill_magic_square
+ 1 2 4
+3 5 7
+6 0 0 
+ [(2, 1), (2, 2)]
+trying 8 at (2, 1) from {8, 9}
+fill_magic_square
+ 1 2 4
+3 5 7
+6 8 0 
+ [(2, 2)]
+trying 9 at (2, 2) from {9}
+fill_magic_square
+ None 
+ []
+trying 9 at (2, 1) from {8, 9}
+fill_magic_square
+ None 
+ [(2, 2)]
+trying 6 at (1, 1) from {5, 6, 7, 8, 9}
+fill_magic_square
+ 1 2 4
+3 6 0
+0 0 0 
+ [(1, 2), (2, 0), (2, 1), (2, 2)]
+trying 8 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 9 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ None 
+ [(2, 0), (2, 1), (2, 2)]
+trying 5 at (1, 2) from {8, 9, 5, 7}
+fill_magic_square
+ 1 2 4
+3 6 5
+0 0 0 
+ [(2, 0), (2, 1), (2, 2)]
+trying 8 at (2, 0) from {8, 9, 7}
+fill_magic_square
+ None 
+ [(2, 1), (2, 2)]
+#+end_example
+
