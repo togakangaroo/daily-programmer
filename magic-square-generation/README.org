@@ -58,31 +58,31 @@ but wait, that's not quite right, a span that isn't filled out yet isn't going t
 
 Finally I want to think about the structure. We really do need immutability I feel unless we want to be really invested in fastidiously cleaning up after each and every depth first search. Now normally I would say that some sort of copy-on-write implementation is what we want, but in this case we're simply storing integers. Copy-on-write would typically work by storing references to the "immutable" bits but that would just be references which aren't any smaller on the stack than integers are, right? I'm sure there's stuff you can do to make improvements here but at such small =n= it just doesn't seem like such a big deal to copy all the numbers in our square on each ~try_set()~
 
+---
+
+Ok, so that's one approach, lets just do a simple version of it. In fact, lets use my favorite approach of picturing ourselves physically on the problem space
+
+I picture standing on a square grid with a book of available numbers. I tear down the page for the first number and pin it to the square, I then move forward and pin the next and I do this all the way across until I have pinned a number to each square. At that point I am done and I can check if it is a magic square. If it is, then hooray we did good; but, if not, then we must remove the last two notes and try things in a different order. Of course we know that this won't work but we can optimize in a bit. By repeating this process we will have successfully brute forced a solution.
+
+Ok, but what about the optimization? Well it is important to understand that for a square of size =N=, each row, column, and diagonal must sum to
+
+$$ \frac{N^2(N^2+1)}{2N} $$ which can be simplified as $$ \frac{N(N^2+1)}{2} $$ and represented as =T=
+
+If we ever hit the following conditions then we can stop exploring as it is impossible to get a magic square from that state
+
+- a row, column, or diagonal with a ~sum > T~
+- a completed row, column, or diagonal with a ~sum != T~
+
+Furthermore, if we can assume move top left to bottom right, if a completed row does not ~sum == T~ then no variation of that row will work. You could say the same thing of the ~/~ diagonal and columns as well, but under this assumption you wouldn't complete any of these until the last row so it doesn't save you on all that much iterations.
+
+Also, you know what? I want to push myself a bit, I have only passing experience with Pandas, and I know it implements copy-on-write semantics for =DataFrame= so - even though it might not be the most efficient, lets learn something and do this with pandas
+
 
 * Python Solution
 :PROPERTIES:
 :header-args:python+: :session magic-square-generation
 :header-args:python+: :results silent
 :END:
-
-
-Alright that gives us some ideas of what to go on, I think our spans can be just a 2d matrix of numbers too. A simple implementation of a ~get_spans~ function therefore might be this
-#+begin_src python
-  def get_spans(square_cells: MagicSquareCells, row: number, column: number):
-      # This row
-      yield square_cells[row]
-      # This column
-      yield [r[column] for r in square_cells]
-      # \ Diagonal
-      square_side_size = len(square_cells)
-      if row == column:
-          yield [square_cells[x][x] for x in range(square_side_size)]
-      # / Diagonal
-      if row == square_side_size - column - 1:
-          yield [square_cells[x][square_side_size - x - 1] for x in range(square_side_size)]
-#+end_src
-
-But you know what? I want to push myself a bit, I have only passing experience with Pandas, and I know it implements copy-on-write semantics for =DataFrame= so - even though it might not be the most efficient, lets learn something and do this with pandas
 
 First some types and imports
 #+begin_src python :tangle magic_square_generation.py
@@ -99,7 +99,7 @@ First some types and imports
       column: int
 #+end_src
 
-lets also build out a class for our magic square builder with some helper values set
+lets also build out a class for our magic square builder with some helper values set. Note that it's a ~Builder~ not a ~MagicSquare~ since we don't want it to be possible to create invalid objects (ie a magic square that is not actually magic)
 #+begin_src python :tangle magic_square_generation.py
   @dataclass(frozen=True)
   class MagicSquareBuilder:
@@ -113,99 +113,10 @@ lets also build out a class for our magic square builder with some helper values
           object.__setattr__(self, 'max_span_sum', self.side_size*(1+self.side_size**2)/2)
 #+end_src
 
-Now lets implement ~get_spans~
-
-#+begin_src python :tangle magic_square_generation.py
-  def get_spans(square: MagicSquareBuilder, position: Position) -> Iterable[np.ndarray]:
-      row, column = position
-      # This row
-      yield square.cells.iloc[row, :].values
-
-      # This column
-      yield square.cells.iloc[:, column].values
-
-      # \ Diagonal (main diagonal)
-      if row == column:
-          yield np.diag(square.cells.values)
-
-      # / Diagonal (anti-diagonal)
-      if row == square.side_size - column - 1:
-          yield np.diag(np.fliplr(square.cells.values))
-#+end_src
-
-lets test this
-#+begin_src python :results output pp replace
-  data = np.arange(1, 17)
-  square = MagicSquareBuilder(cells=pd.DataFrame(data.reshape(4, 4)))
-  print(list(get_spans(square, (0, 1))))
-  print(list(get_spans(square, (1, 1))))
-  print(list(get_spans(square, (2, 1))))
-#+end_src
-
-#+RESULTS:
-: [array([1, 2, 3, 4]), array([ 2,  6, 10, 14])]
-: [array([5, 6, 7, 8]), array([ 2,  6, 10, 14]), array([ 1,  6, 11, 16])]
-: [array([ 9, 10, 11, 12]), array([ 2,  6, 10, 14]), array([ 4,  7, 10, 13])]
-
-That works really well, nice
-
-So then the next step is to implement our ~try_set~
-
-#+begin_src python :tangle magic_square_generation.py
-  def try_set(square: MagicSquareBuilder, position: Position, value: int) -> None | MagicSquareBuilder:
-      """Return a new square with position set to the passed in value. This will
-      do some basic checking to ensure that the returned square could potentially
-      still be a magic square. If not it will return None.
-
-      """
-      spans = get_spans(square, position)
-      if any((square.max_span_sum < (span.sum() + value)) for span in spans):
-          return None
-
-      new_cells = square.cells.copy()
-      new_cells.iloc[*position] = value
-      return MagicSquareBuilder(cells=new_cells)
-#+end_src
-
-Lets experiment with that one
-
-#+begin_src python :results output pp replace
-  print(try_set(square, (1, 1), 10)) #should be none
-  print(try_set(square, (0, 1), 1)) #should be fine
-#+end_src
-
-#+RESULTS:
-: None
-: MagicSquareBuilder(cells=    0   1   2   3
-: 0   1   1   3   4
-: 1   5   6   7   8
-: 2   9  10  11  12
-: 3  13  14  15  16, side_size=4, max_span_sum=34.0)
-
-
-Alright, so now I guess lets implement the depth first search itself, we have all the pieces out in front of us. The plan here is to move through the full list of positions that need to be filled out from top left to bottom right. At each position we will try all the remaining possibilities drilling down to the following position as needed
-
-That does mean that we'll need a helper function to get all remaining values
-#+begin_src python :tangle magic_square_generation.py
-  def remaining_values_to_try(square: MagicSquareBuilder) -> set[int]:
-      already_used_values = set(square.cells.values.flatten())
-      possible_values = set(range(1, square.side_size**2+1))
-      return possible_values - already_used_values
-#+end_src
-lets just try that out
-#+begin_src python :results output pp replace
-  print(remaining_values_to_try(MagicSquareBuilder(cells=pd.DataFrame([[1, 0], [3, 0]]))))
-#+end_src
-
-#+RESULTS:
-: {2, 4}
-
-Oh yes, we also need a way of testing if a square is magic or not
+We need a way to tell if a completed square is indeed magic, and that's going to be a bunch of our pandas stuff. I could make this stuff into methods on the class, but really its all in one module and typed so I see little point to it for the purposes of this exercise.
 
 #+begin_src python :tangle magic_square_generation.py
   def is_magic_square(square: MagicSquareBuilder) -> bool:
-      if remaining_values_to_try(square):
-          return False
       row_sums = square.cells.sum(axis=1)
       first_row_sum = row_sums.iloc[0]
       all_rows_equal = (row_sums == first_row_sum).all()
@@ -219,1001 +130,134 @@ Oh yes, we also need a way of testing if a square is magic or not
 #+end_src
 #+begin_src python :results output pp replace
   print(is_magic_square(MagicSquareBuilder(cells=pd.DataFrame([[1,2],[3,4]])))) # should be false
-  print(is_magic_square(MagicSquareBuilder(cells=pd.DataFrame([
+  magic_square = MagicSquareBuilder(cells=pd.DataFrame([
       [8, 1, 6],
       [3, 5, 7],
       [4, 9, 2],
-  ]) )))# should be true
-  print(is_magic_square(MagicSquareBuilder(cells=pd.DataFrame([[1,1],[1,1]])))) # false
+  ]) )
+  print(is_magic_square(magic_square))# should be true
 #+end_src
 
 #+RESULTS:
 : False
 : True
-: False
 
-ok, that works well
+Ok, that works well. Now we need a way of setting a new value in our builder. A ~try_set~ function will allow us to run some basic checks before setting a value into a new copy of the builder. We want to make sure we're creating new instances since otherwise we'd have to clean up when unwinding the stack. I also believe that pandas might have some optimization around copying that can serve us well. At the very least, I see an article discussing that in Pandas 3.0 (which I'm not on yet).
+
+**Assumption**: Here we are counting on the assumption that movement is top left to bottom right and that any filled values are filled with =0=
 
 #+begin_src python :tangle magic_square_generation.py
-  remaining_recursions = 100
-  def fill_magic_square(square: None | MagicSquareBuilder, remaining_positions: list[Position]) -> None | MagicSquareBuilder:
-      """Move through the list of positions that need to be filled. At each
-      position we try all the remaining possibilities and recurse to the next
-      position as needed.
+  def _potential_span_sums(square: MagicSquareBuilder, position: Position) -> Iterable[int]:
+      row, column = position
+      yield square.cells.iloc[row, :].values.sum()
+      yield square.cells.iloc[:, column].values.sum()
+
+      # \ Diagonal (main diagonal)
+      if row == column:
+          yield np.diag(square.cells.values).sum()
+
+      # / Diagonal (anti-diagonal)
+      if row == square.side_size - column - 1:
+          yield np.diag(np.fliplr(square.cells.values)).sum()
+
+  def try_set(square: MagicSquareBuilder, position: Position, value: int) -> None | MagicSquareBuilder:
+      """Return a new square with position set to the passed in value. This will
+      do some basic checking to ensure that the returned square could potentially
+      still be a magic square. If not it will return None.
       """
-      print("fill_magic_square\n", square and square.cells.to_string(index=False, header=False), "\n", remaining_positions)
-      global remaining_recursions
-      remaining_recursions -= 1
-      if remaining_recursions < 0:
-          raise Exception("recursion limit exceeded")
-      if not square:
+
+      span_sums = _potential_span_sums(square, position)
+      if any((square.max_span_sum < (x + value)) for x in span_sums):
           return None
-      if not remaining_positions:
-          # If we are out of positions to test and there's a square, then that's going to be the answer
-          return square if is_magic_square(square) else None
 
-      next_position, *other_positions = remaining_positions
-      for value in remaining_values_to_try(square):
-          print("trying", value, "at", next_position, "from", remaining_values_to_try(square))
-          square_with_value = try_set(square, next_position, value)
-          res = fill_magic_square(square_with_value, other_positions)
-          if res:
-              return res
-
-      return None
+      new_cells = square.cells.copy()
+      new_cells.iloc[*position] = value
+      return MagicSquareBuilder(cells=new_cells)
 #+end_src
 
-**Wait, we need to actually make sure its a magic square at some point here**
+Lets experiment with that one
 
-Finally, lets write a function to create our square and positions list
+#+begin_src python :results output pp replace
+  incomplete_square = MagicSquareBuilder(cells=pd.DataFrame(np.zeros((3, 3), dtype=int)))
+  print(try_set(incomplete_square, (2, 1), 20)) #should be none
+  print(try_set(incomplete_square, (0, 1), 1)) #should be fine
+#+end_src
+
+#+RESULTS:
+: None
+: MagicSquareBuilder(cells=   0  1  2
+: 0  0  1  0
+: 1  0  0  0
+: 2  0  0  0, side_size=3, max_span_sum=15.0)
+
+
+Ok, so now lets actually implement the depth first search where we move from position to position and try to set values, drilling down to the next level if setting succeeds
 
 #+begin_src python :tangle magic_square_generation.py
+  remaining_recursions = 100000
+  def fill_magic_square(square: None | MagicSquareBuilder, remaining_positions: list[Position], remaining_values_to_try: list[int]) -> None | MagicSquareBuilder:
+      assert len(remaining_positions) == len(remaining_values_to_try)
+      global remaining_recursions
+
+      assert 0 < remaining_recursions
+      remaining_recursions -= 1
+
+      if not remaining_positions:
+          return square if is_magic_square(square) else None
+
+      position_to_set, *other_positions = remaining_positions
+
+      for value in remaining_values_to_try:
+          square_with_value = try_set(square, position_to_set, value)
+          if not square_with_value:
+              continue
+          all_other_values_to_try = [v for v in remaining_values_to_try if v != value]
+          filled_square_with_value = fill_magic_square(square_with_value, other_positions, all_other_values_to_try)
+          if filled_square_with_value:
+              return filled_square_with_value
+
+      return None
+
   def find_magic_square(size: int) -> None | MagicSquareCells:
       # While prefilling with zeros is not technically correct and would in many situations be better
       # to use nan, when working specifically with magic squares it kind of doesn't matter and
       # prefilling with zeros is just more efficient
       square = MagicSquareBuilder(cells=pd.DataFrame(np.zeros((size, size), dtype=int)))
       positions = list((r, c) for r in range(size) for c in range(size))
-      square = fill_magic_square(square, positions)
+      all_values = list(range(1, size**2+1))
+      square = fill_magic_square(square, positions, all_values)
       return square and square.cells
 #+end_src
 
-Lets test it out
+Lets try it
+
 #+begin_src python :results output pp replace
-  remaining_recursions = 200
-  print(find_magic_square(3))
+  print(find_magic_square(2)) # should be None
+  print(find_magic_square(3)) # sould be a square
 #+end_src
 
 #+RESULTS:
-#+begin_example
-fill_magic_square
- 0 0 0
-0 0 0
-0 0 0 
- [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 1 at (0, 0) from {1, 2, 3, 4, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 0 0
-0 0 0
-0 0 0 
- [(0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 2 at (0, 1) from {2, 3, 4, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 0
-0 0 0
-0 0 0 
- [(0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 3 at (0, 2) from {3, 4, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-0 0 0
-0 0 0 
- [(1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 0) from {4, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-4 0 0
-0 0 0 
- [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 1) from {5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-4 5 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- 1 2 3
-4 5 6
-0 0 0 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 9 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 7 at (2, 0) from {8, 9, 7}
-fill_magic_square
- 1 2 3
-4 5 6
-7 0 0 
- [(2, 1), (2, 2)]
-trying 8 at (2, 1) from {8, 9}
-fill_magic_square
- 1 2 3
-4 5 6
-7 8 0 
- [(2, 2)]
-trying 9 at (2, 2) from {9}
-fill_magic_square
- None 
- []
-trying 9 at (2, 1) from {8, 9}
-fill_magic_square
- None 
- [(2, 2)]
-trying 7 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 1) from {5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-4 6 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- 1 2 3
-4 6 5
-0 0 0 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 9 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 7 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 7 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 1) from {5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-4 7 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 9, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 9, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 1) from {5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-4 8 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {9, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {9, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {9, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {9, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 1) from {5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-4 9 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {8, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 0) from {4, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-5 0 0
-0 0 0 
- [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 1) from {4, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-5 4 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- 1 2 3
-5 4 6
-0 0 0 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (2, 0) from {8, 9, 7}
-fill_magic_square
- 1 2 3
-5 4 6
-8 0 0 
- [(2, 1), (2, 2)]
-trying 9 at (2, 1) from {9, 7}
-fill_magic_square
- None 
- [(2, 2)]
-trying 7 at (2, 1) from {9, 7}
-fill_magic_square
- 1 2 3
-5 4 6
-8 7 0 
- [(2, 2)]
-trying 9 at (2, 2) from {9}
-fill_magic_square
- None 
- []
-trying 9 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 7 at (2, 0) from {8, 9, 7}
-fill_magic_square
- 1 2 3
-5 4 6
-7 0 0 
- [(2, 1), (2, 2)]
-trying 8 at (2, 1) from {8, 9}
-fill_magic_square
- 1 2 3
-5 4 6
-7 8 0 
- [(2, 2)]
-trying 9 at (2, 2) from {9}
-fill_magic_square
- None 
- []
-trying 9 at (2, 1) from {8, 9}
-fill_magic_square
- None 
- [(2, 2)]
-trying 7 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 1) from {4, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-5 6 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 4, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 4, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {8, 9, 4, 7}
-fill_magic_square
- 1 2 3
-5 6 4
-0 0 0 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 9 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 7 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 7 at (1, 2) from {8, 9, 4, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 1) from {4, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-5 7 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 4, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 4, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {8, 9, 4, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 9, 4, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 1) from {4, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-5 8 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {9, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {9, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {9, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {9, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 1) from {4, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-5 9 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {8, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {8, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 0) from {4, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-6 0 0
-0 0 0 
- [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 1) from {4, 5, 7, 8, 9}
-fill_magic_square
- 1 2 3
-6 4 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- 1 2 3
-6 4 5
-0 0 0 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (2, 0) from {8, 9, 7}
-fill_magic_square
- 1 2 3
-6 4 5
-8 0 0 
- [(2, 1), (2, 2)]
-trying 9 at (2, 1) from {9, 7}
-fill_magic_square
- None 
- [(2, 2)]
-trying 7 at (2, 1) from {9, 7}
-fill_magic_square
- 1 2 3
-6 4 5
-8 7 0 
- [(2, 2)]
-trying 9 at (2, 2) from {9}
-fill_magic_square
- None 
- []
-trying 9 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 7 at (2, 0) from {8, 9, 7}
-fill_magic_square
- 1 2 3
-6 4 5
-7 0 0 
- [(2, 1), (2, 2)]
-trying 8 at (2, 1) from {8, 9}
-fill_magic_square
- 1 2 3
-6 4 5
-7 8 0 
- [(2, 2)]
-trying 9 at (2, 2) from {9}
-fill_magic_square
- None 
- []
-trying 9 at (2, 1) from {8, 9}
-fill_magic_square
- None 
- [(2, 2)]
-trying 7 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 1) from {4, 5, 7, 8, 9}
-fill_magic_square
- 1 2 3
-6 5 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 4, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 4, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {8, 9, 4, 7}
-fill_magic_square
- 1 2 3
-6 5 4
-0 0 0 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 9 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 7 at (2, 0) from {8, 9, 7}
-fill_magic_square
- 1 2 3
-6 5 4
-7 0 0 
- [(2, 1), (2, 2)]
-trying 8 at (2, 1) from {8, 9}
-fill_magic_square
- 1 2 3
-6 5 4
-7 8 0 
- [(2, 2)]
-trying 9 at (2, 2) from {9}
-fill_magic_square
- None 
- []
-trying 9 at (2, 1) from {8, 9}
-fill_magic_square
- None 
- [(2, 2)]
-trying 7 at (1, 2) from {8, 9, 4, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 1) from {4, 5, 7, 8, 9}
-fill_magic_square
- 1 2 3
-6 7 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 4, 5}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 4, 5}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {8, 9, 4, 5}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 9, 4, 5}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 1) from {4, 5, 7, 8, 9}
-fill_magic_square
- 1 2 3
-6 8 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {9, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {9, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {9, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {9, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 1) from {4, 5, 7, 8, 9}
-fill_magic_square
- 1 2 3
-6 9 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {8, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {8, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 0) from {4, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-7 0 0
-0 0 0 
- [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 1) from {4, 5, 6, 8, 9}
-fill_magic_square
- 1 2 3
-7 4 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 9, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 9, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 1) from {4, 5, 6, 8, 9}
-fill_magic_square
- 1 2 3
-7 5 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 4, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 4, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {8, 9, 4, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 9, 4, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 1) from {4, 5, 6, 8, 9}
-fill_magic_square
- 1 2 3
-7 6 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 4, 5}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 4, 5}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {8, 9, 4, 5}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 9, 4, 5}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 1) from {4, 5, 6, 8, 9}
-fill_magic_square
- 1 2 3
-7 8 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {9, 4, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {9, 4, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {9, 4, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {9, 4, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 1) from {4, 5, 6, 8, 9}
-fill_magic_square
- None 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 0) from {4, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-8 0 0
-0 0 0 
- [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 1) from {4, 5, 6, 7, 9}
-fill_magic_square
- 1 2 3
-8 4 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {9, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {9, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {9, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {9, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 1) from {4, 5, 6, 7, 9}
-fill_magic_square
- 1 2 3
-8 5 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {9, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {9, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {9, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {9, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 1) from {4, 5, 6, 7, 9}
-fill_magic_square
- 1 2 3
-8 6 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {9, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {9, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {9, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {9, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 1) from {4, 5, 6, 7, 9}
-fill_magic_square
- 1 2 3
-8 7 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {9, 4, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {9, 4, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {9, 4, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {9, 4, 5, 6}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 1) from {4, 5, 6, 7, 9}
-fill_magic_square
- None 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 0) from {4, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 3
-9 0 0
-0 0 0 
- [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 1) from {4, 5, 6, 7, 8}
-fill_magic_square
- 1 2 3
-9 4 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {8, 5, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 1) from {4, 5, 6, 7, 8}
-fill_magic_square
- 1 2 3
-9 5 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {8, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {8, 4, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 1) from {4, 5, 6, 7, 8}
-fill_magic_square
- 1 2 3
-9 6 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 4 at (1, 2) from {8, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 2) from {8, 4, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 7 at (1, 1) from {4, 5, 6, 7, 8}
-fill_magic_square
- None 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 1) from {4, 5, 6, 7, 8}
-fill_magic_square
- None 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 4 at (0, 2) from {3, 4, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 4
-0 0 0
-0 0 0 
- [(1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 3 at (1, 0) from {3, 5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 4
-3 0 0
-0 0 0 
- [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 1) from {5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 4
-3 5 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 6 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- 1 2 4
-3 5 6
-0 0 0 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 9 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 7 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 7 at (1, 2) from {8, 9, 6, 7}
-fill_magic_square
- 1 2 4
-3 5 7
-0 0 0 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (2, 0) from {8, 9, 6}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 9 at (2, 0) from {8, 9, 6}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-trying 6 at (2, 0) from {8, 9, 6}
-fill_magic_square
- 1 2 4
-3 5 7
-6 0 0 
- [(2, 1), (2, 2)]
-trying 8 at (2, 1) from {8, 9}
-fill_magic_square
- 1 2 4
-3 5 7
-6 8 0 
- [(2, 2)]
-trying 9 at (2, 2) from {9}
-fill_magic_square
- None 
- []
-trying 9 at (2, 1) from {8, 9}
-fill_magic_square
- None 
- [(2, 2)]
-trying 6 at (1, 1) from {5, 6, 7, 8, 9}
-fill_magic_square
- 1 2 4
-3 6 0
-0 0 0 
- [(1, 2), (2, 0), (2, 1), (2, 2)]
-trying 8 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 9 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- None 
- [(2, 0), (2, 1), (2, 2)]
-trying 5 at (1, 2) from {8, 9, 5, 7}
-fill_magic_square
- 1 2 4
-3 6 5
-0 0 0 
- [(2, 0), (2, 1), (2, 2)]
-trying 8 at (2, 0) from {8, 9, 7}
-fill_magic_square
- None 
- [(2, 1), (2, 2)]
-#+end_example
+: None
+:    0  1  2
+: 0  2  7  6
+: 1  9  5  1
+: 2  4  3  8
+
+
+Wahoo that works, its not the most efficient but it does work. Although I notice that it is taking forever and I hit timeouts even on values as low as 4
+
+#+begin_src python :tangle magic_square_generation.py
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        find_magic_square(int(sys.argv[1]))
+#+end_src
+
+#+RESULTS:
+
+#+begin_src shell :results verbose
+  timeout 10s python magic_square_generation.py 4 2>&1
+#+end_src
+
+#+RESULTS:
 

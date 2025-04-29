@@ -21,44 +21,7 @@ class MagicSquareBuilder:
         # Using Godel's(?) equation for summing up sequential sequences / square_size
         object.__setattr__(self, 'max_span_sum', self.side_size*(1+self.side_size**2)/2)
 
-def get_spans(square: MagicSquareBuilder, position: Position) -> Iterable[np.ndarray]:
-    row, column = position
-    # This row
-    yield square.cells.iloc[row, :].values
-
-    # This column
-    yield square.cells.iloc[:, column].values
-
-    # \ Diagonal (main diagonal)
-    if row == column:
-        yield np.diag(square.cells.values)
-
-    # / Diagonal (anti-diagonal)
-    if row == square.side_size - column - 1:
-        yield np.diag(np.fliplr(square.cells.values))
-
-def try_set(square: MagicSquareBuilder, position: Position, value: int) -> None | MagicSquareBuilder:
-    """Return a new square with position set to the passed in value. This will
-    do some basic checking to ensure that the returned square could potentially
-    still be a magic square. If not it will return None.
-
-    """
-    spans = get_spans(square, position)
-    if any((square.max_span_sum < (span.sum() + value)) for span in spans):
-        return None
-
-    new_cells = square.cells.copy()
-    new_cells.iloc[*position] = value
-    return MagicSquareBuilder(cells=new_cells)
-
-def remaining_values_to_try(square: MagicSquareBuilder) -> set[int]:
-    already_used_values = set(square.cells.values.flatten())
-    possible_values = set(range(1, square.side_size**2+1))
-    return possible_values - already_used_values
-
 def is_magic_square(square: MagicSquareBuilder) -> bool:
-    if remaining_values_to_try(square):
-        return False
     row_sums = square.cells.sum(axis=1)
     first_row_sum = row_sums.iloc[0]
     all_rows_equal = (row_sums == first_row_sum).all()
@@ -70,30 +33,54 @@ def is_magic_square(square: MagicSquareBuilder) -> bool:
         return False
     return first_row_sum == np.diag(square.cells.values).sum() == np.diag(np.fliplr(square.cells.values)).sum()
 
-remaining_recursions = 100
-def fill_magic_square(square: None | MagicSquareBuilder, remaining_positions: list[Position]) -> None | MagicSquareBuilder:
-    """Move through the list of positions that need to be filled. At each
-    position we try all the remaining possibilities and recurse to the next
-    position as needed.
+def _potential_span_sums(square: MagicSquareBuilder, position: Position) -> Iterable[int]:
+    row, column = position
+    yield square.cells.iloc[row, :].values.sum()
+    yield square.cells.iloc[:, column].values.sum()
+
+    # \ Diagonal (main diagonal)
+    if row == column:
+        yield np.diag(square.cells.values).sum()
+
+    # / Diagonal (anti-diagonal)
+    if row == square.side_size - column - 1:
+        yield np.diag(np.fliplr(square.cells.values)).sum()
+
+def try_set(square: MagicSquareBuilder, position: Position, value: int) -> None | MagicSquareBuilder:
+    """Return a new square with position set to the passed in value. This will
+    do some basic checking to ensure that the returned square could potentially
+    still be a magic square. If not it will return None.
     """
-    print("fill_magic_square\n", square and square.cells.to_string(index=False, header=False), "\n", remaining_positions)
-    global remaining_recursions
-    remaining_recursions -= 1
-    if remaining_recursions < 0:
-        raise Exception("recursion limit exceeded")
-    if not square:
+
+    span_sums = _potential_span_sums(square, position)
+    if any((square.max_span_sum < (x + value)) for x in span_sums):
         return None
+
+    new_cells = square.cells.copy()
+    new_cells.iloc[*position] = value
+    return MagicSquareBuilder(cells=new_cells)
+
+remaining_recursions = 100000
+def fill_magic_square(square: None | MagicSquareBuilder, remaining_positions: list[Position], remaining_values_to_try: list[int]) -> None | MagicSquareBuilder:
+    assert len(remaining_positions) == len(remaining_values_to_try)
+    global remaining_recursions
+
+    assert 0 < remaining_recursions
+    remaining_recursions -= 1
+
     if not remaining_positions:
-        # If we are out of positions to test and there's a square, then that's going to be the answer
         return square if is_magic_square(square) else None
 
-    next_position, *other_positions = remaining_positions
-    for value in remaining_values_to_try(square):
-        print("trying", value, "at", next_position, "from", remaining_values_to_try(square))
-        square_with_value = try_set(square, next_position, value)
-        res = fill_magic_square(square_with_value, other_positions)
-        if res:
-            return res
+    position_to_set, *other_positions = remaining_positions
+
+    for value in remaining_values_to_try:
+        square_with_value = try_set(square, position_to_set, value)
+        if not square_with_value:
+            continue
+        all_other_values_to_try = [v for v in remaining_values_to_try if v != value]
+        filled_square_with_value = fill_magic_square(square_with_value, other_positions, all_other_values_to_try)
+        if filled_square_with_value:
+            return filled_square_with_value
 
     return None
 
@@ -103,5 +90,11 @@ def find_magic_square(size: int) -> None | MagicSquareCells:
     # prefilling with zeros is just more efficient
     square = MagicSquareBuilder(cells=pd.DataFrame(np.zeros((size, size), dtype=int)))
     positions = list((r, c) for r in range(size) for c in range(size))
-    square = fill_magic_square(square, positions)
+    all_values = list(range(1, size**2+1))
+    square = fill_magic_square(square, positions, all_values)
     return square and square.cells
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        find_magic_square(int(sys.argv[1]))
