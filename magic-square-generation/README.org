@@ -82,10 +82,15 @@ Also, you know what? I want to push myself a bit, I have only passing experience
 :PROPERTIES:
 :header-args:python+: :session magic-square-generation
 :header-args:python+: :results silent
+:header-args:python+: :tangle  (org-entry-get (point) "tangle-target" 't)
 :END:
 
+** Naive Attempt
+:PROPERTIES:
+:tangle-target: magic_square_generation_attempt_1.py
+:END:
 First some types and imports
-#+begin_src python :tangle magic_square_generation.py
+#+begin_src python
   import pandas as pd
   import numpy as np
   from typing import Iterable
@@ -100,7 +105,7 @@ First some types and imports
 #+end_src
 
 lets also build out a class for our magic square builder with some helper values set. Note that it's a ~Builder~ not a ~MagicSquare~ since we don't want it to be possible to create invalid objects (ie a magic square that is not actually magic)
-#+begin_src python :tangle magic_square_generation.py
+#+begin_src python
   @dataclass(frozen=True)
   class MagicSquareBuilder:
       cells: MagicSquareCells
@@ -115,7 +120,7 @@ lets also build out a class for our magic square builder with some helper values
 
 We need a way to tell if a completed square is indeed magic, and that's going to be a bunch of our pandas stuff. I could make this stuff into methods on the class, but really its all in one module and typed so I see little point to it for the purposes of this exercise.
 
-#+begin_src python :tangle magic_square_generation.py
+#+begin_src python
   def is_magic_square(square: MagicSquareBuilder) -> bool:
       row_sums = square.cells.sum(axis=1)
       first_row_sum = row_sums.iloc[0]
@@ -128,7 +133,7 @@ We need a way to tell if a completed square is indeed magic, and that's going to
           return False
       return first_row_sum == np.diag(square.cells.values).sum() == np.diag(np.fliplr(square.cells.values)).sum()
 #+end_src
-#+begin_src python :results output pp replace
+#+begin_src python :results output pp replace :tangle no
   print(is_magic_square(MagicSquareBuilder(cells=pd.DataFrame([[1,2],[3,4]])))) # should be false
   magic_square = MagicSquareBuilder(cells=pd.DataFrame([
       [8, 1, 6],
@@ -146,7 +151,7 @@ Ok, that works well. Now we need a way of setting a new value in our builder. A 
 
 **Assumption**: Here we are counting on the assumption that movement is top left to bottom right and that any filled values are filled with =0=
 
-#+begin_src python :tangle magic_square_generation.py
+#+begin_src python
   def _potential_span_sums(square: MagicSquareBuilder, position: Position) -> Iterable[int]:
       row, column = position
       yield square.cells.iloc[row, :].values.sum()
@@ -177,7 +182,7 @@ Ok, that works well. Now we need a way of setting a new value in our builder. A 
 
 Lets experiment with that one
 
-#+begin_src python :results output pp replace
+#+begin_src python :results output pp replace :tangle no
   incomplete_square = MagicSquareBuilder(cells=pd.DataFrame(np.zeros((3, 3), dtype=int)))
   print(try_set(incomplete_square, (2, 1), 20)) #should be none
   print(try_set(incomplete_square, (0, 1), 1)) #should be fine
@@ -193,7 +198,7 @@ Lets experiment with that one
 
 Ok, so now lets actually implement the depth first search where we move from position to position and try to set values, drilling down to the next level if setting succeeds
 
-#+begin_src python :tangle magic_square_generation.py
+#+begin_src python
   remaining_recursions = 100000
   def fill_magic_square(square: None | MagicSquareBuilder, remaining_positions: list[Position], remaining_values_to_try: list[int]) -> None | MagicSquareBuilder:
       assert len(remaining_positions) == len(remaining_values_to_try)
@@ -231,7 +236,7 @@ Ok, so now lets actually implement the depth first search where we move from pos
 
 Lets try it
 
-#+begin_src python :results output pp replace
+#+begin_src python :results output pp replace :tangle no
   print(find_magic_square(2)) # should be None
   print(find_magic_square(3)) # sould be a square
 #+end_src
@@ -246,7 +251,7 @@ Lets try it
 
 Wahoo that works, its not the most efficient but it does work. Although I notice that it is taking forever and I hit timeouts even on values as low as 4
 
-#+begin_src python :tangle magic_square_generation.py
+#+begin_src python
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1:
@@ -255,9 +260,12 @@ if __name__ == "__main__":
 
 #+RESULTS:
 
-#+begin_src shell :results verbose
-  timeout 10s python magic_square_generation.py 4 2>&1
+#+begin_src shell :results verbose :var script_name=(org-entry-get (point) "tangle-target" 't)
+  timeout 10s python $script_name 4 2>&1
+  echo $?
 #+end_src
 
 #+RESULTS:
+: 124
 
+Ok, so what I did is just too damn slow even for our limited constraints. Perhaps we can try to speed it up. I'm not ready to blame this all on Pandas just yet
