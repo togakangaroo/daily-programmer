@@ -85,7 +85,7 @@ Also, you know what? I want to push myself a bit, I have only passing experience
 :header-args:python+: :tangle  (org-entry-get (point) "tangle-target" 't)
 :END:
 
-** Naive Attempt
+** Naive Attempt 1
 :PROPERTIES:
 :tangle-target: magic_square_generation_attempt_1.py
 :END:
@@ -269,3 +269,90 @@ if __name__ == "__main__":
 : 124
 
 Ok, so what I did is just too damn slow even for our limited constraints. Perhaps we can try to speed it up. I'm not ready to blame this all on Pandas just yet
+
+** Attempt 2
+:PROPERTIES:
+:tangle-target: magic_square_generation_attempt_2.py
+:END:
+
+Lets change the model to one of constraints. Here the idea is that we can fill out rows one at a time Lets say we start with
+
+| 2 |   |   |
+
+Well we clearly can answer the remaining set of possibilities: ~{(1,13),(3,10),(4,9),(5,8),(6,7)}~ where each pair can go in any order. This can even be cached.
+
+Now lets say we get to
+
+| 2 | 7 | 6 |
+| 9 |   |   |
+
+The possibilities for the row are ~{(1,5),(2,4)}~, and for the column are ~{(2,6),(3,5)}~, for the dialgonal are ~{(1,13),(3,10),(4,9),(5,8),(6,7)}~ and for the anti-diagonal are ~{(1,8),(2,7),(4,5)}~. We flatten these sets and take the intersection and only one possiblity remains =5=. #e can go further and subtract from this the set of already used numbers to narrow it down further
+
+Lets try this again but run through it till we hit a dead end. Also for the sake of expediency lets start at a high number
+
+| 10 |   |   |
+
+The remaining possibilities are ~{(1,4),(2,3)}~ we don't have anything else to go off of so lets pick that first tuple and fill it out before moving on to the next row. If this doesn't work out we can try out the next later
+
+| 10 | 1 | 4 |
+|    |   |   |
+
+The possibilities on the row are all the variants but on the column are once more  ~{(1,4),(2,3)}~ so the intersection is those four numbers flattened. Subtracting out the set of already used values we are left with a possibility of ~{(2,3)}~.
+
+Not having anything else to go on, lets prefill things in that order but we *were* just at another decision point.
+
+| 10 | 1 | 4 |
+|  2 |   |   |
+|  3 |   |   |
+
+Now for the rest of row[1] the possible values are ~{(1,13),(3,10),(4,9),(5,8),(6,7)}~, the possible column values are ~{(2,12),(3,11),(4,10),(5,9),(6,8)}~, the possible diagonals are ~{(1,4),(2,3)}~ and anti-diagonals are ~{(1,10),(2,9),(3,8),(5,6)}~. Flatten the and intersect and you get ~{3}~. That's not enough values to fill the row so we've hit a dead end. Lets back it up to the previous decision point
+
+| 10 | 1 | 4 |
+|  3 |   |   |
+|  2 |   |   |
+
+Now for the rest of row[1] the possible values are ~{(1,11),(2,10),(4,8),(5,7)}~, the possible column values are ~{(2,12),(3,11),(4,10),(5,9),(6,8)}~, the possible diagonals are ~{(1,4),(2,3)}~ and anti-diagonals are ~{(1,10),(2,9),(3,8),(5,6)}~. Flatten the and intersect and you get ~{2}~. Once again, that's not enough values to fill the row so we've hit a dead end.
+
+Lets try that again but without any pairwise thoughts
+
+| 10 |   |   |
+
+The remaining possibilities are ~{1,2,3,4}~ lets pick the first Decision point!
+
+| 10 | 1 |   |
+
+The reminaing possibilities are ~4~, there isn't really a decision here for a 3x3 but would be for more
+
+| 10 | 1 | 4 |
+|    |   |   |
+
+rows are unconstrained, column is contstrained to ~{1,2,3,4}~ subtract out the already used to get ~{2,3}~ and pick the first at a decision point
+
+| 10 | 1 | 4 |
+|  2 |   |   |
+
+the next value is now constrained by row to ~{1,3,4,5,6,7,8,9,10,11,12}~ and by column to ~{2,3,4,5,6,7,8,9,10,11,12}~ by diagonal to ~{1,2,3,4}~ and by anti-diagonal to ~{1,2,3,4,5,6,7,8,9,10}~. This gives us an intersection of ~{3,4}~ and when you subtract all the used ones you get ~{3}~. Dead end!
+
+Rolling back to the previous decision point
+
+| 10 | 1 | 4 |
+|  3 |   |   |
+
+the next value is now constrained by row to ~{1,2,4,5,6,7,8,9,10,11}~ and by column to ~{2,3,4,5,6,7,8,9,10,11,12}~ by diagonal to ~{1,2,3,4}~ and by anti-diagonal to ~{1,2,3,4,5,6,7,8,9,10}~. This gives us an intersection of ~{2,4}~ and when you subtract all the used ones you get ~{2}~. Dead end! Our previous decision point was all the way back on position 2
+
+| 10 | 2 |   |
+
+
+| 10 | 2 | 3 |
+|    |   |   |
+
+rows are unconstrained, column is contstrained to ~{1,2,3,4}~ subtract out the already used to get ~{1,4}~ and pick the first at a decision point
+
+| 10 | 2 | 3 |
+|  1 |   |   |
+
+the next value is now constrained by row to ~{2,3,4,5,6,7,8,9,10,11,12}~ and by column to ~{1,3,4,5,6,7,8,9,10,11,12}~ by diagonal to ~{1,2,3,4}~ and by anti-diagonal to ~{1,2,4,5,6,7,8,9,10,11}~. This gives us an intersection of ~{2,4}~ and when you subtract all the used ones you get ~{4}~. Dead end! 
+
+At this point I am noticing that we're just reflecting the square from above. I guess once we eliminate a set of values for row 1 we could *also* eliminate them for column 1. This might be like overkill as an optimization for our needs though I'm sure it can halve some runtimes.
+
+So there's two concepts here that we probably want to model out - decision points and constraints. I never looked into how constraint solvers are implemented under the hood, but it seems likely that its similar to this
