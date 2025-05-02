@@ -270,12 +270,13 @@ if __name__ == "__main__":
 
 Ok, so what I did is just too damn slow even for our limited constraints. Perhaps we can try to speed it up. I'm not ready to blame this all on Pandas just yet
 
-** Attempt 2
+** Attempt 2 - Constraint Solver
 :PROPERTIES:
 :tangle-target: magic_square_generation_attempt_2.py
 :END:
 
-Lets change the model to one of constraints. Here the idea is that we can fill out rows one at a time Lets say we start with
+*** Brainstorming
+Lets change the model to one of constraints. Here the idea is that we can fill out rows one at a time
 
 | 2 |   |   |
 
@@ -331,14 +332,14 @@ rows are unconstrained, column is contstrained to ~{1,2,3,4}~ subtract out the a
 | 10 | 1 | 4 |
 |  2 |   |   |
 
-the next value is now constrained by row to ~{1,3,4,5,6,7,8,9,10,11,12}~ and by column to ~{2,3,4,5,6,7,8,9,10,11,12}~ by diagonal to ~{1,2,3,4}~ and by anti-diagonal to ~{1,2,3,4,5,6,7,8,9,10}~. This gives us an intersection of ~{3,4}~ and when you subtract all the used ones you get ~{3}~. Dead end!
+the next value is now constrained by row to ~{1,3,4,5,6,7,8,9,10}~ and by column to ~{2,3,4,5,6,7,8,9,10}~ by diagonal to ~{1,2,3,4}~ and by anti-diagonal to ~{1,2,3,4,5,6,7,8,9,10}~. This gives us an intersection of ~{3,4}~ and when you subtract all the used ones you get ~{3}~. Dead end!
 
 Rolling back to the previous decision point
 
 | 10 | 1 | 4 |
 |  3 |   |   |
 
-the next value is now constrained by row to ~{1,2,4,5,6,7,8,9,10,11}~ and by column to ~{2,3,4,5,6,7,8,9,10,11,12}~ by diagonal to ~{1,2,3,4}~ and by anti-diagonal to ~{1,2,3,4,5,6,7,8,9,10}~. This gives us an intersection of ~{2,4}~ and when you subtract all the used ones you get ~{2}~. Dead end! Our previous decision point was all the way back on position 2
+the next value is now constrained by row to ~{1,2,4,5,6,7,8,9,10}~ and by column to ~{2,3,4,5,6,7,8,9,10}~ by diagonal to ~{1,2,3,4}~ and by anti-diagonal to ~{1,2,3,4,5,6,7,8,9,10}~. This gives us an intersection of ~{2,4}~ and when you subtract all the used ones you get ~{2}~. Dead end! Our previous decision point was all the way back on position 2
 
 | 10 | 2 |   |
 
@@ -351,8 +352,130 @@ rows are unconstrained, column is contstrained to ~{1,2,3,4}~ subtract out the a
 | 10 | 2 | 3 |
 |  1 |   |   |
 
-the next value is now constrained by row to ~{2,3,4,5,6,7,8,9,10,11,12}~ and by column to ~{1,3,4,5,6,7,8,9,10,11,12}~ by diagonal to ~{1,2,3,4}~ and by anti-diagonal to ~{1,2,4,5,6,7,8,9,10,11}~. This gives us an intersection of ~{2,4}~ and when you subtract all the used ones you get ~{4}~. Dead end! 
+the next value is now constrained by row to ~{2,3,4,5,6,7,8,9,10}~ and by column to ~{1,3,4,5,6,7,8,9,10}~ by diagonal to ~{1,2,3,4}~ and by anti-diagonal to ~{1,2,4,5,6,7,8,9,10}~. This gives us an intersection of ~{2,4}~ and when you subtract all the used ones you get ~{4}~. Dead end!
 
 At this point I am noticing that we're just reflecting the square from above. I guess once we eliminate a set of values for row 1 we could *also* eliminate them for column 1. This might be like overkill as an optimization for our needs though I'm sure it can halve some runtimes.
 
-So there's two concepts here that we probably want to model out - decision points and constraints. I never looked into how constraint solvers are implemented under the hood, but it seems likely that its similar to this
+Ok, we'll do this one more time but on a ~N=4~, =4x4= square.
+
+I'm also going to be really methodical here with making my steps explicit and listing all constraints. Some universal constraints that we will be applying are
+
+**** Defining our Constraints
+- Known Value :: Must be in \( [1, N^2] = [1,16] \)
+- Row Sum :: Ensure the row sum is
+    \( S = \frac{N(1+N^2)}{2} = 34 \)
+  So when you're on row index =r= and the sum so far is =R=, the bounds will be \( [1, S-R ] \)
+  Though we can actually decrease it further any *sum* of the range of cells after =r= must be possible. But the lowest possible sum for a number of cells =k= ...
+
+  - When r=0 there are k=3 left after this one. \( R'=3+2+1=6 \)
+  - When r=1 there's k=2 left. \( R'=2+1=3 \)
+  - When r=2 there's k=1 left. \( R'=1 \)
+  - When r=3 there's k=0 left. \( R'=0 \)
+  In this case \( k=N-r-1 \). and \( R'=\frac{k(k+1)}{2} \)
+
+  which we can subsitute in to get
+  \begin{equation}
+    \frac{(N-r-1)(N-r-1+1)}{2}
+    \frac{(N-r-1)(N-r)}{2}
+    \\=R'
+  \end{equation}
+
+  I think that's the neatest thing we could reduce it to? So we have this equation \( S = R + V[r] + R' \)
+
+  And finally twe get
+
+  \( [1, S-R-R'] \)
+
+  which accounts for the fact that you don't want to sum up *all* the way to =S= before you get to the end.
+  **Important Caveat*: If \( r+1=N \) then \( [S-R-R']=[S-R] \) is also the lowerbound
+- Column Sum :: Ensure the same for column sum on column index =c= when the sum so far is =C=, the bounds will be \( [1, S-C-C'] \)
+- Diagonal Sum :: When \( r=c \), the same for diagonal sum when the sum so far is =D=, the bounds will be \( [1, S-D-D'] \)
+- Anti-Diagonal Sum :: When \( r=(N-c-1) \), the same for the anti-diagonal sum when the sum so far is =D_a=, the bounds will be \( [1, S-D_a-D_a'] \)
+- Uniqueness :: Must not be one of the numbers already used
+- Disallowed :: Values we already tried DFS when searching this decision point
+
+**** 4 Square Sample
+
+At each decision point we will pick the highest number possible. It shouldn't make a lot of difference but we can hopefully use it to cut down on some options.
+
+We are going to move top left to bottom right, backtracking at each decision point as necessary.
+
+| Cell | Row Sum | Column Sum | Diagonal Sum | Anti-diagonal | Uniqueness            | Disallowed | Decision |
+|------+---------+------------+--------------+---------------+-----------------------+------------+----------|
+| 0 0  | [1,34]  | [1,34]     | [1,34]       |               |                       |            |       16 |
+| 0 1  | [1,15]  | [1,34]     |              |               | -{16}                 |            |       15 |
+| 0 2  | [1,2]   | [1,34]     |              |               | -{15,16}              |            |        2 |
+| 0 3  | [1,1]   | [1,34]     |              | [1,34]        | -{2,15,16}            |            |        1 |
+| 1 0  | [1,34]  | [1,15]     |              |               | -{1,2,15,16}          |            |       14 |
+| 1 1  | [1,17]  | [1,16]     | [1,15]       |               | -{1,2,[14,16]}        |            |       13 |
+| 1 2  | [1,6]   | [1,29]     |              | [1,30]        | -{1,2,[13,16]}        |            |        6 |
+| 1 3  | [1,1]   | [1,30]     |              |               | -{1,2,6,[13,16]}      |            |          |
+| 1 2  | [1,6]   | [1,29]     |              | [1,30]        | -{1,2,[13,16]}        | -{6}       |        5 |
+| 1 3  | [1,2]   | [1,30]     |              |               | -{1,2,5,[13,16]}      |            |          |
+| 1 2  | [1,6]   | [1,29]     |              | [1,30]        | -{1,2,[13,16]}        | -{5,6}     |        4 |
+| 1 3  | [1,3]   | [1,30]     |              |               | -{1,2,5,[13,16]}      |            |        3 |
+| 2 1  | [1,34]  | [1,3]      |              |               | -{[1,3],5,[13,16]}    |            |          |
+| 1 3  | [1,3]   | [1,30]     |              |               | -{1,2,5,[13,16]}      | -{3}       |          |
+| 1 2  | [1,6]   | [1,29]     |              | [1,30]        | -{1,2,[13,16]}        | -{4,5,6}   |        3 |
+| 1 3  | [1,4]   | [1,30]     |              |               | -{[1,3],[13,16]}      |            |        4 |
+| 2 1  | [1,34]  | [1,3]      |              |               | -{[1,4],[13,16]}      |            |          |
+| 1 3  | [1,4]   | [1,30]     |              |               | -{[1,3],[13,16]}      | -{4}       |          |
+| 1 2  | [1,6]   | [1,29]     |              | [1,30]        | -{1,2,[13,16]}        | -{3,4,5,6} |          |
+| 1 1  | [1,17]  | [1,16]     | [1,15]       |               | -{1,2,[14,16]}        | -{13}      |       12 |
+| 1 2  | [1,7]   | [1,29]     |              | [1,30]        | -{1,2,12,[14,16]}     |            |        7 |
+| 1 3  | [1,1]   | [1,30]     |              |               | -{1,2,7,12,[13,16]}   |            |          |
+| 1 2  | [1,7]   | [1,29]     |              | [1,30]        | -{1,2,12,[14,16]}     | -{7}       |        6 |
+| 1 3  | [1,2]   | [1,30]     |              |               | -{1,2,6,12,[13,16]}   |            |          |
+| 1 2  | [1,7]   | [1,29]     |              | [1,30]        | -{1,2,12,[14,16]}     | -{6,7}     |        5 |
+| 1 3  | [1,3]   | [1,30]     |              |               | -{1,2,5,12,[13,16]}   |            |        3 |
+| 2 1  | [1,34]  | [1,4]      |              |               | -{[1,3],5,12,[14,16]} |            |        4 |
+| 2 2  | [1,27]  | [1,4]      |              | [1,27]        | -{[1,5],12,[14,16]}   |            |          |
+|      |         |            |              |               |                       |            |          |
+
+| 16 | 15 | 2 | 1 |
+| 14 | 12 | 5 | 3 |
+|  4 |    |   |   |
+|    |    |   |   |
+
+I mean thats quite a few steps, but we have eliminated a good deal of the start-with-16 possibilities relatively quickly.
+
+ I never looked into how constraint solvers are implemented under the hood, but it seems likely that its similar to this
+
+ I also realize that I screwed up the upper bounds above, but thats ok, I think I am understanding the algorithm here
+
+**** 3 Square Sample
+
+ Ok, lets try one that we can (hopefully) make work in a reasonable amount of time. We'll start with the first row of a 3-square filled out and - importantly - filled out correctly.
+
+| Cell | Row Sum | Column Sum | Diagonal Sum | Anti-diagonal | Uniqueness   | Disallowed | Decision |
+|------+---------+------------+--------------+---------------+--------------+------------+----------|
+| 1 0  | [1,12]  | [1,6]      |              |               | -{1,6,8}     |            |        5 |
+| 1 1  | [1,9]   | [1,13]     | [1,6]        | [1,8]         | -{1,5,6,8}   |            |        4 |
+| 1 2  | [6,6]   | [1,8]      |              |               | -{1,[4,6],8} |            |          |
+| 1 1  | [1,9]   | [1,13]     | [1,6]        | [1,8]         | -{1,5,6,8}   | -{4}       |        3 |
+| 1 2  | [7,7]   | [1,8]      |              |               | -{1,3,5,6,8} |            |        7 |
+| 2 0  | [1,12]  | [2,2]      |              | [6,6]         | -{1,3,[5,8]} |            |          |
+| 1 1  | [1,9]   | [1,13]     | [1,6]        | [1,8]         | -{1,5,6,8}   | -{3,4}     |        2 |
+| 1 2  | [8,8]   | [1,8]      |              |               | -{1,2,5,6,8} |            |          |
+| 1 0  | [1,12]  | [1,6]      |              |               | -{1,6,8}     | -{5}       |        4 |
+| 1 1  | [1,10]  | [1,13]     | [1,6]        | [1,8]         | -{1,4,6,8}   |            |        5 |
+| 1 2  | [6,6]   | [1,8]      |              |               | -{1,[4,6],8} |            |          |
+| 1 1  | [1,10]  | [1,13]     | [1,6]        | [1,8]         | -{1,4,6,8}   | -{5}       |        3 |
+| 1 2  | [8,8]   | [1,8]      | [1,3]        | [1,5]         | -{1,3,4,6,8} |            |          |
+| 1 1  | [1,10]  | [1,13]     | [1,6]        | [1,8]         | -{1,4,6,8}   | -{3,5}     |        2 |
+| 1 2  | [9,9]   | [1,8]      |              |               | -{1,2,4,6,8} |            |        9 |
+| 2 0  | [1,12]  | [3,3]      |              | [7,7]         | -{...}       |            |          |
+| 1 0  | [1,12]  | [1,6]      |              |               | -{1,6,8}     | -{4,5}     |        3 |
+| 1 1  | [1,12]  | [1,13]     | [1,6]        | [1,8]         | -{1,3,6,8}   |            |        5 |
+| 1 2  | [7,7]   | [1,7]      |              |               | -{1,3,5,6,8} |            |        7 |
+| 2 0  | [1,12]  | [4,4]      |              | [4,4]         | -{1,3,[5,8]} |            |        4 |
+| 2 1  | [1,10]  | [9,9]      |              |               | -{1,[3,8]}   |            |        9 |
+| 2 2  | [2,2]   | [2,2]      | [2,2]        |               | -{1,[3,9]}   |            |        2 |
+
+| 8 | 1 | 6 |
+| 3 | 5 | 7 |
+| 4 | 9 | 2 |
+
+I honestly don't even care about the problem anymore, just implementing a constraint solver will be fun
+
+**** Implementation
