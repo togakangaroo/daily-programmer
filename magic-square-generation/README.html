@@ -1,0 +1,1625 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2025-05-01 Thu 22:16 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="author" content="George Mauer" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org11ef109">1. Problem Statement</a>
+<ul>
+<li><a href="#org987427c">1.1. Example:</a></li>
+<li><a href="#orgaba57cb">1.2. Constraints:</a></li>
+</ul>
+</li>
+<li><a href="#org29c0e86">2. Brainstorming</a></li>
+<li><a href="#org09b8f3c">3. Python Solution</a>
+<ul>
+<li><a href="#org76d8dd7">3.1. Naive Attempt 1</a></li>
+<li><a href="#orgbb3ac8e">3.2. Attempt 2 - Constraint Solver</a>
+<ul>
+<li><a href="#org7d9aaed">3.2.1. Brainstorming</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<p>
+I am looking for a job now and my last six months have been more devops focused. Let's get back into some coding
+</p>
+
+<p>
+For this I just asked Mistral to cook me up a simple problem, here's what it gave me
+</p>
+<div id="outline-container-org11ef109" class="outline-2">
+<h2 id="org11ef109"><span class="section-number-2">1.</span> Problem Statement</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+In a magic square, all of the numbers from <code>1</code> to <code>n^2</code> appear, and the sums of the numbers in any row, column, or diagonal are always equal. Given an integer <code>n (1 &lt;= n &lt;= 9)</code>, write a function that creates an
+and returns such a magic square for the given size.
+</p>
+
+<p>
+Here is an example of a <code>3x3</code> magic square:
+</p>
+<blockquote>
+<p>
+[8, 1, 6]
+[3, 5, 7]
+[4, 9, 2]
+</p>
+</blockquote>
+
+
+<p>
+Create a function called <code>magicSquare</code> that takes in an integer <code>n</code> and returns a 2D list representing the magic square for the given size.
+</p>
+</div>
+<div id="outline-container-org987427c" class="outline-3">
+<h3 id="org987427c"><span class="section-number-3">1.1.</span> Example:</h3>
+<div class="outline-text-3" id="text-1-1">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #2aa1ae; font-weight: bold;">magic_square</span><span style="color: #4f97d7;">(</span><span style="color: #a45bad;">3</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7; font-weight: bold;">==</span> <span style="color: #4f97d7;">[</span><span style="color: #bc6ec5;">[</span><span style="color: #a45bad;">8</span>, <span style="color: #a45bad;">1</span>, <span style="color: #a45bad;">6</span><span style="color: #bc6ec5;">]</span>, <span style="color: #bc6ec5;">[</span><span style="color: #a45bad;">3</span>, <span style="color: #a45bad;">5</span>, <span style="color: #a45bad;">7</span><span style="color: #bc6ec5;">]</span>, <span style="color: #bc6ec5;">[</span><span style="color: #a45bad;">4</span>, <span style="color: #a45bad;">9</span>, <span style="color: #a45bad;">2</span><span style="color: #bc6ec5;">]</span><span style="color: #4f97d7;">]</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgaba57cb" class="outline-3">
+<h3 id="orgaba57cb"><span class="section-number-3">1.2.</span> Constraints:</h3>
+<div class="outline-text-3" id="text-1-2">
+<ul class="org-ul">
+<li>The function should be able to handle any valid input from <code>1 to 9</code>.</li>
+<li>Use only basic data structures and built-in functions (avoid external libraries).</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org29c0e86" class="outline-2">
+<h2 id="org29c0e86"><span class="section-number-2">2.</span> Brainstorming</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+A quick Google seems to indicate that magic squares are always possible, or at least possible enough that I think the constraints of the problem make sense. Sounds like there's "simple" techniques to do it. Maybe I'll look into those for a second implementation after I do this one.
+</p>
+
+<p>
+I also want to use python because eh, it keeps coming up lately. I'll probably use elisp later.
+</p>
+
+<p>
+Now what do we actually do? Well, a depth first search seems like the obvious thing, right?
+</p>
+
+<p>
+In fact we know what the sum of every span (column, row, diagonal) in the square must be - it must be <code>sum(1..n^2)/n</code> which for a 3-quare would be <code>45/3=15</code>. We could shortcut the DFS process by picking a number, then checking if that forces the sum of any spans to exceed it.
+</p>
+
+<p>
+Additionally we <b>could</b> set a lower bound as well. If you are in a 3-square row that already contains a <code>1</code> then a <code>2</code> is out of the question since there would be no way to get to <code>15</code> with that. We could generalize it as a branch being a dead end if the row's current sum <code>sum(span)</code> plus the highest values possible in the remaining cells (<code>sum(n, n-1, n-2)</code> <code>n-len(span) times</code>) is less than our <code>Target</code> from above. This is good to know but feels more complicated thatn it might be worth within our constraints so lets punt on it.
+</p>
+
+<p>
+Now, what sort of datastructure would be good here? What comes to mind is a 2d structure comprised of linked lists so that you can easily get the current spans as we go. Even though I'm picturing actually putting values into cells, it is probably best that this thing be immutable just because that works better for the detph first search, right? Lets write down the sort of operations we want to be able to do easily:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #7590db;">new_square</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #4f97d7; font-weight: bold;">set</span><span style="color: #4f97d7;">(</span>square, <span style="color: #bc6ec5;">row</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #a45bad;">0</span>, <span style="color: #bc6ec5;">column</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #a45bad;">2</span>, <span style="color: #bc6ec5;">value</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #a45bad;">7</span><span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+<p>
+and the check for sums would be something like this
+</p>
+
+<p>
+This seems like a good idea at first for an api
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">any</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">(</span>target_sum <span style="color: #4f97d7; font-weight: bold;">!=</span> <span style="color: #4f97d7; font-weight: bold;">sum</span><span style="color: #2d9574;">(</span>span<span style="color: #2d9574;">)</span> <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">span</span> <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #2aa1ae; font-weight: bold;">get_spans</span><span style="color: #2d9574;">(</span>new_square, <span style="color: #bc6ec5;">row</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #a45bad;">0</span>, <span style="color: #bc6ec5;">column</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #a45bad;">2</span><span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>:
+    <span style="color: #4f97d7; font-weight: bold;">return</span>
+</pre>
+</div>
+
+<p>
+but wait, that's not quite right, a span that isn't filled out yet isn't going to be the right sum but is not a dead end either. So I guess we could delegate the whole thing to the set function so it would be impossible to enter an invalid state. <code>try_set</code> instead of <code>set</code> and return <code>True</code> or <code>False</code> as to whether it succeeded. That would be easy enough to check so long as we have some sort of <code>undefined</code> token we could ignore (or coerce to 0 which works for the purposes of summing).
+</p>
+
+<p>
+Finally I want to think about the structure. We really do need immutability I feel unless we want to be really invested in fastidiously cleaning up after each and every depth first search. Now normally I would say that some sort of copy-on-write implementation is what we want, but in this case we're simply storing integers. Copy-on-write would typically work by storing references to the "immutable" bits but that would just be references which aren't any smaller on the stack than integers are, right? I'm sure there's stuff you can do to make improvements here but at such small <code>n</code> it just doesn't seem like such a big deal to copy all the numbers in our square on each <code>try_set()</code>
+</p>
+
+<p>
+&#x2014;
+</p>
+
+<p>
+Ok, so that's one approach, lets just do a simple version of it. In fact, lets use my favorite approach of picturing ourselves physically on the problem space
+</p>
+
+<p>
+I picture standing on a square grid with a book of available numbers. I tear down the page for the first number and pin it to the square, I then move forward and pin the next and I do this all the way across until I have pinned a number to each square. At that point I am done and I can check if it is a magic square. If it is, then hooray we did good; but, if not, then we must remove the last two notes and try things in a different order. Of course we know that this won't work but we can optimize in a bit. By repeating this process we will have successfully brute forced a solution.
+</p>
+
+<p>
+Ok, but what about the optimization? Well it is important to understand that for a square of size <code>N</code>, each row, column, and diagonal must sum to
+</p>
+
+<p>
+\[ \frac{N^2(N^2+1)}{2N} \] which can be simplified as \[ \frac{N(N^2+1)}{2} \] and represented as <code>T</code>
+</p>
+
+<p>
+If we ever hit the following conditions then we can stop exploring as it is impossible to get a magic square from that state
+</p>
+
+<ul class="org-ul">
+<li>a row, column, or diagonal with a <code>sum &gt; T</code></li>
+<li>a completed row, column, or diagonal with a <code>sum != T</code></li>
+</ul>
+
+<p>
+Furthermore, if we can assume move top left to bottom right, if a completed row does not <code>sum == T</code> then no variation of that row will work. You could say the same thing of the <code>/</code> diagonal and columns as well, but under this assumption you wouldn't complete any of these until the last row so it doesn't save you on all that much iterations.
+</p>
+
+<p>
+Also, you know what? I want to push myself a bit, I have only passing experience with Pandas, and I know it implements copy-on-write semantics for <code>DataFrame</code> so - even though it might not be the most efficient, lets learn something and do this with pandas
+</p>
+</div>
+</div>
+<div id="outline-container-org09b8f3c" class="outline-2">
+<h2 id="org09b8f3c"><span class="section-number-2">3.</span> Python Solution</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org76d8dd7" class="outline-3">
+<h3 id="org76d8dd7"><span class="section-number-3">3.1.</span> Naive Attempt 1</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+First some types and imports
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #4f97d7; font-weight: bold;">import</span> pandas <span style="color: #4f97d7; font-weight: bold;">as</span> pd
+<span style="color: #4f97d7; font-weight: bold;">import</span> numpy <span style="color: #4f97d7; font-weight: bold;">as</span> np
+<span style="color: #4f97d7; font-weight: bold;">from</span> typing <span style="color: #4f97d7; font-weight: bold;">import</span> <span style="color: #ce537a; font-weight: bold;">Iterable</span>
+<span style="color: #4f97d7; font-weight: bold;">from</span> dataclasses <span style="color: #4f97d7; font-weight: bold;">import</span> dataclass, field
+
+<span style="color: #7590db; font-weight: bold;">MagicSquareCells</span> <span style="color: #4f97d7; font-weight: bold;">=</span> pd.<span style="color: #ce537a; font-weight: bold; font-style: italic;">DataFrame</span>
+
+<span style="color: #4f97d7; font-weight: bold;">@</span><span style="color: #2aa1ae; font-weight: bold;">dataclass</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">frozen</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #4f97d7;">True</span><span style="color: #4f97d7;">)</span>
+<span style="color: #4f97d7; font-weight: bold;">class</span> <span style="color: #ce537a; font-weight: bold;">Position</span>:
+    <span style="color: #7590db;">row</span>: <span style="color: #4f97d7; font-weight: bold;">int</span>
+    <span style="color: #7590db;">column</span>: <span style="color: #4f97d7; font-weight: bold;">int</span>
+</pre>
+</div>
+
+<p>
+lets also build out a class for our magic square builder with some helper values set. Note that it's a <code>Builder</code> not a <code>MagicSquare</code> since we don't want it to be possible to create invalid objects (ie a magic square that is not actually magic)
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #4f97d7; font-weight: bold;">@</span><span style="color: #2aa1ae; font-weight: bold;">dataclass</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">frozen</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #4f97d7;">True</span><span style="color: #4f97d7;">)</span>
+<span style="color: #4f97d7; font-weight: bold;">class</span> <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span>:
+    <span style="color: #7590db;">cells</span>: <span style="color: #ce537a; font-weight: bold;">MagicSquareCells</span>
+    <span style="color: #7590db;">side_size</span>: <span style="color: #4f97d7; font-weight: bold;">int</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #2aa1ae; font-weight: bold;">field</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">init</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #4f97d7;">False</span><span style="color: #4f97d7;">)</span>
+    <span style="color: #7590db;">max_span_sum</span>: <span style="color: #4f97d7; font-weight: bold;">int</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #2aa1ae; font-weight: bold;">field</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">init</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #4f97d7;">False</span><span style="color: #4f97d7;">)</span>
+
+    <span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">__post_init__</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span><span style="color: #4f97d7;">)</span>:
+        object.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">__setattr__</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span>, <span style="color: #2d9574;">'side_size'</span>, <span style="color: #4f97d7; font-weight: bold;">self</span>.<span style="color: #a45bad; font-style: italic;">cells</span>.<span style="color: #a45bad; font-style: italic;">shape</span><span style="color: #bc6ec5;">[</span><span style="color: #a45bad;">0</span><span style="color: #bc6ec5;">]</span><span style="color: #4f97d7;">)</span>
+        <span style="color: #2aa1ae; background-color: #292e34;"># Using Godel's(?) equation for summing up sequential sequences / square_size</span>
+        object.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">__setattr__</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">self</span>, <span style="color: #2d9574;">'max_span_sum'</span>, <span style="color: #4f97d7; font-weight: bold;">self</span>.<span style="color: #a45bad; font-style: italic;">side_size</span><span style="color: #4f97d7; font-weight: bold;">*</span><span style="color: #bc6ec5;">(</span><span style="color: #a45bad;">1</span><span style="color: #4f97d7; font-weight: bold;">+</span><span style="color: #4f97d7; font-weight: bold;">self</span>.<span style="color: #a45bad; font-style: italic;">side_size</span><span style="color: #4f97d7; font-weight: bold;">**</span><span style="color: #a45bad;">2</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7; font-weight: bold;">/</span><span style="color: #a45bad;">2</span><span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<p>
+We need a way to tell if a completed square is indeed magic, and that's going to be a bunch of our pandas stuff. I could make this stuff into methods on the class, but really its all in one module and typed so I see little point to it for the purposes of this exercise.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">is_magic_square</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">square</span>: <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span><span style="color: #4f97d7;">)</span> -&gt; <span style="color: #4f97d7; font-weight: bold;">bool</span>:
+    <span style="color: #7590db;">row_sums</span> <span style="color: #4f97d7; font-weight: bold;">=</span> square.<span style="color: #a45bad; font-style: italic;">cells</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">sum</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">axis</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #a45bad;">1</span><span style="color: #4f97d7;">)</span>
+    <span style="color: #7590db;">first_row_sum</span> <span style="color: #4f97d7; font-weight: bold;">=</span> row_sums.<span style="color: #a45bad; font-style: italic;">iloc</span><span style="color: #4f97d7;">[</span><span style="color: #a45bad;">0</span><span style="color: #4f97d7;">]</span>
+    <span style="color: #7590db;">all_rows_equal</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #4f97d7;">(</span>row_sums <span style="color: #4f97d7; font-weight: bold;">==</span> first_row_sum<span style="color: #4f97d7;">)</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">all</span><span style="color: #4f97d7;">()</span>
+    <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">not</span> all_rows_equal:
+        <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #4f97d7;">False</span>
+    <span style="color: #7590db;">col_sums</span> <span style="color: #4f97d7; font-weight: bold;">=</span> square.<span style="color: #a45bad; font-style: italic;">cells</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">sum</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">axis</span><span style="color: #4f97d7; font-weight: bold;">=</span><span style="color: #a45bad;">0</span><span style="color: #4f97d7;">)</span>
+    <span style="color: #7590db;">all_cols_sum_same_as_rows</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #4f97d7;">(</span>col_sums <span style="color: #4f97d7; font-weight: bold;">==</span> first_row_sum<span style="color: #4f97d7;">)</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">all</span><span style="color: #4f97d7;">()</span>
+    <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">not</span> all_cols_sum_same_as_rows:
+        <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #4f97d7;">False</span>
+    <span style="color: #4f97d7; font-weight: bold;">return</span> first_row_sum <span style="color: #4f97d7; font-weight: bold;">==</span> np.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">diag</span><span style="color: #4f97d7;">(</span>square.<span style="color: #a45bad; font-style: italic;">cells</span>.<span style="color: #a45bad; font-style: italic;">values</span><span style="color: #4f97d7;">)</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">sum</span><span style="color: #4f97d7;">()</span> <span style="color: #4f97d7; font-weight: bold;">==</span> np.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">diag</span><span style="color: #4f97d7;">(</span>np.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">fliplr</span><span style="color: #bc6ec5;">(</span>square.<span style="color: #a45bad; font-style: italic;">cells</span>.<span style="color: #a45bad; font-style: italic;">values</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">sum</span><span style="color: #4f97d7;">()</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #4f97d7; font-weight: bold;">print</span><span style="color: #4f97d7;">(</span><span style="color: #2aa1ae; font-weight: bold;">is_magic_square</span><span style="color: #bc6ec5;">(</span><span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span><span style="color: #2d9574;">(</span><span style="color: #bc6ec5;">cells</span><span style="color: #4f97d7; font-weight: bold;">=</span>pd.<span style="color: #ce537a; font-weight: bold; font-style: italic;">DataFrame</span><span style="color: #67b11d;">(</span><span style="color: #b1951d;">[</span><span style="color: #4f97d7;">[</span><span style="color: #a45bad;">1</span>,<span style="color: #a45bad;">2</span><span style="color: #4f97d7;">]</span>,<span style="color: #4f97d7;">[</span><span style="color: #a45bad;">3</span>,<span style="color: #a45bad;">4</span><span style="color: #4f97d7;">]</span><span style="color: #b1951d;">]</span><span style="color: #67b11d;">)</span><span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span> <span style="color: #2aa1ae; background-color: #292e34;"># should be false</span>
+<span style="color: #7590db;">magic_square</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">cells</span><span style="color: #4f97d7; font-weight: bold;">=</span>pd.<span style="color: #ce537a; font-weight: bold; font-style: italic;">DataFrame</span><span style="color: #bc6ec5;">(</span><span style="color: #2d9574;">[</span>
+    <span style="color: #67b11d;">[</span><span style="color: #a45bad;">8</span>, <span style="color: #a45bad;">1</span>, <span style="color: #a45bad;">6</span><span style="color: #67b11d;">]</span>,
+    <span style="color: #67b11d;">[</span><span style="color: #a45bad;">3</span>, <span style="color: #a45bad;">5</span>, <span style="color: #a45bad;">7</span><span style="color: #67b11d;">]</span>,
+    <span style="color: #67b11d;">[</span><span style="color: #a45bad;">4</span>, <span style="color: #a45bad;">9</span>, <span style="color: #a45bad;">2</span><span style="color: #67b11d;">]</span>,
+<span style="color: #2d9574;">]</span><span style="color: #bc6ec5;">)</span> <span style="color: #4f97d7;">)</span>
+<span style="color: #4f97d7; font-weight: bold;">print</span><span style="color: #4f97d7;">(</span><span style="color: #2aa1ae; font-weight: bold;">is_magic_square</span><span style="color: #bc6ec5;">(</span>magic_square<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span><span style="color: #2aa1ae; background-color: #292e34;"># should be true</span>
+</pre>
+</div>
+
+<p>
+Ok, that works well. Now we need a way of setting a new value in our builder. A <code>try_set</code> function will allow us to run some basic checks before setting a value into a new copy of the builder. We want to make sure we're creating new instances since otherwise we'd have to clean up when unwinding the stack. I also believe that pandas might have some optimization around copying that can serve us well. At the very least, I see an article discussing that in Pandas 3.0 (which I'm not on yet).
+</p>
+
+<p>
+<b><b>Assumption</b></b>: Here we are counting on the assumption that movement is top left to bottom right and that any filled values are filled with <code>0</code>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">_potential_span_sums</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">square</span>: <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span>, <span style="color: #7590db;">position</span>: <span style="color: #ce537a; font-weight: bold;">Position</span><span style="color: #4f97d7;">)</span> -&gt; <span style="color: #ce537a; font-weight: bold;">Iterable</span><span style="color: #4f97d7;">[</span><span style="color: #4f97d7; font-weight: bold;">int</span><span style="color: #4f97d7;">]</span>:
+    <span style="color: #7590db;">row</span>, <span style="color: #7590db;">column</span> <span style="color: #4f97d7; font-weight: bold;">=</span> position
+    <span style="color: #4f97d7; font-weight: bold;">yield</span> square.<span style="color: #a45bad; font-style: italic;">cells</span>.<span style="color: #a45bad; font-style: italic;">iloc</span><span style="color: #4f97d7;">[</span>row, :<span style="color: #4f97d7;">]</span>.<span style="color: #a45bad; font-style: italic;">values</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">sum</span><span style="color: #4f97d7;">()</span>
+    <span style="color: #4f97d7; font-weight: bold;">yield</span> square.<span style="color: #a45bad; font-style: italic;">cells</span>.<span style="color: #a45bad; font-style: italic;">iloc</span><span style="color: #4f97d7;">[</span>:, column<span style="color: #4f97d7;">]</span>.<span style="color: #a45bad; font-style: italic;">values</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">sum</span><span style="color: #4f97d7;">()</span>
+
+    <span style="color: #2aa1ae; background-color: #292e34;"># \ Diagonal (main diagonal)</span>
+    <span style="color: #4f97d7; font-weight: bold;">if</span> row <span style="color: #4f97d7; font-weight: bold;">==</span> column:
+        <span style="color: #4f97d7; font-weight: bold;">yield</span> np.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">diag</span><span style="color: #4f97d7;">(</span>square.<span style="color: #a45bad; font-style: italic;">cells</span>.<span style="color: #a45bad; font-style: italic;">values</span><span style="color: #4f97d7;">)</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">sum</span><span style="color: #4f97d7;">()</span>
+
+    <span style="color: #2aa1ae; background-color: #292e34;"># / Diagonal (anti-diagonal)</span>
+    <span style="color: #4f97d7; font-weight: bold;">if</span> row <span style="color: #4f97d7; font-weight: bold;">==</span> square.<span style="color: #a45bad; font-style: italic;">side_size</span> <span style="color: #4f97d7; font-weight: bold;">-</span> column <span style="color: #4f97d7; font-weight: bold;">-</span> <span style="color: #a45bad;">1</span>:
+        <span style="color: #4f97d7; font-weight: bold;">yield</span> np.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">diag</span><span style="color: #4f97d7;">(</span>np.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">fliplr</span><span style="color: #bc6ec5;">(</span>square.<span style="color: #a45bad; font-style: italic;">cells</span>.<span style="color: #a45bad; font-style: italic;">values</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">sum</span><span style="color: #4f97d7;">()</span>
+
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">try_set</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">square</span>: <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span>, <span style="color: #7590db;">position</span>: <span style="color: #ce537a; font-weight: bold;">Position</span>, <span style="color: #7590db;">value</span>: <span style="color: #4f97d7; font-weight: bold;">int</span><span style="color: #4f97d7;">)</span> -&gt; <span style="color: #4f97d7;">None</span> <span style="color: #4f97d7; font-weight: bold;">|</span> <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span>:
+    <span style="color: #9f8766;">"""Return a new square with position set to the passed in value. This will</span>
+<span style="color: #9f8766;">    do some basic checking to ensure that the returned square could potentially</span>
+<span style="color: #9f8766;">    still be a magic square. If not it will return None.</span>
+<span style="color: #9f8766;">    """</span>
+
+    <span style="color: #7590db;">span_sums</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #2aa1ae; font-weight: bold;">_potential_span_sums</span><span style="color: #4f97d7;">(</span>square, position<span style="color: #4f97d7;">)</span>
+    <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">any</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">(</span>square.<span style="color: #a45bad; font-style: italic;">max_span_sum</span> <span style="color: #4f97d7; font-weight: bold;">&lt;</span> <span style="color: #2d9574;">(</span>x <span style="color: #4f97d7; font-weight: bold;">+</span> value<span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span> <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">x</span> <span style="color: #4f97d7; font-weight: bold;">in</span> span_sums<span style="color: #4f97d7;">)</span>:
+        <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #4f97d7;">None</span>
+
+    <span style="color: #7590db;">new_cells</span> <span style="color: #4f97d7; font-weight: bold;">=</span> square.<span style="color: #a45bad; font-style: italic;">cells</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">copy</span><span style="color: #4f97d7;">()</span>
+    new_cells.<span style="color: #a45bad; font-style: italic;">iloc</span><span style="color: #4f97d7;">[</span><span style="color: #4f97d7; font-weight: bold;">*</span>position<span style="color: #4f97d7;">]</span> <span style="color: #4f97d7; font-weight: bold;">=</span> value
+    <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">cells</span><span style="color: #4f97d7; font-weight: bold;">=</span>new_cells<span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<p>
+Lets experiment with that one
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #7590db;">incomplete_square</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">cells</span><span style="color: #4f97d7; font-weight: bold;">=</span>pd.<span style="color: #ce537a; font-weight: bold; font-style: italic;">DataFrame</span><span style="color: #bc6ec5;">(</span>np.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">zeros</span><span style="color: #2d9574;">(</span><span style="color: #67b11d;">(</span><span style="color: #a45bad;">3</span>, <span style="color: #a45bad;">3</span><span style="color: #67b11d;">)</span>, <span style="color: #bc6ec5;">dtype</span><span style="color: #4f97d7; font-weight: bold;">=</span>int<span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+<span style="color: #4f97d7; font-weight: bold;">print</span><span style="color: #4f97d7;">(</span><span style="color: #2aa1ae; font-weight: bold;">try_set</span><span style="color: #bc6ec5;">(</span>incomplete_square, <span style="color: #2d9574;">(</span><span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">1</span><span style="color: #2d9574;">)</span>, <span style="color: #a45bad;">20</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span> <span style="color: #2aa1ae; background-color: #292e34;">#should be none</span>
+<span style="color: #4f97d7; font-weight: bold;">print</span><span style="color: #4f97d7;">(</span><span style="color: #2aa1ae; font-weight: bold;">try_set</span><span style="color: #bc6ec5;">(</span>incomplete_square, <span style="color: #2d9574;">(</span><span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">1</span><span style="color: #2d9574;">)</span>, <span style="color: #a45bad;">1</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span> <span style="color: #2aa1ae; background-color: #292e34;">#should be fine</span>
+</pre>
+</div>
+
+
+<p>
+Ok, so now lets actually implement the depth first search where we move from position to position and try to set values, drilling down to the next level if setting succeeds
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #7590db;">remaining_recursions</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #a45bad;">100000</span>
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">fill_magic_square</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">square</span>: <span style="color: #4f97d7;">None</span> <span style="color: #4f97d7; font-weight: bold;">|</span> <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span>, <span style="color: #7590db;">remaining_positions</span>: list<span style="color: #bc6ec5;">[</span><span style="color: #ce537a; font-weight: bold;">Position</span><span style="color: #bc6ec5;">]</span>, <span style="color: #7590db;">remaining_values_to_try</span>: list<span style="color: #bc6ec5;">[</span><span style="color: #4f97d7; font-weight: bold;">int</span><span style="color: #bc6ec5;">]</span><span style="color: #4f97d7;">)</span> -&gt; <span style="color: #4f97d7;">None</span> <span style="color: #4f97d7; font-weight: bold;">|</span> <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span>:
+    <span style="color: #4f97d7; font-weight: bold;">assert</span> <span style="color: #4f97d7; font-weight: bold;">len</span><span style="color: #4f97d7;">(</span>remaining_positions<span style="color: #4f97d7;">)</span> <span style="color: #4f97d7; font-weight: bold;">==</span> <span style="color: #4f97d7; font-weight: bold;">len</span><span style="color: #4f97d7;">(</span>remaining_values_to_try<span style="color: #4f97d7;">)</span>
+    <span style="color: #4f97d7; font-weight: bold;">global</span> remaining_recursions
+
+    <span style="color: #4f97d7; font-weight: bold;">assert</span> <span style="color: #a45bad;">0</span> <span style="color: #4f97d7; font-weight: bold;">&lt;</span> remaining_recursions
+    <span style="color: #7590db;">remaining_recursions</span> <span style="color: #4f97d7; font-weight: bold;">-=</span> <span style="color: #a45bad;">1</span>
+
+    <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">not</span> remaining_positions:
+        <span style="color: #4f97d7; font-weight: bold;">return</span> square <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #2aa1ae; font-weight: bold;">is_magic_square</span><span style="color: #4f97d7;">(</span>square<span style="color: #4f97d7;">)</span> <span style="color: #4f97d7; font-weight: bold;">else</span> <span style="color: #4f97d7;">None</span>
+
+    <span style="color: #7590db;">position_to_set</span>, <span style="color: #4f97d7; font-weight: bold;">*</span>other_positions <span style="color: #4f97d7; font-weight: bold;">=</span> remaining_positions
+
+    <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">value</span> <span style="color: #4f97d7; font-weight: bold;">in</span> remaining_values_to_try:
+        <span style="color: #7590db;">square_with_value</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #2aa1ae; font-weight: bold;">try_set</span><span style="color: #4f97d7;">(</span>square, position_to_set, value<span style="color: #4f97d7;">)</span>
+        <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">not</span> square_with_value:
+            <span style="color: #4f97d7; font-weight: bold;">continue</span>
+        <span style="color: #7590db;">all_other_values_to_try</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #4f97d7;">[</span>v <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">v</span> <span style="color: #4f97d7; font-weight: bold;">in</span> remaining_values_to_try <span style="color: #4f97d7; font-weight: bold;">if</span> v <span style="color: #4f97d7; font-weight: bold;">!=</span> value<span style="color: #4f97d7;">]</span>
+        <span style="color: #7590db;">filled_square_with_value</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #2aa1ae; font-weight: bold;">fill_magic_square</span><span style="color: #4f97d7;">(</span>square_with_value, other_positions, all_other_values_to_try<span style="color: #4f97d7;">)</span>
+        <span style="color: #4f97d7; font-weight: bold;">if</span> filled_square_with_value:
+            <span style="color: #4f97d7; font-weight: bold;">return</span> filled_square_with_value
+
+    <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #4f97d7;">None</span>
+
+<span style="color: #4f97d7; font-weight: bold;">def</span> <span style="color: #bc6ec5; font-weight: bold;">find_magic_square</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">size</span>: <span style="color: #4f97d7; font-weight: bold;">int</span><span style="color: #4f97d7;">)</span> -&gt; <span style="color: #4f97d7;">None</span> <span style="color: #4f97d7; font-weight: bold;">|</span> <span style="color: #ce537a; font-weight: bold;">MagicSquareCells</span>:
+    <span style="color: #2aa1ae; background-color: #292e34;"># While prefilling with zeros is not technically correct and would in many situations be better</span>
+    <span style="color: #2aa1ae; background-color: #292e34;"># to use nan, when working specifically with magic squares it kind of doesn't matter and</span>
+    <span style="color: #2aa1ae; background-color: #292e34;"># prefilling with zeros is just more efficient</span>
+    <span style="color: #7590db;">square</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #ce537a; font-weight: bold;">MagicSquareBuilder</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">cells</span><span style="color: #4f97d7; font-weight: bold;">=</span>pd.<span style="color: #ce537a; font-weight: bold; font-style: italic;">DataFrame</span><span style="color: #bc6ec5;">(</span>np.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">zeros</span><span style="color: #2d9574;">(</span><span style="color: #67b11d;">(</span>size, size<span style="color: #67b11d;">)</span>, <span style="color: #bc6ec5;">dtype</span><span style="color: #4f97d7; font-weight: bold;">=</span>int<span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+    <span style="color: #7590db;">positions</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #4f97d7; font-weight: bold;">list</span><span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">(</span>r, c<span style="color: #bc6ec5;">)</span> <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">r</span> <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7; font-weight: bold;">range</span><span style="color: #bc6ec5;">(</span>size<span style="color: #bc6ec5;">)</span> <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">c</span> <span style="color: #4f97d7; font-weight: bold;">in</span> <span style="color: #4f97d7; font-weight: bold;">range</span><span style="color: #bc6ec5;">(</span>size<span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+    <span style="color: #7590db;">all_values</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #4f97d7; font-weight: bold;">list</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">range</span><span style="color: #bc6ec5;">(</span><span style="color: #a45bad;">1</span>, size<span style="color: #4f97d7; font-weight: bold;">**</span><span style="color: #a45bad;">2</span><span style="color: #4f97d7; font-weight: bold;">+</span><span style="color: #a45bad;">1</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+    <span style="color: #7590db;">square</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #2aa1ae; font-weight: bold;">fill_magic_square</span><span style="color: #4f97d7;">(</span>square, positions, all_values<span style="color: #4f97d7;">)</span>
+    <span style="color: #4f97d7; font-weight: bold;">return</span> square <span style="color: #4f97d7; font-weight: bold;">and</span> square.<span style="color: #a45bad; font-style: italic;">cells</span>
+</pre>
+</div>
+
+<p>
+Lets try it
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #4f97d7; font-weight: bold;">print</span><span style="color: #4f97d7;">(</span><span style="color: #2aa1ae; font-weight: bold;">find_magic_square</span><span style="color: #bc6ec5;">(</span><span style="color: #a45bad;">2</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span> <span style="color: #2aa1ae; background-color: #292e34;"># should be None</span>
+<span style="color: #4f97d7; font-weight: bold;">print</span><span style="color: #4f97d7;">(</span><span style="color: #2aa1ae; font-weight: bold;">find_magic_square</span><span style="color: #bc6ec5;">(</span><span style="color: #a45bad;">3</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span> <span style="color: #2aa1ae; background-color: #292e34;"># sould be a square</span>
+</pre>
+</div>
+
+
+<p>
+Wahoo that works, its not the most efficient but it does work. Although I notice that it is taking forever and I hit timeouts even on values as low as 4
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7;">__name__</span> <span style="color: #4f97d7; font-weight: bold;">==</span> <span style="color: #2d9574;">"__main__"</span>:
+    <span style="color: #4f97d7; font-weight: bold;">import</span> sys
+    <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">len</span><span style="color: #4f97d7;">(</span>sys.<span style="color: #a45bad; font-style: italic;">argv</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7; font-weight: bold;">&gt;</span> <span style="color: #a45bad;">1</span>:
+        <span style="color: #2aa1ae; font-weight: bold;">find_magic_square</span><span style="color: #4f97d7;">(</span><span style="color: #4f97d7; font-weight: bold;">int</span><span style="color: #bc6ec5;">(</span>sys.<span style="color: #a45bad; font-style: italic;">argv</span><span style="color: #2d9574;">[</span><span style="color: #a45bad;">1</span><span style="color: #2d9574;">]</span><span style="color: #bc6ec5;">)</span><span style="color: #4f97d7;">)</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #2aa1ae; font-weight: bold;">timeout</span> <span style="color: #a45bad;">10s</span> python <span style="color: #4f97d7; font-weight: bold;">$</span><span style="color: #a45bad; font-style: italic;">script_name</span> <span style="color: #a45bad;">4</span> <span style="color: #a45bad;">2</span>&gt;&amp;<span style="color: #a45bad;">1</span>
+<span style="color: #4f97d7; font-weight: bold;">echo</span> <span style="color: #4f97d7; font-weight: bold;">$</span><span style="color: #dc752f; background-color: #292b2e;">?</span>
+</pre>
+</div>
+
+<p>
+Ok, so what I did is just too damn slow even for our limited constraints. Perhaps we can try to speed it up. I'm not ready to blame this all on Pandas just yet
+</p>
+</div>
+</div>
+<div id="outline-container-orgbb3ac8e" class="outline-3">
+<h3 id="orgbb3ac8e"><span class="section-number-3">3.2.</span> Attempt 2 - Constraint Solver</h3>
+<div class="outline-text-3" id="text-3-2">
+</div>
+<div id="outline-container-org7d9aaed" class="outline-4">
+<h4 id="org7d9aaed"><span class="section-number-4">3.2.1.</span> Brainstorming</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+Lets change the model to one of constraints. Here the idea is that we can fill out rows one at a time
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Well we clearly can answer the remaining set of possibilities: <code>{(1,13),(3,10),(4,9),(5,8),(6,7)}</code> where each pair can go in any order. This can even be cached.
+</p>
+
+<p>
+Now lets say we get to
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">2</td>
+<td class="org-right">7</td>
+<td class="org-right">6</td>
+</tr>
+
+<tr>
+<td class="org-right">9</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The possibilities for the row are <code>{(1,5),(2,4)}</code>, and for the column are <code>{(2,6),(3,5)}</code>, for the dialgonal are <code>{(1,13),(3,10),(4,9),(5,8),(6,7)}</code> and for the anti-diagonal are <code>{(1,8),(2,7),(4,5)}</code>. We flatten these sets and take the intersection and only one possiblity remains <code>5</code>. #e can go further and subtract from this the set of already used numbers to narrow it down further
+</p>
+
+<p>
+Lets try this again but run through it till we hit a dead end. Also for the sake of expediency lets start at a high number
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The remaining possibilities are <code>{(1,4),(2,3)}</code> we don't have anything else to go off of so lets pick that first tuple and fill it out before moving on to the next row. If this doesn't work out we can try out the next later
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-right">1</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The possibilities on the row are all the variants but on the column are once more  <code>{(1,4),(2,3)}</code> so the intersection is those four numbers flattened. Subtracting out the set of already used values we are left with a possibility of <code>{(2,3)}</code>.
+</p>
+
+<p>
+Not having anything else to go on, lets prefill things in that order but we <b>were</b> just at another decision point.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-right">1</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Now for the rest of row[1] the possible values are <code>{(1,13),(3,10),(4,9),(5,8),(6,7)}</code>, the possible column values are <code>{(2,12),(3,11),(4,10),(5,9),(6,8)}</code>, the possible diagonals are <code>{(1,4),(2,3)}</code> and anti-diagonals are <code>{(1,10),(2,9),(3,8),(5,6)}</code>. Flatten the and intersect and you get <code>{3}</code>. That's not enough values to fill the row so we've hit a dead end. Lets back it up to the previous decision point
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-right">1</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Now for the rest of row[1] the possible values are <code>{(1,11),(2,10),(4,8),(5,7)}</code>, the possible column values are <code>{(2,12),(3,11),(4,10),(5,9),(6,8)}</code>, the possible diagonals are <code>{(1,4),(2,3)}</code> and anti-diagonals are <code>{(1,10),(2,9),(3,8),(5,6)}</code>. Flatten the and intersect and you get <code>{2}</code>. Once again, that's not enough values to fill the row so we've hit a dead end.
+</p>
+
+<p>
+Lets try that again but without any pairwise thoughts
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The remaining possibilities are <code>{1,2,3,4}</code> lets pick the first Decision point!
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-right">1</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The reminaing possibilities are <code>4</code>, there isn't really a decision here for a 3x3 but would be for more
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-right">1</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+rows are unconstrained, column is contstrained to <code>{1,2,3,4}</code> subtract out the already used to get <code>{2,3}</code> and pick the first at a decision point
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-right">1</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+the next value is now constrained by row to <code>{1,3,4,5,6,7,8,9,10}</code> and by column to <code>{2,3,4,5,6,7,8,9,10}</code> by diagonal to <code>{1,2,3,4}</code> and by anti-diagonal to <code>{1,2,3,4,5,6,7,8,9,10}</code>. This gives us an intersection of <code>{3,4}</code> and when you subtract all the used ones you get <code>{3}</code>. Dead end!
+</p>
+
+<p>
+Rolling back to the previous decision point
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-right">1</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+the next value is now constrained by row to <code>{1,2,4,5,6,7,8,9,10}</code> and by column to <code>{2,3,4,5,6,7,8,9,10}</code> by diagonal to <code>{1,2,3,4}</code> and by anti-diagonal to <code>{1,2,3,4,5,6,7,8,9,10}</code>. This gives us an intersection of <code>{2,4}</code> and when you subtract all the used ones you get <code>{2}</code>. Dead end! Our previous decision point was all the way back on position 2
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-right">2</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-right">2</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+rows are unconstrained, column is contstrained to <code>{1,2,3,4}</code> subtract out the already used to get <code>{1,4}</code> and pick the first at a decision point
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">10</td>
+<td class="org-right">2</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+the next value is now constrained by row to <code>{2,3,4,5,6,7,8,9,10}</code> and by column to <code>{1,3,4,5,6,7,8,9,10}</code> by diagonal to <code>{1,2,3,4}</code> and by anti-diagonal to <code>{1,2,4,5,6,7,8,9,10}</code>. This gives us an intersection of <code>{2,4}</code> and when you subtract all the used ones you get <code>{4}</code>. Dead end!
+</p>
+
+<p>
+At this point I am noticing that we're just reflecting the square from above. I guess once we eliminate a set of values for row 1 we could <b>also</b> eliminate them for column 1. This might be like overkill as an optimization for our needs though I'm sure it can halve some runtimes.
+</p>
+
+<p>
+Ok, we'll do this one more time but on a <code>N=4</code>, <code>4x4</code> square.
+</p>
+
+<p>
+I'm also going to be really methodical here with making my steps explicit and listing all constraints. Some universal constraints that we will be applying are
+</p>
+</div>
+<ol class="org-ol">
+<li><a id="org0a4e176"></a>Defining our Constraints<br />
+<div class="outline-text-5" id="text-3-2-1-1">
+<dl class="org-dl">
+<dt>Known Value</dt><dd>Must be in \( [1, N^2] = [1,16] \)</dd>
+<dt>Row Sum</dt><dd><p>
+Ensure the row sum is
+  \( S = \frac{N(1+N^2)}{2} = 34 \)
+So when you're on row index <code>r</code> and the sum so far is <code>R</code>, the bounds will be \( [1, S-R ] \)
+Though we can actually decrease it further any <b>sum</b> of the range of cells after <code>r</code> must be possible. But the lowest possible sum for a number of cells <code>k</code> &#x2026;
+</p>
+
+<ul class="org-ul">
+<li>If N=4
+<ul class="org-ul">
+<li>When r=0 there are k=3 left after this one. \( R'=3+2+1=6 \)</li>
+<li>When r=1 there's k=2 left. \( R'=2+1=3 \)</li>
+<li>When r=2 there's k=1 left. \( R'=1 \)</li>
+<li>When r=3 there's k=0 left. \( R'=0 \)</li>
+</ul></li>
+</ul>
+<p>
+In this case \( k=N-r-1 \). and \( R'=\frac{k(k+1)}{2} \)
+</p>
+
+<p>
+which we can subsitute in to get
+</p>
+\begin{equation}
+  \frac{(N-r-1)(N-r-1+1)}{2}
+  \frac{(N-r-1)(N-r)}{2}
+  \\=R'
+\end{equation}
+
+<p>
+I think that's the neatest thing we could reduce it to? So we have this equation \( S = R + V[r] + R' \)
+</p>
+
+<p>
+And finally twe get
+</p>
+
+<p>
+\( [1, S-R-R'] \)
+</p>
+
+<p>
+which accounts for the fact that you don't want to sum up <b>all</b> the way to <code>S</code> before you get to the end.
+<b>*Important Caveat</b>: If \( r+1=N \) then this range is simply \( [S-R,S-R] \)
+</p></dd>
+<dt>Column Sum</dt><dd>Ensure the same for column sum on column index <code>c</code> when the sum so far is <code>C</code>, the bounds will be \( [1, S-C-C'] \)</dd>
+<dt>Diagonal Sum</dt><dd>When \( r=c \), the same for diagonal sum when the sum so far is <code>D</code>, the bounds will be \( [1, S-D-D'] \)</dd>
+<dt>Anti-Diagonal Sum</dt><dd>When \( r=(N-c-1) \), the same for the anti-diagonal sum when the sum so far is <code>D_a</code>, the bounds will be \( [1, S-D_a-D_a'] \)</dd>
+<dt>Uniqueness</dt><dd>Must not be one of the numbers already used</dd>
+<dt>Disallowed</dt><dd>Values we already tried DFS when searching this decision point</dd>
+</dl>
+</div>
+</li>
+<li><a id="org48ee63b"></a>4 Square Sample<br />
+<div class="outline-text-5" id="text-3-2-1-2">
+<p>
+At each decision point we will pick the highest number possible. It shouldn't make a lot of difference but we can hopefully use it to cut down on some options.
+</p>
+
+<p>
+We are going to move top left to bottom right, backtracking at each decision point as necessary.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Cell</th>
+<th scope="col" class="org-left">Row Sum</th>
+<th scope="col" class="org-left">Column Sum</th>
+<th scope="col" class="org-left">Diagonal Sum</th>
+<th scope="col" class="org-left">Anti-diagonal</th>
+<th scope="col" class="org-left">Uniqueness</th>
+<th scope="col" class="org-left">Disallowed</th>
+<th scope="col" class="org-right">Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">0 0</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">16</td>
+</tr>
+
+<tr>
+<td class="org-left">0 1</td>
+<td class="org-left">[1,15]</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{16}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">15</td>
+</tr>
+
+<tr>
+<td class="org-left">0 2</td>
+<td class="org-left">[1,2]</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{15,16}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-left">0 3</td>
+<td class="org-left">[1,1]</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">-{2,15,16}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-left">1 0</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">[1,15]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,2,15,16}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">14</td>
+</tr>
+
+<tr>
+<td class="org-left">1 1</td>
+<td class="org-left">[1,17]</td>
+<td class="org-left">[1,16]</td>
+<td class="org-left">[1,15]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,2,[14,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">13</td>
+</tr>
+
+<tr>
+<td class="org-left">1 2</td>
+<td class="org-left">[1,6]</td>
+<td class="org-left">[1,29]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">-{1,2,[13,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">6</td>
+</tr>
+
+<tr>
+<td class="org-left">1 3</td>
+<td class="org-left">[1,1]</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,2,6,[13,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">1 2</td>
+<td class="org-left">[1,6]</td>
+<td class="org-left">[1,29]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">-{1,2,[13,16]}</td>
+<td class="org-left">-{6}</td>
+<td class="org-right">5</td>
+</tr>
+
+<tr>
+<td class="org-left">1 3</td>
+<td class="org-left">[1,2]</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,2,5,[13,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">1 2</td>
+<td class="org-left">[1,6]</td>
+<td class="org-left">[1,29]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">-{1,2,[13,16]}</td>
+<td class="org-left">-{5,6}</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-left">1 3</td>
+<td class="org-left">[1,3]</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,2,5,[13,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-left">2 1</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">[1,3]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{[1,3],5,[13,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">1 3</td>
+<td class="org-left">[1,3]</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,2,5,[13,16]}</td>
+<td class="org-left">-{3}</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">1 2</td>
+<td class="org-left">[1,6]</td>
+<td class="org-left">[1,29]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">-{1,2,[13,16]}</td>
+<td class="org-left">-{4,5,6}</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-left">1 3</td>
+<td class="org-left">[1,4]</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{[1,3],[13,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-left">2 1</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">[1,3]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{[1,4],[13,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">1 3</td>
+<td class="org-left">[1,4]</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{[1,3],[13,16]}</td>
+<td class="org-left">-{4}</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">1 2</td>
+<td class="org-left">[1,6]</td>
+<td class="org-left">[1,29]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">-{1,2,[13,16]}</td>
+<td class="org-left">-{3,4,5,6}</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">1 1</td>
+<td class="org-left">[1,17]</td>
+<td class="org-left">[1,16]</td>
+<td class="org-left">[1,15]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,2,[14,16]}</td>
+<td class="org-left">-{13}</td>
+<td class="org-right">12</td>
+</tr>
+
+<tr>
+<td class="org-left">1 2</td>
+<td class="org-left">[1,7]</td>
+<td class="org-left">[1,29]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">-{1,2,12,[14,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">7</td>
+</tr>
+
+<tr>
+<td class="org-left">1 3</td>
+<td class="org-left">[1,1]</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,2,7,12,[13,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">1 2</td>
+<td class="org-left">[1,7]</td>
+<td class="org-left">[1,29]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">-{1,2,12,[14,16]}</td>
+<td class="org-left">-{7}</td>
+<td class="org-right">6</td>
+</tr>
+
+<tr>
+<td class="org-left">1 3</td>
+<td class="org-left">[1,2]</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,2,6,12,[13,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">1 2</td>
+<td class="org-left">[1,7]</td>
+<td class="org-left">[1,29]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">-{1,2,12,[14,16]}</td>
+<td class="org-left">-{6,7}</td>
+<td class="org-right">5</td>
+</tr>
+
+<tr>
+<td class="org-left">1 3</td>
+<td class="org-left">[1,3]</td>
+<td class="org-left">[1,30]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,2,5,12,[13,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-left">2 1</td>
+<td class="org-left">[1,34]</td>
+<td class="org-left">[1,4]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{[1,3],5,12,[14,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-left">2 2</td>
+<td class="org-left">[1,27]</td>
+<td class="org-left">[1,4]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">[1,27]</td>
+<td class="org-left">-{[1,5],12,[14,16]}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">16</td>
+<td class="org-right">15</td>
+<td class="org-right">2</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">14</td>
+<td class="org-right">12</td>
+<td class="org-right">5</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-right">4</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+I mean thats quite a few steps, but we have eliminated a good deal of the start-with-16 possibilities relatively quickly.
+</p>
+
+<p>
+I never looked into how constraint solvers are implemented under the hood, but it seems likely that its similar to this
+</p>
+
+<p>
+I also realize that I screwed up the upper bounds above, but thats ok, I think I am understanding the algorithm here
+</p>
+</div>
+</li>
+<li><a id="orga3334d1"></a>3 Square Sample<br />
+<div class="outline-text-5" id="text-3-2-1-3">
+<p>
+Ok, lets try one that we can (hopefully) make work in a reasonable amount of time. We'll start with the first row of a 3-square filled out and - importantly - filled out correctly.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Cell</th>
+<th scope="col" class="org-left">Row Sum</th>
+<th scope="col" class="org-left">Column Sum</th>
+<th scope="col" class="org-left">Diagonal Sum</th>
+<th scope="col" class="org-left">Anti-diagonal</th>
+<th scope="col" class="org-left">Uniqueness</th>
+<th scope="col" class="org-left">Disallowed</th>
+<th scope="col" class="org-right">Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">1 0</td>
+<td class="org-left">[1,12]</td>
+<td class="org-left">[1,6]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,6,8}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">5</td>
+</tr>
+
+<tr>
+<td class="org-left">1 1</td>
+<td class="org-left">[1,9]</td>
+<td class="org-left">[1,13]</td>
+<td class="org-left">[1,6]</td>
+<td class="org-left">[1,8]</td>
+<td class="org-left">-{1,5,6,8}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">4</td>
+</tr>
+
+<tr>
+<td class="org-left">1 2</td>
+<td class="org-left">[6,6]</td>
+<td class="org-left">[1,8]</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">-{1,[4,6],8}</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">8</td>
+<td class="org-right">1</td>
+<td class="org-right">6</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-right">4</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: George Mauer</p>
+<p class="date">Created: 2025-05-01 Thu 22:16</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=42.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[project]
+name = "magic-square-generation"
+version = "0.1.0"
+description = "Magic square generation implementation"
+requires-python = ">=3.10"
+dependencies = [
+    "ruff>=0.11.8",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.0.0",
+    "types-setuptools",
+]

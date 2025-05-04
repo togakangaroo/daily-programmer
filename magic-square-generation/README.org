@@ -87,7 +87,8 @@ Also, you know what? I want to push myself a bit, I have only passing experience
 
 ** Naive Attempt 1
 :PROPERTIES:
-:tangle-target: magic_square_generation_attempt_1.py
+:tangle-target: naive-attempt/magic_square_generation.py
+:header-args:python+: :mkdirp 't
 :END:
 First some types and imports
 #+begin_src python
@@ -272,7 +273,11 @@ Ok, so what I did is just too damn slow even for our limited constraints. Perhap
 
 ** Attempt 2 - Constraint Solver
 :PROPERTIES:
-:tangle-target: magic_square_generation_attempt_2.py
+:tangle-target: constraint-solver/magic_square_generation.py
+:header-args+: :dir ./constraint-solver
+:header-args:python+: :mkdirp 't
+:header-args:python+: :comments link
+:header-args:emacs-lisp+: :results silent
 :END:
 
 *** Brainstorming
@@ -478,4 +483,75 @@ I mean thats quite a few steps, but we have eliminated a good deal of the start-
 
 I honestly don't even care about the problem anymore, just implementing a constraint solver will be fun
 
-**** Implementation
+*** Implementation
+
+**** Setup
+
+I also just learned about the ~type~ keyword which is cool but comes from python 3.12 so I need that. I want to be able to do some type checking and linting live and I want to practice using uv which I haven't touched before but seems to be gaining steam, I've created [[./constraint-solver/pyproject.toml][a pyproject.toml]] file for it and lets set it up
+
+
+#+begin_src emacs-lisp  :results silent
+  (async-shell-command "
+    uv venv
+    uv pip install -e '.[dev]'
+  ")
+#+end_src
+
+Lets set
+#+begin_src emacs-lisp
+  (setq projectile-project-compilation-dir "./magic-square-generation/constraint-solver")
+#+end_src
+and now we can run [[elisp:(projectile-test-command)][projectile-test-command]] with ~watchexec -e py -r -- uv run mypy *.py~ (make sure to ~pyenv-deactivate~ first)
+
+I honestly don't see where pandas helps with this.
+**** Basic structures
+Lets create our basic structures and type aliases
+
+#+begin_src python
+  from dataclasses import dataclass, field
+  from abc import ABC, abstractmethod
+  from typing import Iterator, Tuple
+
+  type Position = Tuple[int, int]
+  type CellValue = int
+  type MagicSquareCells = dict[Position, CellValue]
+
+  @dataclass(frozen=True)
+  class MagicSquareBuilder:
+      """A magic square that is in process of being constructed."""
+      cells: MagicSquareCells
+      side_size: int
+      max_span_sum: int = field(init=False)
+
+      def __post_init__(self) -> None:
+          # Using Godel's(?) equation for summing up sequential sequences / square_size
+          object.__setattr__(self, 'max_span_sum', self.side_size*(1+self.side_size**2)/2)
+#+end_src
+**** Constraints
+
+Constraints are going to be just filters of possibilities. A possibility will just be an integer. In theory you could metaprogram to your hearts content there, within the constraints we are using, it seems reasonable to say that a possibility is just an exact integer
+
+#+begin_src python
+  type Possibility = int
+
+  @dataclass(frozen=True)
+  class Constraint(ABC):
+      """Abstract base class for constraints on a magic square."""
+      square: MagicSquareBuilder
+      position: Position
+
+      @abstractmethod
+      def filter(self, possibilities: Iterator[Possibility]) -> Iterator[Possibility]:
+          """
+          Filter down the given possibilities based on this constraint.
+          """
+          pass
+#+end_src
+
+So now implement the ~UniquenessConstraint~
+#+begin_src python
+  class UniquenessConstraint(Constraint):
+      def filter(self, possibilities: Iterator[Possibility]) -> Iterator[Possibility]:
+          square_values = set(self.square.cells.values())
+          return (p for p in possibilities if p not in square_values)
+#+end_src
