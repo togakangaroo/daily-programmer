@@ -50,18 +50,6 @@ class UniquenessConstraint(Constraint):
 
 # [[file:../../README.org::*Constraints][Constraints:3]]
 @dataclass(frozen=True)
-class DisallowedConstraint(Constraint):
-    _disallowed_values: set[Possibility] = field(default_factory=set)
-
-    def disallow(self, p: Possibility) -> None:
-        self._disallowed_values.add(p)
-
-    def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
-        return (p for p in possibilities if p not in self._disallowed_values)
-# Constraints:3 ends here
-
-# [[file:../../README.org::*Constraints][Constraints:4]]
-@dataclass(frozen=True)
 class RowSumConstraint(Constraint):
     def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
         r,c = self.position
@@ -116,13 +104,55 @@ class AntiDiagonalSumConstraint(Constraint):
         minimum = 1 if r+1<self.square.side_size else maximum
 
         return (p for p in possibilities if minimum <= p <= maximum)
-# Constraints:4 ends here
+# Constraints:3 ends here
 
-# [[file:../../README.org::*Constraints][Constraints:5]]
+# [[file:../../README.org::*Constraints][Constraints:4]]
 def get_possibilities(square: MagicSquareBuilder) -> Iterable[Possibility]:
     return range(1, square.side_size**2+1)
-# Constraints:5 ends here
+# Constraints:4 ends here
 
 # [[file:../../README.org::*Implementing our search][Implementing our search:1]]
+def possibilities_to_values(possibilities: Iterable[Possibility]) -> Iterable[CellValue]:
+    return possibilities # For now that is all this is, at some point later we might be handling ranges here
 
+def fill_magic_square(square: MagicSquareBuilder, remaining_positions: list[Position]) -> None | MagicSquareBuilder:
+    if not square or not remaining_positions:
+        return square
+
+    position, *other_positions = remaining_positions
+
+    filters = (
+        UniquenessConstraint(square, position),
+        RowSumConstraint(square, position),
+        ColumnSumConstraint(square, position),
+        DiagonalSumConstraint(square, position),
+        AntiDiagonalSumConstraint(square, position),
+    )
+
+    possibilities = get_possibilities(square)
+    for f in filters:
+        possibilities = f.filter(possibilities)
+
+    for value in possibilities_to_values(possibilities):
+        resulting_filled_square = fill_magic_square(square.set(position, value), other_positions)
+        if resulting_filled_square:
+            return resulting_filled_square
+
+    return None
 # Implementing our search:1 ends here
+
+# [[file:../../README.org::*Implementing our search][Implementing our search:4]]
+def find_magic_square(size: int) -> None | MagicSquareBuilder:
+    square = MagicSquareBuilder(cells={}, side_size=size)
+    positions = list((r, c) for r in range(size) for c in range(size))
+    final_square = fill_magic_square(square, positions)
+    return final_square
+
+def print_magic_square(square: MagicSquareBuilder | None) -> None:
+    if not square:
+        print("No such square")
+        return
+
+    for r in range(square.side_size):
+        print('\t'.join([str(square.cells[r,c]) for c in range(square.side_size)]))
+# Implementing our search:4 ends here

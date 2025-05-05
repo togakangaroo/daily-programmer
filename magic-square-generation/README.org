@@ -562,20 +562,6 @@ So now implement the ~UniquenessConstraint~
           return (p for p in possibilities if p not in square_values)
 #+end_src
 
-Ok cool, now lets do another one. How about our disallowed constraint? That's nice and simple
-
-#+begin_src python
-  @dataclass(frozen=True)
-  class DisallowedConstraint(Constraint):
-      _disallowed_values: set[Possibility] = field(default_factory=set)
-
-      def disallow(self, p: Possibility) -> None:
-          self._disallowed_values.add(p)
-
-      def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
-          return (p for p in possibilities if p not in self._disallowed_values)
-#+end_src
-
 And now we've got the sum constraints, they all have similar behavior
 #+begin_src python
   @dataclass(frozen=True)
@@ -649,7 +635,6 @@ Lets try these out
   pos = (1,1)
   square = MagicSquareBuilder(cells=cells, side_size=3)
   filters = (
-      DisallowedConstraint(square, pos),
       UniquenessConstraint(square, pos),
       RowSumConstraint(square, pos), ColumnSumConstraint(square, pos),
       DiagonalSumConstraint(square, pos), AntiDiagonalSumConstraint(square, pos),
@@ -664,7 +649,6 @@ Lets try these out
 #+end_src
 
 #+RESULTS:
-: possibilities are [1, 2, 3, 4, 5, 6, 7, 8, 9] invoking <class '__main__.DisallowedConstraint'>
 : possibilities are [1, 2, 3, 4, 5, 6, 7, 8, 9] invoking <class '__main__.UniquenessConstraint'>
 : possibilities are [2, 4, 5, 7, 9] invoking <class '__main__.RowSumConstraint'>
 : possibilities are [2, 4, 5, 7, 9] invoking <class '__main__.ColumnSumConstraint'>
@@ -679,4 +663,92 @@ That seems right
 Now lets do our find
 
 #+begin_src python
+  def possibilities_to_values(possibilities: Iterable[Possibility]) -> Iterable[CellValue]:
+      return possibilities # For now that is all this is, at some point later we might be handling ranges here
+
+  def fill_magic_square(square: MagicSquareBuilder, remaining_positions: list[Position]) -> None | MagicSquareBuilder:
+      if not square or not remaining_positions:
+          return square
+
+      position, *other_positions = remaining_positions
+
+      filters = (
+          UniquenessConstraint(square, position),
+          RowSumConstraint(square, position),
+          ColumnSumConstraint(square, position),
+          DiagonalSumConstraint(square, position),
+          AntiDiagonalSumConstraint(square, position),
+      )
+
+      possibilities = get_possibilities(square)
+      for f in filters:
+          possibilities = f.filter(possibilities)
+
+      for value in possibilities_to_values(possibilities):
+          resulting_filled_square = fill_magic_square(square.set(position, value), other_positions)
+          if resulting_filled_square:
+              return resulting_filled_square
+
+      return None
+#+end_src
+
+lets try this
+#+begin_src python :tangle no :results output pp replace
+  print( fill_magic_square(square, [(1,1),(1,2),(2,0),(2,1),(2,2)]) )
+#+end_src
+
+#+RESULTS:
+: MagicSquareBuilder(cells={(0, 0): 8, (0, 1): 1, (0, 2): 6, (1, 0): 3, (1, 1): 5, (1, 2): 7, (2, 0): 4, (2, 1): 9, (2, 2): 2}, side_size=3, span_sum=15.0)
+
+Nice. What about an impossible magic square?
+
+#+begin_src python :tangle no :results output pp replace
+  print( fill_magic_square(square.set((1,0), 5), [(1,1),(1,2),(2,0),(2,1),(2,2)]) )
+#+end_src
+
+#+RESULTS:
+: None
+
+Correct, now lets lets make that main function
+#+begin_src python
+  def find_magic_square(size: int) -> None | MagicSquareBuilder:
+      square = MagicSquareBuilder(cells={}, side_size=size)
+      positions = list((r, c) for r in range(size) for c in range(size))
+      final_square = fill_magic_square(square, positions)
+      return final_square
+
+  def print_magic_square(square: MagicSquareBuilder | None) -> None:
+      if not square:
+          print("No such square")
+          return
+
+      for r in range(square.side_size):
+          print('\t'.join([str(square.cells[r,c]) for c in range(square.side_size)]))
+#+end_src
+
+Now lets test that
+
+#+begin_src python :tangle no :results output pp replace
+  print_magic_square( find_magic_square(3) )
+#+end_src
+
+#+RESULTS:
+: 2	7	6
+: 9	5	1
+: 4	3	8
+
+#+begin_src python :tangle no :results output pp replace
+  print_magic_square( find_magic_square(4) )
+#+end_src
+
+#+RESULTS:
+: 1	2	15	16
+: 12	14	3	5
+: 13	7	10	4
+: 8	11	6	9
+
+wow nice!
+
+#+begin_src python :tangle no :results output pp replace
+  print_magic_square( find_magic_square(5) )
 #+end_src
