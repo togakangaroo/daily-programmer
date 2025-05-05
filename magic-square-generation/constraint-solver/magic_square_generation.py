@@ -155,4 +155,9 @@ def print_magic_square(square: MagicSquareBuilder | None) -> None:
 
     for r in range(square.side_size):
         print('\t'.join([str(square.cells[r,c]) for c in range(square.side_size)]))
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        find_magic_square(int(sys.argv[1]))
 # Implementing our search:4 ends here

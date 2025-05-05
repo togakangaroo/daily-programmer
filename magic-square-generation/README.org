@@ -724,6 +724,11 @@ Correct, now lets lets make that main function
 
       for r in range(square.side_size):
           print('\t'.join([str(square.cells[r,c]) for c in range(square.side_size)]))
+
+  if __name__ == "__main__":
+      import sys
+      if len(sys.argv) > 1:
+          find_magic_square(int(sys.argv[1]))
 #+end_src
 
 Now lets test that
@@ -747,8 +752,15 @@ Now lets test that
 : 13	7	10	4
 : 8	11	6	9
 
-wow nice!
+wow nice! very quick
 
-#+begin_src python :tangle no :results output pp replace
-  print_magic_square( find_magic_square(5) )
+
+#+begin_src shell :results verbatim :var script_name=(org-entry-get (point) "tangle-target" 't)
+  timeout 10s python "../../$script_name" 5 2>&1
+  echo $?
 #+end_src
+
+#+RESULTS:
+: 124
+
+Damn, that one still timed out even thought he 4-square was near instant
