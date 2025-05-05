@@ -1,7 +1,7 @@
-# [[file:../README.org::*Basic structures][Basic structures:1]]
+# [[file:../../README.org::*Basic structures][Basic structures:1]]
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
-from typing import Iterator, Tuple
+from typing import Iterable, Tuple
 
 type Position = Tuple[int, int]
 type CellValue = int
@@ -12,14 +12,18 @@ class MagicSquareBuilder:
     """A magic square that is in process of being constructed."""
     cells: MagicSquareCells
     side_size: int
-    max_span_sum: int = field(init=False)
+    span_sum: int = field(init=False)
 
     def __post_init__(self) -> None:
         # Using Godel's(?) equation for summing up sequential sequences / square_size
-        object.__setattr__(self, 'max_span_sum', self.side_size*(1+self.side_size**2)/2)
+        object.__setattr__(self, 'span_sum', self.side_size*(1+self.side_size**2)/2)
+
+    def set(self, position: Position, value: CellValue) -> "MagicSquareBuilder":
+        new_cells = {**self.cells, position: value}
+        return MagicSquareBuilder(cells=new_cells, side_size=self.side_size)
 # Basic structures:1 ends here
 
-# [[file:../README.org::*Constraints][Constraints:1]]
+# [[file:../../README.org::*Constraints][Constraints:1]]
 type Possibility = int
 
 @dataclass(frozen=True)
@@ -29,16 +33,96 @@ class Constraint(ABC):
     position: Position
 
     @abstractmethod
-    def filter(self, possibilities: Iterator[Possibility]) -> Iterator[Possibility]:
+    def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
         """
         Filter down the given possibilities based on this constraint.
         """
         pass
 # Constraints:1 ends here
 
-# [[file:../README.org::*Constraints][Constraints:2]]
+# [[file:../../README.org::*Constraints][Constraints:2]]
+@dataclass(frozen=True)
 class UniquenessConstraint(Constraint):
-    def filter(self, possibilities: Iterator[Possibility]) -> Iterator[Possibility]:
+    def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
         square_values = set(self.square.cells.values())
         return (p for p in possibilities if p not in square_values)
 # Constraints:2 ends here
+
+# [[file:../../README.org::*Constraints][Constraints:3]]
+@dataclass(frozen=True)
+class DisallowedConstraint(Constraint):
+    _disallowed_values: set[Possibility] = field(default_factory=set)
+
+    def disallow(self, p: Possibility) -> None:
+        self._disallowed_values.add(p)
+
+    def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
+        return (p for p in possibilities if p not in self._disallowed_values)
+# Constraints:3 ends here
+
+# [[file:../../README.org::*Constraints][Constraints:4]]
+@dataclass(frozen=True)
+class RowSumConstraint(Constraint):
+    def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
+        r,c = self.position
+        sum_before_position = sum((self.square.cells[(rb,c)] for rb in range(0,r)))
+        lowest_possible_sum_after_position = int((self.square.side_size-r-1)*(self.square.side_size-r)/2) # this cannot ever be odd
+
+        maximum = self.square.span_sum - sum_before_position - lowest_possible_sum_after_position
+        minimum = 1 if r+1<self.square.side_size else maximum
+
+        return (p for p in possibilities if minimum <= p <= maximum)
+
+@dataclass(frozen=True)
+class ColumnSumConstraint(Constraint):
+    def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
+        r,c = self.position
+        sum_before_position = sum((self.square.cells[(r,cb)] for cb in range(0,c)))
+        lowest_possible_sum_after_position = int((self.square.side_size-c-1)*(self.square.side_size-c)/2) # this cannot ever be odd
+
+        maximum = self.square.span_sum - sum_before_position - lowest_possible_sum_after_position
+        minimum = 1 if c+1<self.square.side_size else maximum
+
+        return (p for p in possibilities if minimum <= p <= maximum)
+
+@dataclass(frozen=True)
+class DiagonalSumConstraint(Constraint):
+    def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
+        r,c = self.position
+        if r != c:
+            return possibilities
+        sum_before_position = sum((self.square.cells[(rb,rb)] for rb in range(0,r)))
+
+        lowest_possible_sum_after_position = int((self.square.side_size-r-1)*(self.square.side_size-r)/2) # this cannot ever be odd
+
+        minimum = 1
+        maximum = self.square.span_sum - sum_before_position - lowest_possible_sum_after_position
+        minimum = 1 if r+1<self.square.side_size else maximum
+
+        return (p for p in possibilities if minimum <= p <= maximum)
+
+@dataclass(frozen=True)
+class AntiDiagonalSumConstraint(Constraint):
+    def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
+        r,c = self.position
+        if r + 1 != self.square.side_size - c:
+            return possibilities
+        sum_before_position = sum((self.square.cells[(rb,(self.square.side_size-rb-1))] for rb in range(0,r)))
+
+        lowest_possible_sum_after_position = int((self.square.side_size-r-1)*(self.square.side_size-r)/2) # this cannot ever be odd
+
+        minimum = 1
+        maximum = self.square.span_sum - sum_before_position - lowest_possible_sum_after_position
+        minimum = 1 if r+1<self.square.side_size else maximum
+
+        return (p for p in possibilities if minimum <= p <= maximum)
+# Constraints:4 ends here
+
+# [[file:../../README.org::*Constraints][Constraints:5]]
+def get_possibilities(square: MagicSquareBuilder) -> Iterable[Possibility]:
+    return range(1, square.side_size**2+1)
+# Constraints:5 ends here
+
+# [[file:../../README.org::*Implementing our search][Implementing our search:1]]
+
+# Implementing our search:1 ends here

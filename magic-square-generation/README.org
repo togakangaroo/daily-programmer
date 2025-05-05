@@ -80,13 +80,13 @@ Also, you know what? I want to push myself a bit, I have only passing experience
 
 * Python Solution
 :PROPERTIES:
-:header-args:python+: :session magic-square-generation
 :header-args:python+: :results silent
 :header-args:python+: :tangle  (org-entry-get (point) "tangle-target" 't)
 :END:
 
 ** Naive Attempt 1
 :PROPERTIES:
+:header-args:python+: :session magic-square-generation
 :tangle-target: naive-attempt/magic_square_generation.py
 :header-args:python+: :mkdirp 't
 :END:
@@ -275,6 +275,7 @@ Ok, so what I did is just too damn slow even for our limited constraints. Perhap
 :PROPERTIES:
 :tangle-target: constraint-solver/magic_square_generation.py
 :header-args+: :dir ./constraint-solver
+:header-args:python+: :session magic-square-generation-constraint-solver
 :header-args:python+: :mkdirp 't
 :header-args:python+: :comments link
 :header-args:emacs-lisp+: :results silent
@@ -501,7 +502,7 @@ Lets set
 #+begin_src emacs-lisp
   (setq projectile-project-compilation-dir "./magic-square-generation/constraint-solver")
 #+end_src
-and now we can run [[elisp:(projectile-test-command)][projectile-test-command]] with ~watchexec -e py -r -- uv run mypy *.py~ (make sure to ~pyenv-deactivate~ first)
+and now we can run [[elisp:(projectile-test-command)][projectile-test-command]] with ~watchexec -e py -r -- "uv run mypy *.py && uv run ruff check ."~ (make sure to ~pyenv-deactivate~ first)
 
 I honestly don't see where pandas helps with this.
 **** Basic structures
@@ -510,7 +511,7 @@ Lets create our basic structures and type aliases
 #+begin_src python
   from dataclasses import dataclass, field
   from abc import ABC, abstractmethod
-  from typing import Iterator, Tuple
+  from typing import Iterable, Tuple
 
   type Position = Tuple[int, int]
   type CellValue = int
@@ -521,15 +522,19 @@ Lets create our basic structures and type aliases
       """A magic square that is in process of being constructed."""
       cells: MagicSquareCells
       side_size: int
-      max_span_sum: int = field(init=False)
+      span_sum: int = field(init=False)
 
       def __post_init__(self) -> None:
           # Using Godel's(?) equation for summing up sequential sequences / square_size
-          object.__setattr__(self, 'max_span_sum', self.side_size*(1+self.side_size**2)/2)
+          object.__setattr__(self, 'span_sum', self.side_size*(1+self.side_size**2)/2)
+
+      def set(self, position: Position, value: CellValue) -> "MagicSquareBuilder":
+          new_cells = {**self.cells, position: value}
+          return MagicSquareBuilder(cells=new_cells, side_size=self.side_size)
 #+end_src
 **** Constraints
 
-Constraints are going to be just filters of possibilities. A possibility will just be an integer. In theory you could metaprogram to your hearts content there, within the constraints we are using, it seems reasonable to say that a possibility is just an exact integer
+Constraints are going to be just filters of possibilities given a square and a position in the square. A possibility will just be an integer. In theory you could metaprogram to your hearts content there, within the constraints we are using, it seems reasonable to say that a possibility is just an exact integer
 
 #+begin_src python
   type Possibility = int
@@ -541,7 +546,7 @@ Constraints are going to be just filters of possibilities. A possibility will ju
       position: Position
 
       @abstractmethod
-      def filter(self, possibilities: Iterator[Possibility]) -> Iterator[Possibility]:
+      def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
           """
           Filter down the given possibilities based on this constraint.
           """
@@ -550,8 +555,128 @@ Constraints are going to be just filters of possibilities. A possibility will ju
 
 So now implement the ~UniquenessConstraint~
 #+begin_src python
+  @dataclass(frozen=True)
   class UniquenessConstraint(Constraint):
-      def filter(self, possibilities: Iterator[Possibility]) -> Iterator[Possibility]:
+      def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
           square_values = set(self.square.cells.values())
           return (p for p in possibilities if p not in square_values)
+#+end_src
+
+Ok cool, now lets do another one. How about our disallowed constraint? That's nice and simple
+
+#+begin_src python
+  @dataclass(frozen=True)
+  class DisallowedConstraint(Constraint):
+      _disallowed_values: set[Possibility] = field(default_factory=set)
+
+      def disallow(self, p: Possibility) -> None:
+          self._disallowed_values.add(p)
+
+      def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
+          return (p for p in possibilities if p not in self._disallowed_values)
+#+end_src
+
+And now we've got the sum constraints, they all have similar behavior
+#+begin_src python
+  @dataclass(frozen=True)
+  class RowSumConstraint(Constraint):
+      def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
+          r,c = self.position
+          sum_before_position = sum((self.square.cells[(rb,c)] for rb in range(0,r)))
+          lowest_possible_sum_after_position = int((self.square.side_size-r-1)*(self.square.side_size-r)/2) # this cannot ever be odd
+
+          maximum = self.square.span_sum - sum_before_position - lowest_possible_sum_after_position
+          minimum = 1 if r+1<self.square.side_size else maximum
+
+          return (p for p in possibilities if minimum <= p <= maximum)
+
+  @dataclass(frozen=True)
+  class ColumnSumConstraint(Constraint):
+      def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
+          r,c = self.position
+          sum_before_position = sum((self.square.cells[(r,cb)] for cb in range(0,c)))
+          lowest_possible_sum_after_position = int((self.square.side_size-c-1)*(self.square.side_size-c)/2) # this cannot ever be odd
+
+          maximum = self.square.span_sum - sum_before_position - lowest_possible_sum_after_position
+          minimum = 1 if c+1<self.square.side_size else maximum
+
+          return (p for p in possibilities if minimum <= p <= maximum)
+
+  @dataclass(frozen=True)
+  class DiagonalSumConstraint(Constraint):
+      def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
+          r,c = self.position
+          if r != c:
+              return possibilities
+          sum_before_position = sum((self.square.cells[(rb,rb)] for rb in range(0,r)))
+
+          lowest_possible_sum_after_position = int((self.square.side_size-r-1)*(self.square.side_size-r)/2) # this cannot ever be odd
+
+          minimum = 1
+          maximum = self.square.span_sum - sum_before_position - lowest_possible_sum_after_position
+          minimum = 1 if r+1<self.square.side_size else maximum
+
+          return (p for p in possibilities if minimum <= p <= maximum)
+
+  @dataclass(frozen=True)
+  class AntiDiagonalSumConstraint(Constraint):
+      def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
+          r,c = self.position
+          if r + 1 != self.square.side_size - c:
+              return possibilities
+          sum_before_position = sum((self.square.cells[(rb,(self.square.side_size-rb-1))] for rb in range(0,r)))
+
+          lowest_possible_sum_after_position = int((self.square.side_size-r-1)*(self.square.side_size-r)/2) # this cannot ever be odd
+
+          minimum = 1
+          maximum = self.square.span_sum - sum_before_position - lowest_possible_sum_after_position
+          minimum = 1 if r+1<self.square.side_size else maximum
+
+          return (p for p in possibilities if minimum <= p <= maximum)
+#+end_src
+
+And finally we need a way of emitting the full range of possibilties
+#+begin_src python
+  def get_possibilities(square: MagicSquareBuilder) -> Iterable[Possibility]:
+      return range(1, square.side_size**2+1)
+#+end_src
+
+Lets try these out
+#+begin_src python :tangle no :results output pp replace
+  cells = {(0,0): 8, (0,1): 1, (0,2): 6,
+           (1,0): 3,
+          }
+  pos = (1,1)
+  square = MagicSquareBuilder(cells=cells, side_size=3)
+  filters = (
+      DisallowedConstraint(square, pos),
+      UniquenessConstraint(square, pos),
+      RowSumConstraint(square, pos), ColumnSumConstraint(square, pos),
+      DiagonalSumConstraint(square, pos), AntiDiagonalSumConstraint(square, pos),
+  )
+
+  possibilities = list(get_possibilities(square))
+  for f in filters:
+      print("possibilities are", possibilities, "invoking", type(f))
+      possibilities = list(f.filter(possibilities))
+
+  print(list(possibilities))
+#+end_src
+
+#+RESULTS:
+: possibilities are [1, 2, 3, 4, 5, 6, 7, 8, 9] invoking <class '__main__.DisallowedConstraint'>
+: possibilities are [1, 2, 3, 4, 5, 6, 7, 8, 9] invoking <class '__main__.UniquenessConstraint'>
+: possibilities are [2, 4, 5, 7, 9] invoking <class '__main__.RowSumConstraint'>
+: possibilities are [2, 4, 5, 7, 9] invoking <class '__main__.ColumnSumConstraint'>
+: possibilities are [2, 4, 5, 7, 9] invoking <class '__main__.DiagonalSumConstraint'>
+: possibilities are [2, 4, 5] invoking <class '__main__.AntiDiagonalSumConstraint'>
+: [2, 4, 5]
+
+That seems right
+
+**** Implementing our search
+
+Now lets do our find
+
+#+begin_src python
 #+end_src
