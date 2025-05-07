@@ -1,4 +1,4 @@
-# [[file:../../README.org::*Basic structures][Basic structures:1]]
+# [[file:../README.org::*Basic structures][Basic structures:1]]
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from typing import Iterable, Tuple
@@ -23,7 +23,7 @@ class MagicSquareBuilder:
         return MagicSquareBuilder(cells=new_cells, side_size=self.side_size)
 # Basic structures:1 ends here
 
-# [[file:../../README.org::*Constraints][Constraints:1]]
+# [[file:../README.org::*Constraints][Constraints:1]]
 type Possibility = int
 
 @dataclass(frozen=True)
@@ -40,7 +40,7 @@ class Constraint(ABC):
         pass
 # Constraints:1 ends here
 
-# [[file:../../README.org::*Constraints][Constraints:2]]
+# [[file:../README.org::*Constraints][Constraints:2]]
 @dataclass(frozen=True)
 class UniquenessConstraint(Constraint):
     def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
@@ -48,7 +48,7 @@ class UniquenessConstraint(Constraint):
         return (p for p in possibilities if p not in square_values)
 # Constraints:2 ends here
 
-# [[file:../../README.org::*Constraints][Constraints:3]]
+# [[file:../README.org::*Constraints][Constraints:3]]
 @dataclass(frozen=True)
 class RowSumConstraint(Constraint):
     def filter(self, possibilities: Iterable[Possibility]) -> Iterable[Possibility]:
@@ -106,12 +106,12 @@ class AntiDiagonalSumConstraint(Constraint):
         return (p for p in possibilities if minimum <= p <= maximum)
 # Constraints:3 ends here
 
-# [[file:../../README.org::*Constraints][Constraints:4]]
+# [[file:../README.org::*Constraints][Constraints:4]]
 def get_possibilities(square: MagicSquareBuilder) -> Iterable[Possibility]:
     return range(1, square.side_size**2+1)
 # Constraints:4 ends here
 
-# [[file:../../README.org::*Implementing our search][Implementing our search:1]]
+# [[file:../README.org::*Implementing our search][Implementing our search:1]]
 def possibilities_to_values(possibilities: Iterable[Possibility]) -> Iterable[CellValue]:
     return possibilities # For now that is all this is, at some point later we might be handling ranges here
 
@@ -141,7 +141,7 @@ def fill_magic_square(square: MagicSquareBuilder, remaining_positions: list[Posi
     return None
 # Implementing our search:1 ends here
 
-# [[file:../../README.org::*Implementing our search][Implementing our search:4]]
+# [[file:../README.org::*Implementing our search][Implementing our search:4]]
 def find_magic_square(size: int) -> None | MagicSquareBuilder:
     square = MagicSquareBuilder(cells={}, side_size=size)
     positions = list((r, c) for r in range(size) for c in range(size))
@@ -155,9 +155,45 @@ def print_magic_square(square: MagicSquareBuilder | None) -> None:
 
     for r in range(square.side_size):
         print('\t'.join([str(square.cells[r,c]) for c in range(square.side_size)]))
+# Implementing our search:4 ends here
 
+# [[file:../README.org::*Implementing our search][Implementing our search:5]]
 if __name__ == "__main__":
     import sys
+    import cProfile
+    import pstats
+    import signal
+    import time
+    from pstats import SortKey
+
     if len(sys.argv) > 1:
-        find_magic_square(int(sys.argv[1]))
-# Implementing our search:4 ends here
+        size = int(sys.argv[1])
+        timeout_seconds = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+
+        profiler = cProfile.Profile()
+        profiler.enable()
+
+        def timeout_handler(signum, frame):
+            raise TimeoutError("Computation timed out")
+
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(timeout_seconds)
+
+        square = None
+        start_time = time.time()
+        try:
+            square = find_magic_square(size)
+            signal.alarm(0)
+        except TimeoutError:
+            print(f"\nComputation timed out after {timeout_seconds} seconds")
+        finally:
+            elapsed_time = time.time() - start_time
+            profiler.disable()
+
+            print(f"\nMagic Square Result (after {elapsed_time:.2f} seconds):")
+            print_magic_square(square)
+
+            print("\nProfiling Results:")
+            stats = pstats.Stats(profiler).sort_stats(SortKey.CUMULATIVE)
+            stats.print_stats(20)  # Print top 20 functions by cumulative time
+# Implementing our search:5 ends here
