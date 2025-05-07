@@ -839,4 +839,24 @@ Profiling Results:
 
 #+end_example
 
-Damn, that one still timed out. It's such a huge ramp up in execution time that I feel no amount of optimization will help, but lets just try a few more optimizations to see if we can get past the hump
+Damn, that one still timed out. It's such a huge ramp up in execution time that I feel no amount of optimization will help us get to 9.
+
+**** Optimization Brainstorming
+Brainstorming some other optimizations that I *could* do
+- Obviously unrolling the recursive function, though the recursion doesn't seem to be too much of an issue here
+- ~1/Nth~ of the time the sum constraints will be in the ~miminum = maximum~ state in which case there's no need to iterate possibilities just to check if they contain ~minimum~
+- Interestingly, its spending significantly more time in the ~ColumnSumConstraint~ which comes second than in the ~RowSumConstraint~, I don't really have a theory as to why
+- We could pre-calculate what numbers we are going to try for the row so we do not waste time on things that cannot be a row sum. In fact now that I think of it, how many combinations are there total of sets of numbers that could add up to ~S~? Maybe I should just precalculate all of those to try. For example for ~N=3~ the possibilities are
+  | 12 | 2 | 1 |
+  | 11 | 3 | 1 |
+  | 10 | 4 | 1 |
+  | 10 | 3 | 2 |
+  |  9 | 5 | 1 |
+  |  9 | 4 | 2 |
+  |  8 | 6 | 1 |
+  |  8 | 5 | 2 |
+  |  8 | 4 | 3 |
+  |  7 | 6 | 2 |
+  |  7 | 5 | 3 |
+
+  I think that's it? Just 11 possibilities each with 6 permutations? This is promising as a direction
