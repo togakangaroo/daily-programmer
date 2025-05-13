@@ -1,0 +1,95 @@
+
+A lot of jobs are talking about Go now, I guess lets try Go.
+
+Pulling a problem from an old #daily-programmer post
+
+* Problem Statement - Can make arithmetic progression from sequence
+
+A sequence of numbers is called an arithemtic progression if the difference between any two consecutive elements is the same. Given an array of numbers ~arr~. return ~true~ if the array can be rearranged to form an arithmetic progression. Otherwise return ~false~.
+
+** Example 1
+
+- Input :: =3 5 1=
+- Output :: ~true~
+
+** Example 2
+
+- Input :: =1 2 4=
+- Output :: ~false~
+
+** Constraints
+- ~2 <= input.length <= 1000~
+- ~-100 <= input[i] <= 100~
+
+* Brainstorming
+
+I mean...you could do this DFS, I suppose. This is really a stream sort of situation
+
+There's a stream for evaluating if a given sequence is an arithmetic progression
+- One stream that produces numbers in a given order
+- A transform that calculates deltas
+- A short circuit where if any two are not equal, then it returns false
+- if the stream terminates return true
+
+And another stream for generating all possible sequences
+- using DFS
+- if any one sequence is true, then return true
+- if all sequences were checked, then return false
+
+
+ This actually sounds like a go routine and a go channel sort of thing
+
+ Ok so lets get a feel for channels
+
+** Learning Go Channels
+Let's grab an example from mistral.
+#+name: learning-go-channels/send-and-recieve-values
+#+begin_src go :var bufferSize=3
+  package main
+
+  import (
+  	"fmt"
+  	"time"
+  )
+
+  func sendValues(c chan<- int) {
+  	for i := 0; i < 5; i++ {
+  		c <- i
+  		time.Sleep(100 * time.Millisecond)
+  	}
+  	close(c)
+  }
+
+  func receiveValues(c <-chan int) {
+  	for value := range c {
+  		fmt.Println("Received:", value)
+  	}
+  }
+
+  func main() {
+  	ch := make(chan int, bufferSize)
+  	go sendValues(ch)
+  	go receiveValues(ch)
+  	time.Sleep(1 * time.Second)
+  }
+#+end_src
+
+#+RESULTS: learning-go-channels/send-and-recieve-values
+: Received: 0
+: Received: 1
+: Received: 2
+: Received: 3
+: Received: 4
+
+I see, so it looks like you get bufferred delivery, what happens if you call it with bufferring disabled?
+
+#+call: learning-go-channels/send-and-recieve-values(bufferSize=0)
+
+#+RESULTS:
+: Received: 0
+: Received: 1
+: Received: 2
+: Received: 3
+: Received: 4
+
+Same deal, so in this case it really didn't matter, they just ran sequentially. I'm sure there's a way to parallelize from there. This is just a matter of learning some syntax and that final ~time.Sleep~ is interesting as well, that tells us that the process doesn't hang out waiting for channels to close. I wonder how we *would* do that?
