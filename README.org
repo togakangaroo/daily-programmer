@@ -4,6 +4,7 @@ What you find here, are not writeups of me solving these problems, they're the a
 
 * Implementations
 
+- [[./can-make-arithmetic-progression][Can Make Airthmetic Progression From Sequence]] (in Go)
 - [[./merge-intervals][Merge Intervals]] (in Python, Emacs Lisp)
 - [[./lemonade-change][Lemonade Change]] (in Emacs Lisp)
 - [[./count-number-of-islands][Count Number of Islands]] (in Python)
