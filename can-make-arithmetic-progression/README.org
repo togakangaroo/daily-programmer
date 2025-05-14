@@ -1,7 +1,9 @@
 #+OPTIONS: toc:nil
 #+OPTIONS: html-postamble:nil
 
-A lot of jobs are talking about Go now, I guess lets try Go.
+**Note that some of the auto formatting here doesn't seem to work on Github. Please see the [[https://htmlpreview.github.io/?https://github.com/togakangaroo/daily-programmer/blob/master/can-make-arithmetic-progression/README.html][Converted html file]] for something that is nicely formatted.**
+
+A lot of roles are talking about Go now, I guess lets try Go.
 
 Pulling a problem from an old #daily-programmer post
 

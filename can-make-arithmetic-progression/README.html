@@ -1,0 +1,791 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2025-05-14 Wed 11:50 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>README</title>
+<meta name="author" content="George Mauer" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">README</h1>
+<p>
+A lot of jobs are talking about Go now, I guess lets try Go.
+</p>
+
+<p>
+Pulling a problem from an old #daily-programmer post
+</p>
+<div id="outline-container-org128775e" class="outline-2">
+<h2 id="org128775e"><span class="section-number-2">1.</span> Problem Statement - Can make arithmetic progression from sequence</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+A sequence of numbers is called an arithemtic progression if the difference between any two consecutive elements is the same. Given an array of numbers <code>arr</code>. return <code>true</code> if the array can be rearranged to form an arithmetic progression. Otherwise return <code>false</code>.
+</p>
+</div>
+<div id="outline-container-orgb03c51e" class="outline-3">
+<h3 id="orgb03c51e"><span class="section-number-3">1.1.</span> Example 1</h3>
+<div class="outline-text-3" id="text-1-1">
+<dl class="org-dl">
+<dt>Input</dt><dd><code>3 5 1</code></dd>
+<dt>Output</dt><dd><code>true</code></dd>
+</dl>
+</div>
+</div>
+<div id="outline-container-org5dcdd9d" class="outline-3">
+<h3 id="org5dcdd9d"><span class="section-number-3">1.2.</span> Example 2</h3>
+<div class="outline-text-3" id="text-1-2">
+<dl class="org-dl">
+<dt>Input</dt><dd><code>1 2 4</code></dd>
+<dt>Output</dt><dd><code>false</code></dd>
+</dl>
+</div>
+</div>
+<div id="outline-container-orgdcf08d0" class="outline-3">
+<h3 id="orgdcf08d0"><span class="section-number-3">1.3.</span> Constraints</h3>
+<div class="outline-text-3" id="text-1-3">
+<ul class="org-ul">
+<li><code>2 &lt;= input.length &lt;= 1000</code></li>
+<li><code>-100 &lt;= input[i] &lt;= 100</code></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org3620300" class="outline-2">
+<h2 id="org3620300"><span class="section-number-2">2.</span> Brainstorming</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-orgf4b9b14" class="outline-3">
+<h3 id="orgf4b9b14"><span class="section-number-3">2.1.</span> As Streams</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+I mean&#x2026;you could do this DFS, I suppose. This is really a stream sort of situation
+</p>
+
+<p>
+There's a stream for evaluating if a given sequence is an arithmetic progression
+</p>
+<ul class="org-ul">
+<li>One stream that produces numbers in a given order</li>
+<li>A transform that calculates deltas</li>
+<li>A short circuit where if any delta is not equal to the previous one, then the whole thing returns false</li>
+<li>if the stream terminates the whole thing return true</li>
+</ul>
+
+<p>
+And another stream for generating all possible sequences
+</p>
+<ul class="org-ul">
+<li>using DFS</li>
+<li>if any one sequence is an arithmetic progression, then return true</li>
+<li>if all sequences were checked, then return false</li>
+</ul>
+
+
+<p>
+This actually sounds like a go routine and a go channel sort of thing
+</p>
+
+<p>
+Ok so lets get a feel for channels
+</p>
+</div>
+</div>
+<div id="outline-container-org6678efa" class="outline-3">
+<h3 id="org6678efa"><span class="section-number-3">2.2.</span> Learning Go Channels</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+Let's grab an example from mistral.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-go" id="orgf267f06"><span style="color: #4f97d7; font-weight: bold;">package</span> main
+
+<span style="color: #4f97d7; font-weight: bold;">import</span> <span style="color: #4f97d7;">(</span>
+  <span style="color: #2d9574;">"fmt"</span>
+  <span style="color: #2d9574;">"time"</span>
+<span style="color: #4f97d7;">)</span>
+
+<span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">sendValues</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">c</span> <span style="color: #4f97d7; font-weight: bold;">chan</span><span style="color: #4f97d7; font-weight: bold;">&lt;-</span> <span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">i</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #a45bad;">0</span>; <span style="color: #7590db;">i</span> <span style="color: #4f97d7; font-weight: bold;">&lt;</span> <span style="color: #a45bad;">5</span>; <span style="color: #7590db;">i</span><span style="color: #4f97d7; font-weight: bold;">++</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #7590db;">c</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span> <span style="color: #7590db;">i</span>
+    <span style="color: #7590db;">time</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Sleep</span><span style="color: #2d9574;">(</span><span style="color: #a45bad;">100</span> <span style="color: #4f97d7; font-weight: bold;">*</span> <span style="color: #7590db;">time</span>.<span style="color: #a45bad; font-style: italic;">Millisecond</span><span style="color: #2d9574;">)</span>
+  <span style="color: #bc6ec5;">}</span>
+  <span style="color: #4f97d7; font-weight: bold;">close</span><span style="color: #bc6ec5;">(</span><span style="color: #7590db;">c</span><span style="color: #bc6ec5;">)</span>
+<span style="color: #4f97d7;">}</span>
+
+<span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">receiveValues</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">c</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span><span style="color: #4f97d7; font-weight: bold;">chan</span> <span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">value</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #7590db;">c</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #7590db;">fmt</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Println</span><span style="color: #2d9574;">(</span><span style="color: #2d9574;">"Received:"</span>, <span style="color: #7590db;">value</span><span style="color: #2d9574;">)</span>
+  <span style="color: #bc6ec5;">}</span>
+<span style="color: #4f97d7;">}</span>
+
+<span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">arithmetic_progression</span><span style="color: #4f97d7;">()</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #7590db;">ch</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">make</span><span style="color: #bc6ec5;">(</span><span style="color: #4f97d7; font-weight: bold;">chan</span> <span style="color: #ce537a; font-weight: bold;">int</span>, <span style="color: #7590db;">bufferSize</span><span style="color: #bc6ec5;">)</span>
+  <span style="color: #4f97d7; font-weight: bold;">go</span> <span style="color: #2aa1ae; font-weight: bold;">sendValues</span><span style="color: #bc6ec5;">(</span><span style="color: #7590db;">ch</span><span style="color: #bc6ec5;">)</span>
+  <span style="color: #2aa1ae; font-weight: bold;">receiveValues</span><span style="color: #bc6ec5;">(</span><span style="color: #7590db;">ch</span><span style="color: #bc6ec5;">)</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+
+<p>
+I see, so it looks like you get bufferred delivery, what happens if you call it with bufferring disabled?
+</p>
+
+<p>
+Same deal, so in this case it really didn't matter, they just ran sequentially similar to javascript's <code>defer</code> behavior I imagine. I'm sure there's a way to parallelize from there. Beyond that, it is just a matter of learning some syntax.
+</p>
+</div>
+</div>
+<div id="outline-container-org6f803c2" class="outline-3">
+<h3 id="org6f803c2"><span class="section-number-3">2.3.</span> Essence of the problem</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+As I think about it more, that is quite a lot of permutations that you might have to check.
+</p>
+
+<p>
+for an input of size <code>2</code> there is only up to <code>1</code> permutation to try as the answer to <b>all</b> permutations that they are, in fact, arithmetic progressions of 1.
+</p>
+
+<p>
+What about for an input the size of <code>3</code>? Lets consider the possible positions
+</p>
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Permutation</td>
+<td class="org-left">Is AP?</td>
+</tr>
+
+<tr>
+<td class="org-left">1 2 3</td>
+<td class="org-left">X</td>
+</tr>
+
+<tr>
+<td class="org-left">1 3 2</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">2 1 3</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">2 3 1</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">3 1 2</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">3 2 1</td>
+<td class="org-left">X</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+So hold on&#x2026;that is a good point. If you just sort the list can it not be a simple scan to see if each subsequent delta is the same? Are there counter-examples where sorting is not the only answer?
+</p>
+
+<p>
+I'm thinking about something that bounces betweens positive and negative. But no, that doesn't make sense. If you think about it, if you were to chart out any algorithmic progression it would have to have a constant, monotonic slope. But anything with negatives and positive mixed would contain not only not the same slope but a slope in the opposite direction. The same argument could be made for why it <b>has</b> to be a sorted list since an out-of-sort-order list's derivative chart could would not be monotonic.
+</p>
+
+<p>
+To speak to performance, I know that in just about any language that a sort of 999 items is nearly instantaneous so even if there's further improvements possible, this approach should fit within our constraints very nicely.
+</p>
+
+<p>
+So maybe the solution isn't all that perfect a fit for go channels&#x2026;we need only to sort with a builtin then walk the sorted list to see if any two are differnt
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org50ef5a3" class="outline-2">
+<h2 id="org50ef5a3"><span class="section-number-2">3.</span> Implementation</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-orgb8490c4" class="outline-3">
+<h3 id="orgb8490c4"><span class="section-number-3">3.1.</span> Simple Implementation</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Ok lets do it based on the deeper insight above. It becomes quite simple
+</p>
+
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #4f97d7; font-weight: bold;">package</span> main
+
+
+<span style="color: #4f97d7; font-weight: bold;">import</span> <span style="color: #4f97d7;">(</span>
+  <span style="color: #2d9574;">"fmt"</span>
+  <span style="color: #2d9574;">"slices"</span>
+<span style="color: #4f97d7;">)</span>
+
+<span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">isArithmeticProgression</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">array</span> <span style="color: #bc6ec5;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #4f97d7;">)</span> <span style="color: #ce537a; font-weight: bold;">bool</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #4f97d7; font-weight: bold;">len</span><span style="color: #bc6ec5;">(</span><span style="color: #7590db;">array</span><span style="color: #bc6ec5;">)</span> <span style="color: #4f97d7; font-weight: bold;">&lt;=</span> <span style="color: #a45bad;">2</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #4f97d7;">true</span>
+  <span style="color: #bc6ec5;">}</span>
+
+  <span style="color: #7590db;">sortedArray</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #7590db;">slices</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Clone</span><span style="color: #bc6ec5;">(</span><span style="color: #7590db;">array</span><span style="color: #bc6ec5;">)</span>
+  <span style="color: #7590db;">slices</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Sort</span><span style="color: #bc6ec5;">(</span><span style="color: #7590db;">sortedArray</span><span style="color: #bc6ec5;">)</span>
+
+  <span style="color: #7590db;">prevItem</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #7590db;">sortedArray</span><span style="color: #bc6ec5;">[</span><span style="color: #a45bad;">1</span><span style="color: #bc6ec5;">]</span>
+  <span style="color: #7590db;">prevGap</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #7590db;">prevItem</span> <span style="color: #4f97d7; font-weight: bold;">-</span> <span style="color: #7590db;">sortedArray</span><span style="color: #bc6ec5;">[</span><span style="color: #a45bad;">0</span><span style="color: #bc6ec5;">]</span>
+
+  <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">_</span>, <span style="color: #7590db;">item</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #7590db;">sortedArray</span><span style="color: #bc6ec5;">[</span><span style="color: #a45bad;">2</span>:<span style="color: #bc6ec5;">]</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #7590db;">newGap</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #7590db;">item</span> <span style="color: #4f97d7; font-weight: bold;">-</span> <span style="color: #7590db;">prevItem</span>
+    <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #7590db;">newGap</span> <span style="color: #4f97d7; font-weight: bold;">!=</span> <span style="color: #7590db;">prevGap</span> <span style="color: #2d9574;">{</span>
+      <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #4f97d7;">false</span>
+    <span style="color: #2d9574;">}</span>
+    <span style="color: #7590db;">prevGap</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #7590db;">newGap</span>
+    <span style="color: #7590db;">prevItem</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #7590db;">item</span>
+  <span style="color: #bc6ec5;">}</span>
+
+  <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #4f97d7;">true</span>
+<span style="color: #4f97d7;">}</span>
+
+<span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">arithmetic_progression</span><span style="color: #4f97d7;">()</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #7590db;">fmt</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Println</span><span style="color: #bc6ec5;">(</span><span style="color: #2aa1ae; font-weight: bold;">isArithmeticProgression</span><span style="color: #2d9574;">(</span><span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">3</span>, <span style="color: #a45bad;">5</span>, <span style="color: #a45bad;">1</span><span style="color: #67b11d;">}</span><span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span>
+  <span style="color: #7590db;">fmt</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Println</span><span style="color: #bc6ec5;">(</span><span style="color: #2aa1ae; font-weight: bold;">isArithmeticProgression</span><span style="color: #2d9574;">(</span><span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">1</span>, <span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">4</span><span style="color: #67b11d;">}</span><span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org5d3194f" class="outline-3">
+<h3 id="org5d3194f"><span class="section-number-3">3.2.</span> Simple implementation tests</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Lets write some tests
+</p>
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #4f97d7; font-weight: bold;">package</span> main
+
+<span style="color: #4f97d7; font-weight: bold;">import</span> <span style="color: #4f97d7;">(</span>
+  <span style="color: #2d9574;">"testing"</span>
+<span style="color: #4f97d7;">)</span>
+
+<span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">TestIsArithmeticProgression</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">t</span> <span style="color: #4f97d7; font-weight: bold;">*</span>testing.<span style="color: #ce537a; font-weight: bold;">T</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #7590db;">testCases</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #bc6ec5;">[]</span><span style="color: #4f97d7; font-weight: bold;">struct</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #a45bad; font-style: italic;">name</span>     <span style="color: #ce537a; font-weight: bold;">string</span>
+    <span style="color: #a45bad; font-style: italic;">input</span>    <span style="color: #2d9574;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span>
+    <span style="color: #a45bad; font-style: italic;">expected</span> <span style="color: #ce537a; font-weight: bold;">bool</span>
+  <span style="color: #bc6ec5;">}{</span>
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Example 1 - Valid progression"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">3</span>, <span style="color: #a45bad;">5</span>, <span style="color: #a45bad;">1</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Example 2 - Invalid progression"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">1</span>, <span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">4</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">false</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Empty array"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Single element"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">5</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Two elements"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">1</span>, <span style="color: #a45bad;">2</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Negative numbers"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #4f97d7; font-weight: bold;">-</span><span style="color: #a45bad;">3</span>, <span style="color: #4f97d7; font-weight: bold;">-</span><span style="color: #a45bad;">1</span>, <span style="color: #a45bad;">1</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Same numbers"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">2</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+  <span style="color: #bc6ec5;">}</span>
+
+  <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">_</span>, <span style="color: #7590db;">tc</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #7590db;">testCases</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #7590db;">t</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Run</span><span style="color: #2d9574;">(</span><span style="color: #7590db;">tc</span>.<span style="color: #a45bad; font-style: italic;">name</span>, <span style="color: #4f97d7; font-weight: bold;">func</span><span style="color: #67b11d;">(</span><span style="color: #7590db;">t</span> <span style="color: #4f97d7; font-weight: bold;">*</span>testing.<span style="color: #ce537a; font-weight: bold;">T</span><span style="color: #67b11d;">)</span> <span style="color: #67b11d;">{</span>
+      <span style="color: #7590db;">result</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #2aa1ae; font-weight: bold;">isArithmeticProgression</span><span style="color: #b1951d;">(</span><span style="color: #7590db;">tc</span>.<span style="color: #a45bad; font-style: italic;">input</span><span style="color: #b1951d;">)</span>
+      <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #7590db;">result</span> <span style="color: #4f97d7; font-weight: bold;">!=</span> <span style="color: #7590db;">tc</span>.<span style="color: #a45bad; font-style: italic;">expected</span> <span style="color: #b1951d;">{</span>
+        <span style="color: #7590db;">t</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Errorf</span><span style="color: #4f97d7;">(</span><span style="color: #2d9574;">"isArithmeticProgression(%v) = %v; want %v"</span>, <span style="color: #7590db;">tc</span>.<span style="color: #a45bad; font-style: italic;">input</span>, <span style="color: #7590db;">result</span>, <span style="color: #7590db;">tc</span>.<span style="color: #a45bad; font-style: italic;">expected</span><span style="color: #4f97d7;">)</span>
+      <span style="color: #b1951d;">}</span>
+    <span style="color: #67b11d;">}</span><span style="color: #2d9574;">)</span>
+  <span style="color: #bc6ec5;">}</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+
+<p>
+We can then run this like this
+</p>
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #2aa1ae; font-weight: bold;">go</span> test 
+</pre>
+</div>
+
+<pre class="example">
+PASS
+ok  	github.com/user/can-make-arithmetic-progression	0.002s
+</pre>
+</div>
+</div>
+<div id="outline-container-orgc6323c2" class="outline-3">
+<h3 id="orgc6323c2"><span class="section-number-3">3.3.</span> Using channels</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+Ok, so hear me out, the above works just fine of course, but in other languages I would be using a generator or a stream to calculate the stream of deltas which I could then just compare one after the other, perhaps even generating another generator. With Go, the equivalent is to use channels. <a href="https://stackoverflow.com/a/34466755/5056">Because of the semantics around closing them</a> hover it's not so straightforward and has higher overhead. Still, I would like to try and implement it as a learning exercise.
+</p>
+
+<p>
+First some standard imports
+</p>
+
+<div class="org-src-container">
+<pre class="src src-go" id="org48ea378"><span style="color: #4f97d7; font-weight: bold;">package</span> main
+
+<span style="color: #4f97d7; font-weight: bold;">import</span> <span style="color: #4f97d7;">(</span>
+  <span style="color: #2d9574;">"fmt"</span>
+  <span style="color: #2d9574;">"slices"</span>
+<span style="color: #4f97d7;">)</span>
+
+<span style="color: #4f97d7; font-weight: bold;">var</span> <span style="color: #7590db;">_</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #7590db;">fmt</span>.<span style="color: #a45bad; font-style: italic;">Printf</span> <span style="color: #2aa1ae; background-color: #292e34;">// Just for the sake of how we're structuring things here we don't want to get an unused import error</span>
+</pre>
+</div>
+
+<p>
+Here there will actually be multiple channels
+</p>
+
+<ul class="org-ul">
+<li><b>Channel that has written into it a sorted stream of numbers</b></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-go" id="orgb2ac679"><span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">emitSequentialNumbers</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">array</span> <span style="color: #bc6ec5;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span><span style="color: #4f97d7; font-weight: bold;">chan</span> <span style="color: #ce537a; font-weight: bold;">int</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #7590db;">c</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">make</span><span style="color: #bc6ec5;">(</span><span style="color: #4f97d7; font-weight: bold;">chan</span> <span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #bc6ec5;">)</span>
+
+  <span style="color: #4f97d7; font-weight: bold;">go</span> <span style="color: #4f97d7; font-weight: bold;">func</span><span style="color: #bc6ec5;">()</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #4f97d7; font-weight: bold;">defer</span> <span style="color: #4f97d7; font-weight: bold;">close</span><span style="color: #2d9574;">(</span><span style="color: #7590db;">c</span><span style="color: #2d9574;">)</span>
+    <span style="color: #7590db;">sortedArray</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #7590db;">slices</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Clone</span><span style="color: #2d9574;">(</span><span style="color: #7590db;">array</span><span style="color: #2d9574;">)</span>
+    <span style="color: #7590db;">slices</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Sort</span><span style="color: #2d9574;">(</span><span style="color: #7590db;">sortedArray</span><span style="color: #2d9574;">)</span>
+
+    <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">_</span>, <span style="color: #7590db;">num</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #7590db;">sortedArray</span> <span style="color: #2d9574;">{</span>
+      <span style="color: #7590db;">c</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span> <span style="color: #7590db;">num</span>
+    <span style="color: #2d9574;">}</span>
+  <span style="color: #bc6ec5;">}()</span>
+
+  <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #7590db;">c</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+
+<p>
+We should be able to use that
+</p>
+<div class="org-src-container">
+<pre class="src src-go">
+
+
+
+<span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">arithmetic_progression</span><span style="color: #4f97d7;">()</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">val</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #2aa1ae; font-weight: bold;">emitSequentialNumbers</span><span style="color: #bc6ec5;">(</span><span style="color: #2d9574;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #2d9574;">{</span><span style="color: #a45bad;">3</span>, <span style="color: #4f97d7; font-weight: bold;">-</span><span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">5</span>, <span style="color: #a45bad;">1</span><span style="color: #2d9574;">}</span><span style="color: #bc6ec5;">)</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #7590db;">fmt</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Println</span><span style="color: #2d9574;">(</span><span style="color: #7590db;">val</span><span style="color: #2d9574;">)</span>
+  <span style="color: #bc6ec5;">}</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+
+<p>
+Sweet!
+</p>
+
+<hr />
+
+<ul class="org-ul">
+<li><p>
+<b><b>Channel that has written into it deltas between sequential numbers</b></b>
+</p></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">emitDeltasBetweenSequentialNumbers</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">sequentialNumbers</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span><span style="color: #4f97d7; font-weight: bold;">chan</span> <span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span><span style="color: #4f97d7; font-weight: bold;">chan</span> <span style="color: #ce537a; font-weight: bold;">int</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #7590db;">c</span><span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">make</span><span style="color: #bc6ec5;">(</span><span style="color: #4f97d7; font-weight: bold;">chan</span> <span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #bc6ec5;">)</span>
+  <span style="color: #4f97d7; font-weight: bold;">go</span> <span style="color: #4f97d7; font-weight: bold;">func</span><span style="color: #bc6ec5;">()</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #4f97d7; font-weight: bold;">defer</span> <span style="color: #4f97d7; font-weight: bold;">close</span><span style="color: #2d9574;">(</span><span style="color: #7590db;">c</span><span style="color: #2d9574;">)</span>
+    <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #7590db;">prevItem</span>, <span style="color: #7590db;">ok</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span> <span style="color: #7590db;">sequentialNumbers</span>; <span style="color: #7590db;">ok</span> <span style="color: #2d9574;">{</span>
+      <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">newItem</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #7590db;">sequentialNumbers</span> <span style="color: #67b11d;">{</span>
+        <span style="color: #7590db;">c</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span> <span style="color: #b1951d;">(</span><span style="color: #7590db;">newItem</span> <span style="color: #4f97d7; font-weight: bold;">-</span> <span style="color: #7590db;">prevItem</span><span style="color: #b1951d;">)</span>
+        <span style="color: #7590db;">prevItem</span> <span style="color: #4f97d7; font-weight: bold;">=</span> <span style="color: #7590db;">newItem</span>
+
+      <span style="color: #67b11d;">}</span>
+    <span style="color: #2d9574;">}</span>
+  <span style="color: #bc6ec5;">}()</span>
+  <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #7590db;">c</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+<p>
+let's test that one
+</p>
+
+<p>
+We should be able to use that
+</p>
+<div class="org-src-container">
+<pre class="src src-go">
+
+
+
+
+
+<span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">arithmetic_progression</span><span style="color: #4f97d7;">()</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">val</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #2aa1ae; font-weight: bold;">emitDeltasBetweenSequentialNumbers</span><span style="color: #bc6ec5;">(</span><span style="color: #2aa1ae; font-weight: bold;">emitSequentialNumbers</span><span style="color: #2d9574;">(</span><span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">3</span>, <span style="color: #4f97d7; font-weight: bold;">-</span><span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">5</span>, <span style="color: #a45bad;">1</span><span style="color: #67b11d;">}</span><span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #7590db;">fmt</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Println</span><span style="color: #2d9574;">(</span><span style="color: #7590db;">val</span><span style="color: #2d9574;">)</span>
+  <span style="color: #bc6ec5;">}</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+
+<p>
+That is indeed correct
+</p>
+
+<hr />
+
+<ul class="org-ul">
+<li><b><b>Signal-only channel that has written into it a signal which pops whether two sequential numbers have changed</b></b></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-go" id="org63f21e6"><span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">emitIfValueChanged</span><span style="color: #4f97d7;">[</span><span style="color: #7590db;">T</span> <span style="color: #ce537a; font-weight: bold;">comparable</span><span style="color: #4f97d7;">](</span><span style="color: #7590db;">values</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span><span style="color: #4f97d7; font-weight: bold;">chan</span> <span style="color: #ce537a; font-weight: bold;">T</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span><span style="color: #4f97d7; font-weight: bold;">chan</span> <span style="color: #4f97d7; font-weight: bold;">struct</span><span style="color: #4f97d7;">{}</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #7590db;">c</span><span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">make</span><span style="color: #bc6ec5;">(</span><span style="color: #4f97d7; font-weight: bold;">chan</span> <span style="color: #4f97d7; font-weight: bold;">struct</span><span style="color: #2d9574;">{}</span><span style="color: #bc6ec5;">)</span>
+  <span style="color: #4f97d7; font-weight: bold;">go</span> <span style="color: #4f97d7; font-weight: bold;">func</span><span style="color: #bc6ec5;">()</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #4f97d7; font-weight: bold;">defer</span> <span style="color: #4f97d7; font-weight: bold;">close</span><span style="color: #2d9574;">(</span><span style="color: #7590db;">c</span><span style="color: #2d9574;">)</span>
+    <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #7590db;">firstItem</span>, <span style="color: #7590db;">ok</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span> <span style="color: #7590db;">values</span>; <span style="color: #7590db;">ok</span> <span style="color: #2d9574;">{</span>
+      <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">newItem</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #7590db;">values</span> <span style="color: #67b11d;">{</span>
+        <span style="color: #4f97d7; font-weight: bold;">if</span><span style="color: #b1951d;">(</span><span style="color: #7590db;">newItem</span> <span style="color: #4f97d7; font-weight: bold;">!=</span> <span style="color: #7590db;">firstItem</span><span style="color: #b1951d;">)</span> <span style="color: #b1951d;">{</span>
+          <span style="color: #7590db;">c</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span> <span style="color: #4f97d7; font-weight: bold;">struct</span><span style="color: #4f97d7;">{}{}</span>
+        <span style="color: #b1951d;">}</span>
+      <span style="color: #67b11d;">}</span>
+    <span style="color: #2d9574;">}</span>
+  <span style="color: #bc6ec5;">}()</span>
+  <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #7590db;">c</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+
+<p>
+Lets test this real quick
+</p>
+
+<div class="org-src-container">
+<pre class="src src-go">
+
+
+
+
+
+<span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">main</span><span style="color: #4f97d7;">()</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #2aa1ae; font-weight: bold;">emitIfValueChanged</span><span style="color: #bc6ec5;">(</span><span style="color: #2aa1ae; font-weight: bold;">emitSequentialNumbers</span><span style="color: #2d9574;">(</span><span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">0</span><span style="color: #67b11d;">}</span><span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #7590db;">fmt</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Println</span><span style="color: #2d9574;">(</span><span style="color: #2d9574;">"got a change in the first loop"</span><span style="color: #2d9574;">)</span>
+  <span style="color: #bc6ec5;">}</span>
+  <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #2aa1ae; font-weight: bold;">emitIfValueChanged</span><span style="color: #bc6ec5;">(</span><span style="color: #2aa1ae; font-weight: bold;">emitSequentialNumbers</span><span style="color: #2d9574;">(</span><span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">1</span><span style="color: #67b11d;">}</span><span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #7590db;">fmt</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Println</span><span style="color: #2d9574;">(</span><span style="color: #2d9574;">"got a change in the second loop"</span><span style="color: #2d9574;">)</span>
+  <span style="color: #bc6ec5;">}</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+
+<pre class="example">
+got a change in the second loop
+</pre>
+
+
+<p>
+Aha, interesting how the <code>_</code> variable was not only not necessary here, but actually didn't work
+</p>
+
+<hr />
+<p>
+Finally, lets actually create a function to return true/false here
+</p>
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">IsArithmeticProgressionWithChannels</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">array</span> <span style="color: #bc6ec5;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #4f97d7;">)</span> <span style="color: #ce537a; font-weight: bold;">bool</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #7590db;">_</span>, <span style="color: #7590db;">changed</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">&lt;-</span><span style="color: #2aa1ae; font-weight: bold;">emitIfValueChanged</span><span style="color: #bc6ec5;">(</span><span style="color: #2aa1ae; font-weight: bold;">emitDeltasBetweenSequentialNumbers</span><span style="color: #2d9574;">(</span><span style="color: #2aa1ae; font-weight: bold;">emitSequentialNumbers</span><span style="color: #67b11d;">(</span><span style="color: #7590db;">array</span><span style="color: #67b11d;">)</span><span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span>
+  <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #4f97d7; font-weight: bold;">!</span><span style="color: #7590db;">changed</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga28b2fa" class="outline-3">
+<h3 id="orga28b2fa"><span class="section-number-3">3.4.</span> Channel implementation tests</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+Lets write some tests
+</p>
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #4f97d7; font-weight: bold;">package</span> main
+
+
+<span style="color: #4f97d7; font-weight: bold;">import</span> <span style="color: #4f97d7;">(</span>
+  <span style="color: #2d9574;">"testing"</span>
+<span style="color: #4f97d7;">)</span>
+
+<span style="color: #4f97d7; font-weight: bold;">func</span> <span style="color: #bc6ec5; font-weight: bold;">TestIsArithmeticProgressionUsingChannels</span><span style="color: #4f97d7;">(</span><span style="color: #7590db;">t</span> <span style="color: #4f97d7; font-weight: bold;">*</span>testing.<span style="color: #ce537a; font-weight: bold;">T</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7;">{</span>
+  <span style="color: #7590db;">testCases</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #bc6ec5;">[]</span><span style="color: #4f97d7; font-weight: bold;">struct</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #a45bad; font-style: italic;">name</span>     <span style="color: #ce537a; font-weight: bold;">string</span>
+    <span style="color: #a45bad; font-style: italic;">input</span>    <span style="color: #2d9574;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span>
+    <span style="color: #a45bad; font-style: italic;">expected</span> <span style="color: #ce537a; font-weight: bold;">bool</span>
+  <span style="color: #bc6ec5;">}{</span>
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Example 1 - Valid progression"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">3</span>, <span style="color: #a45bad;">5</span>, <span style="color: #a45bad;">1</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Example 2 - Invalid progression"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">1</span>, <span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">4</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">false</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Empty array"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Single element"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">5</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Two elements"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">1</span>, <span style="color: #a45bad;">2</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Negative numbers"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #4f97d7; font-weight: bold;">-</span><span style="color: #a45bad;">3</span>, <span style="color: #4f97d7; font-weight: bold;">-</span><span style="color: #a45bad;">1</span>, <span style="color: #a45bad;">1</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+    <span style="color: #2d9574;">{</span><span style="color: #2d9574;">"Same numbers"</span>, <span style="color: #67b11d;">[]</span><span style="color: #ce537a; font-weight: bold;">int</span><span style="color: #67b11d;">{</span><span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">2</span>, <span style="color: #a45bad;">2</span><span style="color: #67b11d;">}</span>, <span style="color: #4f97d7;">true</span><span style="color: #2d9574;">}</span>,
+  <span style="color: #bc6ec5;">}</span>
+
+  <span style="color: #4f97d7; font-weight: bold;">for</span> <span style="color: #7590db;">_</span>, <span style="color: #7590db;">tc</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #4f97d7; font-weight: bold;">range</span> <span style="color: #7590db;">testCases</span> <span style="color: #bc6ec5;">{</span>
+    <span style="color: #7590db;">t</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Run</span><span style="color: #2d9574;">(</span><span style="color: #7590db;">tc</span>.<span style="color: #a45bad; font-style: italic;">name</span>, <span style="color: #4f97d7; font-weight: bold;">func</span><span style="color: #67b11d;">(</span><span style="color: #7590db;">t</span> <span style="color: #4f97d7; font-weight: bold;">*</span>testing.<span style="color: #ce537a; font-weight: bold;">T</span><span style="color: #67b11d;">)</span> <span style="color: #67b11d;">{</span>
+      <span style="color: #7590db;">result</span> <span style="color: #4f97d7; font-weight: bold;">:=</span> <span style="color: #2aa1ae; font-weight: bold;">IsArithmeticProgressionWithChannels</span><span style="color: #b1951d;">(</span><span style="color: #7590db;">tc</span>.<span style="color: #a45bad; font-style: italic;">input</span><span style="color: #b1951d;">)</span>
+      <span style="color: #4f97d7; font-weight: bold;">if</span> <span style="color: #7590db;">result</span> <span style="color: #4f97d7; font-weight: bold;">!=</span> <span style="color: #7590db;">tc</span>.<span style="color: #a45bad; font-style: italic;">expected</span> <span style="color: #b1951d;">{</span>
+        <span style="color: #7590db;">t</span>.<span style="color: #2aa1ae; font-weight: bold; font-style: italic;">Errorf</span><span style="color: #4f97d7;">(</span><span style="color: #2d9574;">"IsArithmeticProgressionWithChannels(%v) = %v; want %v"</span>, <span style="color: #7590db;">tc</span>.<span style="color: #a45bad; font-style: italic;">input</span>, <span style="color: #7590db;">result</span>, <span style="color: #7590db;">tc</span>.<span style="color: #a45bad; font-style: italic;">expected</span><span style="color: #4f97d7;">)</span>
+      <span style="color: #b1951d;">}</span>
+    <span style="color: #67b11d;">}</span><span style="color: #2d9574;">)</span>
+  <span style="color: #bc6ec5;">}</span>
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+
+<p>
+We can then run all our tests to make sure they still work
+</p>
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #2aa1ae; font-weight: bold;">go</span> test <span style="color: #a45bad;">-v</span>
+</pre>
+</div>
+
+<pre class="example" id="orge597a0e">
+=== RUN   TestIsArithmeticProgression
+=== RUN   TestIsArithmeticProgression/Example_1_-_Valid_progression
+=== RUN   TestIsArithmeticProgression/Example_2_-_Invalid_progression
+=== RUN   TestIsArithmeticProgression/Empty_array
+=== RUN   TestIsArithmeticProgression/Single_element
+=== RUN   TestIsArithmeticProgression/Two_elements
+=== RUN   TestIsArithmeticProgression/Negative_numbers
+=== RUN   TestIsArithmeticProgression/Same_numbers
+--- PASS: TestIsArithmeticProgression (0.00s)
+    --- PASS: TestIsArithmeticProgression/Example_1_-_Valid_progression (0.00s)
+    --- PASS: TestIsArithmeticProgression/Example_2_-_Invalid_progression (0.00s)
+    --- PASS: TestIsArithmeticProgression/Empty_array (0.00s)
+    --- PASS: TestIsArithmeticProgression/Single_element (0.00s)
+    --- PASS: TestIsArithmeticProgression/Two_elements (0.00s)
+    --- PASS: TestIsArithmeticProgression/Negative_numbers (0.00s)
+    --- PASS: TestIsArithmeticProgression/Same_numbers (0.00s)
+=== RUN   TestIsArithmeticProgressionUsingChannels
+=== RUN   TestIsArithmeticProgressionUsingChannels/Example_1_-_Valid_progression
+=== RUN   TestIsArithmeticProgressionUsingChannels/Example_2_-_Invalid_progression
+=== RUN   TestIsArithmeticProgressionUsingChannels/Empty_array
+=== RUN   TestIsArithmeticProgressionUsingChannels/Single_element
+=== RUN   TestIsArithmeticProgressionUsingChannels/Two_elements
+=== RUN   TestIsArithmeticProgressionUsingChannels/Negative_numbers
+=== RUN   TestIsArithmeticProgressionUsingChannels/Same_numbers
+--- PASS: TestIsArithmeticProgressionUsingChannels (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Example_1_-_Valid_progression (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Example_2_-_Invalid_progression (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Empty_array (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Single_element (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Two_elements (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Negative_numbers (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Same_numbers (0.00s)
+PASS
+ok  	github.com/user/can-make-arithmetic-progression	0.001s
+</pre>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
