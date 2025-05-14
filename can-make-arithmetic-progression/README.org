@@ -68,7 +68,7 @@ Let's grab an example from mistral.
   	}
   }
 
-  func main() {
+  func arithmetic_progression() {
   	ch := make(chan int, bufferSize)
   	go sendValues(ch)
   	receiveValues(ch)
@@ -98,7 +98,7 @@ I see, so it looks like you get bufferred delivery, what happens if you call it 
 Same deal, so in this case it really didn't matter, they just ran sequentially similar to javascript's ~defer~ behavior I imagine. I'm sure there's a way to parallelize from there. Beyond that, it is just a matter of learning some syntax.
 
 ** Essence of the problem
-As I think about it more, that is quite a lot of permutations that you might have to check. 
+As I think about it more, that is quite a lot of permutations that you might have to check.
 
 for an input of size ~2~ there is only up to =1= permutation to try as the answer to *all* permutations that they are, in fact, arithmetic progressions of 1.
 
@@ -120,10 +120,15 @@ So maybe the solution isn't all that perfect a fit for go channels...we need onl
 * Implementation
 :PROPERTIES:
 :header-args+: :noweb strip-export
-:header-args:go+: :mkdirp 't :tangle main.go :comments both
+:header-args:go+: :mkdirp 't :comments both
+:header-args:go+: :main no
 :END:
 
 ** Simple Implementation
+:PROPERTIES:
+:header-args:go+: :tangle arithmetic_progression.go
+:END:
+
 Ok lets do it based on the deeper insight above. It becomes quite simple
 
 #+begin_src go
@@ -158,7 +163,7 @@ Ok lets do it based on the deeper insight above. It becomes quite simple
     return true
   }
 
-  func main() {
+  func arithmetic_progression() {
     fmt.Println(isArithmeticProgression([]int{3, 5, 1}))
     fmt.Println(isArithmeticProgression([]int{1, 2, 4}))
   }
@@ -169,10 +174,13 @@ Ok lets do it based on the deeper insight above. It becomes quite simple
 : false
 
 
-** Some tests
+** Simple implementation tests
+:PROPERTIES:
+:header-args:go+: :tangle arithmetic_progression_test.go
+:END:
 
 Lets write some tests
-#+begin_src go :tangle main_test.go
+#+begin_src go
   package main
 
   import (
@@ -203,17 +211,261 @@ Lets write some tests
   		})
   	}
   }
-  /* Necessary just for ob-go to not try and insert this
-  func main() {}
-  ,*/
 #+end_src
 
 We can then run this like this
 #+begin_src shell :results verbatim
-  go test
+  go test 
 #+end_src
 
 #+RESULTS:
 : PASS
 : ok  	github.com/user/can-make-arithmetic-progression	0.002s
 
+** Using channels
+:PROPERTIES:
+:header-args:go+: :eval no
+:header-args:go+: :tangle using_channels_arithmetic_progression.go
+:header-args:go+: :package 'discard
+:END:
+
+Ok, so hear me out, the above works just fine of course, but in other languages I would be using a generator or a stream to calculate the stream of deltas which I could then just compare one after the other, perhaps even generating another generator. With Go, the equivalent is to use channels. [[https://stackoverflow.com/a/34466755/5056][Because of the semantics around closing them]] hover it's not so straightforward and has higher overhead. Still, I would like to try and implement it as a learning exercise.
+
+First some standard imports
+
+#+name: implementation/set-up
+#+begin_src go
+  package main
+
+  import (
+    "fmt"
+    "slices"
+  )
+  
+  var _ = fmt.Printf // Just for the sake of how we're structuring things here we don't want to get an unused import error
+#+end_src
+
+Here there will actually be multiple channels
+
+- *Channel that has written into it a sorted stream of numbers*
+
+#+name: implementation/emitSequentialNumbers
+#+begin_src go
+  func emitSequentialNumbers(array []int) <-chan int {
+  	c := make(chan int)
+
+  	go func() {
+  		defer close(c)
+  		sortedArray := slices.Clone(array)
+  		slices.Sort(sortedArray)
+
+  		for _, num := range sortedArray {
+  			c <- num
+  		}
+  	}()
+
+  	return c
+  }
+#+end_src
+
+We should be able to use that
+#+begin_src go :eval yes :tangle no
+  <<implementation/set-up>>
+
+  <<implementation/emitSequentialNumbers>>
+
+  func arithmetic_progression() {
+  	for val := range emitSequentialNumbers([]int{3, -2, 5, 1}) {
+  		fmt.Println(val)
+  	}
+  }
+#+end_src
+
+#+RESULTS:
+: -2
+: 1
+: 3
+: 5
+
+Sweet!
+
+--------
+
+- **Channel that has written into it deltas between sequential numbers**
+
+  #+name: implementation/emitDeltasBetweenSequentialNumbers
+#+begin_src go
+  func emitDeltasBetweenSequentialNumbers(sequentialNumbers <-chan int) <-chan int {
+  	c:= make(chan int)
+  	go func() {
+  		defer close(c)
+  		if prevItem, ok := <- sequentialNumbers; ok {
+  			for newItem := range sequentialNumbers {
+  				c <- (newItem - prevItem)
+  				prevItem = newItem
+
+  			}
+  		}
+  	}()
+  	return c
+  }
+#+end_src
+let's test that one
+
+We should be able to use that
+#+begin_src go :eval yes :tangle no
+  <<implementation/set-up>>
+
+  <<implementation/emitSequentialNumbers>>
+
+  <<implementation/emitDeltasBetweenSequentialNumbers>>
+
+  func arithmetic_progression() {
+  	for val := range emitDeltasBetweenSequentialNumbers(emitSequentialNumbers([]int{3, -2, 5, 1})) {
+  		fmt.Println(val)
+  	}
+  }
+#+end_src
+
+#+RESULTS:
+: 3
+: 2
+: 2
+
+That is indeed correct
+
+--------
+
+- **Signal-only channel that has written into it a signal which pops whether two sequential numbers have changed**
+
+#+name: implementation/emitIfValueChanged
+#+begin_src go
+  func emitIfValueChanged[T comparable](values <-chan T) <-chan struct{} {
+  	c:= make(chan struct{})
+  	go func() {
+  		defer close(c)
+  		if firstItem, ok := <- values; ok {
+  			for newItem := range values {
+  				if(newItem != firstItem) {
+  					c <- struct{}{}
+  				}
+  			}
+  		}
+  	}()
+  	return c
+  }
+#+end_src
+
+Lets test this real quick
+
+#+begin_src go :eval yes :tangle no
+  <<implementation/set-up>>
+
+  <<implementation/emitSequentialNumbers>>
+
+  <<implementation/emitIfValueChanged>>
+
+  func main() {
+  	for range emitIfValueChanged(emitSequentialNumbers([]int{0, 0, 0})) {
+  		fmt.Println("got a change in the first loop")
+  	}
+  	for range emitIfValueChanged(emitSequentialNumbers([]int{0, 0, 1})) {
+  		fmt.Println("got a change in the second loop")
+  	}
+  }
+#+end_src
+
+#+RESULTS:
+: got a change in the second loop
+
+Aha, interesting how the ~_~ variable was not only not necessary here, but actually didn't work
+
+------
+Finally, lets actually create a function to return true/false here
+#+begin_src go
+  func IsArithmeticProgressionWithChannels(array []int) bool {
+  	_, changed := <-emitIfValueChanged(emitDeltasBetweenSequentialNumbers(emitSequentialNumbers(array)))
+  	return !changed
+  }
+#+end_src
+** Channel implementation tests
+:PROPERTIES:
+:END:
+
+Lets write some tests
+#+begin_src go :tangle using_channels_test.go
+  package main
+
+
+  import (
+    "testing"
+  )
+
+  func TestIsArithmeticProgressionUsingChannels(t *testing.T) {
+    testCases := []struct {
+      name     string
+      input    []int
+      expected bool
+    }{
+      {"Example 1 - Valid progression", []int{3, 5, 1}, true},
+      {"Example 2 - Invalid progression", []int{1, 2, 4}, false},
+      {"Empty array", []int{}, true},
+      {"Single element", []int{5}, true},
+      {"Two elements", []int{1, 2}, true},
+      {"Negative numbers", []int{-3, -1, 1}, true},
+      {"Same numbers", []int{2, 2, 2, 2}, true},
+    }
+
+    for _, tc := range testCases {
+      t.Run(tc.name, func(t *testing.T) {
+        result := IsArithmeticProgressionWithChannels(tc.input)
+        if result != tc.expected {
+          t.Errorf("IsArithmeticProgressionWithChannels(%v) = %v; want %v", tc.input, result, tc.expected)
+        }
+      })
+    }
+  }
+#+end_src
+
+We can then run all our tests to make sure they still work
+#+begin_src shell :results verbatim
+  go test -v
+#+end_src
+
+#+RESULTS:
+#+begin_example
+=== RUN   TestIsArithmeticProgression
+=== RUN   TestIsArithmeticProgression/Example_1_-_Valid_progression
+=== RUN   TestIsArithmeticProgression/Example_2_-_Invalid_progression
+=== RUN   TestIsArithmeticProgression/Empty_array
+=== RUN   TestIsArithmeticProgression/Single_element
+=== RUN   TestIsArithmeticProgression/Two_elements
+=== RUN   TestIsArithmeticProgression/Negative_numbers
+=== RUN   TestIsArithmeticProgression/Same_numbers
+--- PASS: TestIsArithmeticProgression (0.00s)
+    --- PASS: TestIsArithmeticProgression/Example_1_-_Valid_progression (0.00s)
+    --- PASS: TestIsArithmeticProgression/Example_2_-_Invalid_progression (0.00s)
+    --- PASS: TestIsArithmeticProgression/Empty_array (0.00s)
+    --- PASS: TestIsArithmeticProgression/Single_element (0.00s)
+    --- PASS: TestIsArithmeticProgression/Two_elements (0.00s)
+    --- PASS: TestIsArithmeticProgression/Negative_numbers (0.00s)
+    --- PASS: TestIsArithmeticProgression/Same_numbers (0.00s)
+=== RUN   TestIsArithmeticProgressionUsingChannels
+=== RUN   TestIsArithmeticProgressionUsingChannels/Example_1_-_Valid_progression
+=== RUN   TestIsArithmeticProgressionUsingChannels/Example_2_-_Invalid_progression
+=== RUN   TestIsArithmeticProgressionUsingChannels/Empty_array
+=== RUN   TestIsArithmeticProgressionUsingChannels/Single_element
+=== RUN   TestIsArithmeticProgressionUsingChannels/Two_elements
+=== RUN   TestIsArithmeticProgressionUsingChannels/Negative_numbers
+=== RUN   TestIsArithmeticProgressionUsingChannels/Same_numbers
+--- PASS: TestIsArithmeticProgressionUsingChannels (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Example_1_-_Valid_progression (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Example_2_-_Invalid_progression (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Empty_array (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Single_element (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Two_elements (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Negative_numbers (0.00s)
+    --- PASS: TestIsArithmeticProgressionUsingChannels/Same_numbers (0.00s)
+PASS
+ok  	github.com/user/can-make-arithmetic-progression	0.002s
+#+end_example

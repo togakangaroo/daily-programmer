@@ -1,8 +1,11 @@
-// Some tests
+// Simple implementation tests
+// :PROPERTIES:
+// :header-args:go+: :tangle arithmetic_progression_test.go
+// :END:
 
 // Lets write some tests
 
-// [[file:README.org::*Some tests][Some tests:1]]
+// [[file:README.org::*Simple implementation tests][Simple implementation tests:1]]
 package main
 
 
@@ -34,7 +37,4 @@ func TestIsArithmeticProgression(t *testing.T) {
 		})
 	}
 }
-/* Necessary just for ob-go to not try and insert this
-func main() {}
-*/
-// Some tests:1 ends here
+// Simple implementation tests:1 ends here

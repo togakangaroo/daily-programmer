@@ -1,4 +1,8 @@
 // Simple Implementation
+// :PROPERTIES:
+// :header-args:go+: :tangle arithmetic_progression.go
+// :END:
+
 // Ok lets do it based on the deeper insight above. It becomes quite simple
 
 
@@ -35,7 +39,7 @@ func isArithmeticProgression(array []int) bool {
   return true
 }
 
-func main() {
+func arithmetic_progression() {
   fmt.Println(isArithmeticProgression([]int{3, 5, 1}))
   fmt.Println(isArithmeticProgression([]int{1, 2, 4}))
 }
