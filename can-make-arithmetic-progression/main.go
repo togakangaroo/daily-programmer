@@ -1,9 +1,4 @@
 // Simple Implementation
-// :PROPERTIES:
-// :header-args+: :noweb strip-export
-// :header-args:go+: :mkdirp 't :tangle main.go :comments both
-// :END:
-
 // Ok lets do it based on the deeper insight above. It becomes quite simple
 
 

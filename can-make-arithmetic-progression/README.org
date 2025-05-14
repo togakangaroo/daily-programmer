@@ -117,12 +117,13 @@ So hold on...that is a good point. If you just sort the list can it not be a sim
 
 So maybe the solution isn't all that perfect a fit for go channels...we need only to sort with a builtin then walk the sorted list to see if any two are differnt
 
-* Simple Implementation
+* Implementation
 :PROPERTIES:
 :header-args+: :noweb strip-export
 :header-args:go+: :mkdirp 't :tangle main.go :comments both
 :END:
 
+** Simple Implementation
 Ok lets do it based on the deeper insight above. It becomes quite simple
 
 #+begin_src go
@@ -166,7 +167,6 @@ Ok lets do it based on the deeper insight above. It becomes quite simple
 #+RESULTS:
 : true
 : false
-
 
 
 ** Some tests
@@ -216,3 +216,4 @@ We can then run this like this
 #+RESULTS:
 : PASS
 : ok  	github.com/user/can-make-arithmetic-progression	0.002s
+
