@@ -1,3 +1,5 @@
+#+OPTIONS: toc:nil
+#+OPTIONS: html-postamble:nil
 
 A lot of jobs are talking about Go now, I guess lets try Go.
 
@@ -43,6 +45,10 @@ And another stream for generating all possible sequences
  Ok so lets get a feel for channels
 
 ** Learning Go Channels
+:PROPERTIES:
+:header-args:go+: :exports both
+:END:
+
 Let's grab an example from mistral.
 
 #+name: learning-go-channels/send-and-recieve-values
@@ -120,6 +126,7 @@ So maybe the solution isn't all that perfect a fit for go channels...we need onl
 * Implementation
 :PROPERTIES:
 :header-args+: :noweb strip-export
+:header-args+: :exports both
 :header-args:go+: :mkdirp 't :comments both
 :header-args:go+: :main no
 :END:
