@@ -17,7 +17,7 @@ import (
   "slices"
 )
 
-func isAlgorithmicProgression(array []int) bool {
+func isArithmeticProgression(array []int) bool {
   if len(array) <= 2 {
     return true
   }
@@ -41,7 +41,7 @@ func isAlgorithmicProgression(array []int) bool {
 }
 
 func main() {
-  fmt.Println(isAlgorithmicProgression([]int{3, 5, 1}))
-  fmt.Println(isAlgorithmicProgression([]int{1, 2, 4}))
+  fmt.Println(isArithmeticProgression([]int{3, 5, 1}))
+  fmt.Println(isArithmeticProgression([]int{1, 2, 4}))
 }
 // Simple Implementation:1 ends here

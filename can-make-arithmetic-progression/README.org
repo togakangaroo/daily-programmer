@@ -134,7 +134,7 @@ Ok lets do it based on the deeper insight above. It becomes quite simple
     "slices"
   )
 
-  func isAlgorithmicProgression(array []int) bool {
+  func isArithmeticProgression(array []int) bool {
     if len(array) <= 2 {
       return true
     }
@@ -158,8 +158,8 @@ Ok lets do it based on the deeper insight above. It becomes quite simple
   }
 
   func main() {
-    fmt.Println(isAlgorithmicProgression([]int{3, 5, 1}))
-    fmt.Println(isAlgorithmicProgression([]int{1, 2, 4}))
+    fmt.Println(isArithmeticProgression([]int{3, 5, 1}))
+    fmt.Println(isArithmeticProgression([]int{1, 2, 4}))
   }
 #+end_src
 
@@ -169,3 +169,50 @@ Ok lets do it based on the deeper insight above. It becomes quite simple
 
 
 
+** Some tests
+
+Lets write some tests
+#+begin_src go :tangle main_test.go
+  package main
+
+  import (
+  	"testing"
+  )
+
+  func TestIsArithmeticProgression(t *testing.T) {
+  	testCases := []struct {
+  		name     string
+  		input    []int
+  		expected bool
+  	}{
+  		{"Example 1 - Valid progression", []int{3, 5, 1}, true},
+  		{"Example 2 - Invalid progression", []int{1, 2, 4}, false},
+  		{"Empty array", []int{}, true},
+  		{"Single element", []int{5}, true},
+  		{"Two elements", []int{1, 2}, true},
+  		{"Negative numbers", []int{-3, -1, 1}, true},
+  		{"Same numbers", []int{2, 2, 2, 2}, true},
+  	}
+
+  	for _, tc := range testCases {
+  		t.Run(tc.name, func(t *testing.T) {
+  			result := isArithmeticProgression(tc.input)
+  			if result != tc.expected {
+  				t.Errorf("isArithmeticProgression(%v) = %v; want %v", tc.input, result, tc.expected)
+  			}
+  		})
+  	}
+  }
+  /* Necessary just for ob-go to not try and insert this
+  func main() {}
+  ,*/
+#+end_src
+
+We can then run this like this
+#+begin_src shell :results verbatim
+  go test
+#+end_src
+
+#+RESULTS:
+: PASS
+: ok  	github.com/user/can-make-arithmetic-progression	0.002s
