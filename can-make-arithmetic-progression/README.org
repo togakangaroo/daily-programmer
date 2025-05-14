@@ -23,17 +23,18 @@ A sequence of numbers is called an arithemtic progression if the difference betw
 
 * Brainstorming
 
+** As Streams
 I mean...you could do this DFS, I suppose. This is really a stream sort of situation
 
 There's a stream for evaluating if a given sequence is an arithmetic progression
 - One stream that produces numbers in a given order
 - A transform that calculates deltas
-- A short circuit where if any two are not equal, then it returns false
-- if the stream terminates return true
+- A short circuit where if any delta is not equal to the previous one, then the whole thing returns false
+- if the stream terminates the whole thing return true
 
 And another stream for generating all possible sequences
 - using DFS
-- if any one sequence is true, then return true
+- if any one sequence is an arithmetic progression, then return true
 - if all sequences were checked, then return false
 
 
@@ -43,6 +44,7 @@ And another stream for generating all possible sequences
 
 ** Learning Go Channels
 Let's grab an example from mistral.
+
 #+name: learning-go-channels/send-and-recieve-values
 #+begin_src go :var bufferSize=3
   package main
@@ -69,8 +71,7 @@ Let's grab an example from mistral.
   func main() {
   	ch := make(chan int, bufferSize)
   	go sendValues(ch)
-  	go receiveValues(ch)
-  	time.Sleep(1 * time.Second)
+  	receiveValues(ch)
   }
 #+end_src
 
@@ -80,6 +81,7 @@ Let's grab an example from mistral.
 : Received: 2
 : Received: 3
 : Received: 4
+
 
 I see, so it looks like you get bufferred delivery, what happens if you call it with bufferring disabled?
 
@@ -92,4 +94,78 @@ I see, so it looks like you get bufferred delivery, what happens if you call it 
 : Received: 3
 : Received: 4
 
-Same deal, so in this case it really didn't matter, they just ran sequentially. I'm sure there's a way to parallelize from there. This is just a matter of learning some syntax and that final ~time.Sleep~ is interesting as well, that tells us that the process doesn't hang out waiting for channels to close. I wonder how we *would* do that?
+
+Same deal, so in this case it really didn't matter, they just ran sequentially similar to javascript's ~defer~ behavior I imagine. I'm sure there's a way to parallelize from there. Beyond that, it is just a matter of learning some syntax.
+
+** Essence of the problem
+As I think about it more, that is quite a lot of permutations that you might have to check. 
+
+for an input of size ~2~ there is only up to =1= permutation to try as the answer to *all* permutations that they are, in fact, arithmetic progressions of 1.
+
+What about for an input the size of ~3~? Lets consider the possible positions
+
+
+| Permutation | Is AP? |
+| 1 2 3       | X      |
+| 1 3 2       |        |
+| 2 1 3       |        |
+| 2 3 1       |        |
+| 3 1 2       |        |
+| 3 2 1       | X      |
+
+So hold on...that is a good point. If you just sort the list can it not be a simple scan to see if each subsequent delta is the same? Are there counter-examples where sorting is not the only answer? I'm thinking about something that bounces betweens positive and negative. But no, that doesn't make sense. If you think aobut it, if you were to chart out any algorithmic progression it would have to have a constant, monotonic slope. But anything with negatives and positive mixed would contain not only not the same slope but a slope in the opposite direction. At the same time, I know that in just about any language that a sort of 999 items is nearly instantaneous so this should fit within our constraints very nicely
+
+So maybe the solution isn't all that perfect a fit for go channels...we need only to sort with a builtin then walk the sorted list to see if any two are differnt
+
+* Simple Implementation
+:PROPERTIES:
+:header-args+: :noweb strip-export
+:header-args:go+: :mkdirp 't :tangle main.go :comments both
+:END:
+
+Ok lets do it based on the deeper insight above. It becomes quite simple
+
+#+begin_src go
+  package main
+
+
+  import (
+    "fmt"
+    "slices"
+  )
+
+  func isAlgorithmicProgression(array []int) bool {
+    if len(array) <= 2 {
+      return true
+    }
+
+    sortedArray := slices.Clone(array)
+    slices.Sort(sortedArray)
+
+    prevItem := sortedArray[1]
+    prevGap := prevItem - sortedArray[0]
+
+    for _, item := range sortedArray[2:] {
+      newGap := item - prevItem
+      if newGap != prevGap {
+        return false
+      }
+      prevGap = newGap
+      prevItem = item
+    }
+
+    return true
+  }
+
+  func main() {
+    fmt.Println(isAlgorithmicProgression([]int{3, 5, 1}))
+    fmt.Println(isAlgorithmicProgression([]int{1, 2, 4}))
+  }
+#+end_src
+
+#+RESULTS:
+: true
+: false
+
+
+
