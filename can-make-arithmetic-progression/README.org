@@ -119,7 +119,11 @@ What about for an input the size of ~3~? Lets consider the possible positions
 | 3 1 2       |        |
 | 3 2 1       | X      |
 
-So hold on...that is a good point. If you just sort the list can it not be a simple scan to see if each subsequent delta is the same? Are there counter-examples where sorting is not the only answer? I'm thinking about something that bounces betweens positive and negative. But no, that doesn't make sense. If you think aobut it, if you were to chart out any algorithmic progression it would have to have a constant, monotonic slope. But anything with negatives and positive mixed would contain not only not the same slope but a slope in the opposite direction. At the same time, I know that in just about any language that a sort of 999 items is nearly instantaneous so this should fit within our constraints very nicely
+So hold on...that is a good point. If you just sort the list can it not be a simple scan to see if each subsequent delta is the same? Are there counter-examples where sorting is not the only answer?
+
+I'm thinking about something that bounces betweens positive and negative. But no, that doesn't make sense. If you think about it, if you were to chart out any algorithmic progression it would have to have a constant, monotonic slope. But anything with negatives and positive mixed would contain not only not the same slope but a slope in the opposite direction. The same argument could be made for why it *has* to be a sorted list since an out-of-sort-order list's derivative chart could would not be monotonic.
+
+To speak to performance, I know that in just about any language that a sort of 999 items is nearly instantaneous so even if there's further improvements possible, this approach should fit within our constraints very nicely.
 
 So maybe the solution isn't all that perfect a fit for go channels...we need only to sort with a builtin then walk the sorted list to see if any two are differnt
 
