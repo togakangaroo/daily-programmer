@@ -255,3 +255,66 @@ I know no one cares about my abilities to code in lisp, but I do enjoy it even i
 | 4 | 5 |  6 |
 
 Nice! I really like lisps...
+
+* Go Implementation
+:PROPERTIES:
+:header-args+: :exports both
+:END:
+
+I've been poking at Go lately and while it doesn't have generators it has channels which are a similar use case
+
+#+begin_src go
+  package main
+
+  import "fmt"
+
+  func getIncrementingAddends(lowestFirstNumber, upperBound, k, desiredSum int) <-chan []int {
+  	resultChan := make(chan []int)
+
+  	go func() {
+  		defer close(resultChan)
+
+  		if k <= 0 {
+  			panic("K must be positive")
+  		}
+
+  		if desiredSum <= 0 || upperBound <= lowestFirstNumber || desiredSum < lowestFirstNumber {
+  			return
+  		}
+
+  		if k == 1 {
+  			if desiredSum <= upperBound {
+  				resultChan <- []int{desiredSum}
+  			}
+  			return
+  		}
+
+  		for newLowestFirstNumber := lowestFirstNumber; newLowestFirstNumber < upperBound; newLowestFirstNumber++ {
+  			resultsToTheRightChan := getIncrementingAddends(newLowestFirstNumber+1, upperBound, k-1, desiredSum-newLowestFirstNumber,)
+
+  			for subResult := range resultsToTheRightChan {
+  				result := append([]int{newLowestFirstNumber}, subResult...)
+  				resultChan <- result
+  			}
+  		}
+  	}()
+
+  	return resultChan
+  }
+
+  func main() {
+  	for addends := range getIncrementingAddends(1, 9, 3, 15) {
+  		fmt.Println(addends)
+  	}
+  }
+#+end_src
+
+#+RESULTS:
+: [1 5 9]
+: [1 6 8]
+: [2 4 9]
+: [2 5 8]
+: [2 6 7]
+: [3 4 8]
+: [3 5 7]
+: [4 5 6]
