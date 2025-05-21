@@ -214,3 +214,44 @@ ok so I think that getting "all" should be similar, you just iterate upwards and
 Oh snap, I think that worked!
 
 I do suspect that some further optimization is possible, it certainly is not necessary for that final loop to run all the way up to ~upper_bound~, but those branches would teriminate rapidly either way so I'm not concerned
+
+* Emacs Lisp Implementation
+:PROPERTIES:
+:header-args+: :exports both
+:END:
+
+I know no one cares about my abilities to code in lisp, but I do enjoy it even if the emacs flavor is not my favorite, lets just do one of those really quick. Plus, its good experience using cl-loop which I like a lot
+
+#+begin_src emacs-lisp :lexical yes
+  (require 'generator)
+
+  (iter-defun gim/get-incrementing-addends (lowest-first-number upper-bound k desired-sum)
+    (cl-assert (when (<= 1 k) 't) nil "k must be positive")
+    (when (and (< 0 desired-sum)
+               (< lowest-first-number upper-bound)
+               (<= lowest-first-number desired-sum))
+      (if (= k 1)
+          (iter-yield (list desired-sum))
+        (cl-loop for new-lowest from lowest-first-number to upper-bound
+                 do (cl-loop for addends iter-by (gim/get-incrementing-addends (+ 1 new-lowest) upper-bound (- k 1) (- desired-sum new-lowest))
+                             do (iter-yield (cons new-lowest addends)))))))
+
+  (cl-loop for addends iter-by (gim/get-incrementing-addends 1 9 3 15)
+           collect addends)
+#+end_src
+
+#+RESULTS:
+| 1 | 2 | 12 |
+| 1 | 3 | 11 |
+| 1 | 4 | 10 |
+| 1 | 5 |  9 |
+| 1 | 6 |  8 |
+| 2 | 3 | 10 |
+| 2 | 4 |  9 |
+| 2 | 5 |  8 |
+| 2 | 6 |  7 |
+| 3 | 4 |  8 |
+| 3 | 5 |  7 |
+| 4 | 5 |  6 |
+
+Nice! I really like lisps...
