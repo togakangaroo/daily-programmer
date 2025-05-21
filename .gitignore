@@ -9,3 +9,4 @@ node_modules/
 .lsp
 .clj-kondo
 .aider*
+/.python-version
