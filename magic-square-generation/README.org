@@ -858,8 +858,9 @@ Brainstorming some other optimizations that I *could* do
   |  8 | 4 | 3 |
   |  7 | 6 | 2 |
   |  7 | 5 | 3 |
+  |  6 | 5 | 4 |
 
-  I think that's it? Just 11 possibilities each with 6 permutations of each? This is promising as a direction. This would be a wholly new direction to go in
+  I think that's it? Just 12 possibilities each with 6 permutations of each? This is promising as a direction. This would be a wholly new direction to go in
 
   I can almost, but not quite see the pattern. Lets try the above again with 4 numbers \( [1,16] \) which add up to =34=
 
